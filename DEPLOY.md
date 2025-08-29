@@ -44,13 +44,13 @@ git push -u origin main
 #### 方法一：创建CNAME文件
 在仓库根目录创建名为 `CNAME` 的文件（无扩展名），内容为：
 ```
-wooho.com
+wooho.cc
 ```
 
 #### 方法二：通过GitHub设置
 1. 在Pages设置页面
 2. 找到 "Custom domain" 部分
-3. 输入 `wooho.com`
+3. 输入 `wooho.cc`
 4. 勾选 "Enforce HTTPS"
 5. 点击 "Save"
 
@@ -82,7 +82,7 @@ TTL: 3600
 
 ## 🔍 验证部署
 1. 访问 `https://yourusername.github.io` 查看是否正常
-2. 访问 `https://wooho.com` 查看自定义域名是否生效
+2. 访问 `https://wooho.cc` 查看自定义域名是否生效
 3. 检查HTTPS证书是否自动配置
 
 ## 📱 移动端测试
