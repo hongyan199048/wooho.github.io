@@ -178,6 +178,42 @@ body {
     z-index: 1;
 }
 
+/* 装饰性动态元素 */
+.hero::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    width: 200px;
+    height: 200px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    opacity: 0.1;
+    animation: float 6s ease-in-out infinite, pulse 4s ease-in-out infinite;
+    z-index: 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* 添加光圈效果 */
+.hero-content::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    background: conic-gradient(from 0deg, transparent, rgba(255, 97, 97, 0.1), transparent, rgba(149, 255, 160, 0.1), transparent, rgba(149, 185, 255, 0.1), transparent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: rotate 20s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
 .hero-title {
     font-family: 'Panchang', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 5.5rem;
@@ -217,6 +253,60 @@ body {
     }
     50% {
         background-position: 100% 50%;
+    }
+}
+
+/* 浮动动画 */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* 脉冲效果 */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+/* 渐入动画 */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 旋转光圈效果 */
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 光束扫过效果 */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
     }
 }
 
@@ -268,6 +358,23 @@ body {
     color: var(--text-primary);
     backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
 }
 
 .btn-primary:hover {
@@ -310,30 +417,53 @@ body {
 
 /* 通用部分样式 */
 .section-title {
-    font-size: 2.5rem;
+    font-family: 'Panchang', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 3rem;
     font-weight: 700;
     text-align: center;
     margin-bottom: 3rem;
-    color: #1f2937;
+    color: var(--text-primary);
     position: relative;
+    background: var(--gradient-primary);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 8s ease-in-out infinite;
 }
 
 .section-title::after {
     content: '';
     position: absolute;
-    bottom: -10px;
+    bottom: -15px;
     left: 50%;
     transform: translateX(-50%);
-    width: 60px;
+    width: 80px;
     height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
+    background: var(--gradient-primary);
     border-radius: 2px;
+    animation: shimmer 2s ease-in-out infinite;
 }
 
 /* 关于我部分 */
 .about {
     padding: 80px 0;
-    background: #f8fafc;
+    background: #000000;
+    position: relative;
+    overflow: hidden;
+}
+
+.about::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(215, 149, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(149, 185, 255, 0.15) 0%, transparent 50%);
+    z-index: 0;
 }
 
 .about-content {
@@ -341,12 +471,14 @@ body {
     grid-template-columns: 2fr 1fr;
     gap: 4rem;
     align-items: center;
+    position: relative;
+    z-index: 1;
 }
 
 .about-text p {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     margin-bottom: 1.5rem;
-    color: #4b5563;
+    color: var(--text-secondary);
     line-height: 1.8;
 }
 
@@ -359,26 +491,51 @@ body {
 
 .stat-item {
     text-align: center;
-    padding: 1.5rem;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+    padding: 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: var(--gradient-primary);
+    border-radius: 16px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.stat-item:hover::before {
+    opacity: 0.3;
 }
 
 .stat-item:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .stat-item h3 {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 700;
-    color: #2563eb;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 0.5rem;
 }
 
 .stat-item p {
-    color: #6b7280;
+    color: var(--text-muted);
     font-weight: 500;
 }
 
@@ -404,7 +561,22 @@ body {
 /* 技能部分 */
 .skills {
     padding: 80px 0;
-    background: white;
+    background: #000000;
+    position: relative;
+    overflow: hidden;
+}
+
+.skills::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 80% 20%, rgba(255, 97, 97, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(149, 255, 160, 0.15) 0%, transparent 50%);
+    z-index: 0;
 }
 
 .skills-grid {
