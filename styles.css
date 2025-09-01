@@ -9,11 +9,22 @@ html {
     scroll-behavior: smooth;
 }
 
+:root {
+    --gradient-primary: conic-gradient(from 180deg at 50% 50%, #FF6161 0deg, #FFD361 70deg, #95FFA0 162deg, #95B9FF 234deg, #D795FF 310deg);
+    --gradient-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.85);
+    --text-muted: rgba(255, 255, 255, 0.70);
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
-    color: #333;
-    background-color: #ffffff;
+    color: var(--text-primary);
+    background: #000000;
+    overflow-x: hidden;
 }
 
 /* 容器 */
@@ -28,10 +39,10 @@ body {
     position: fixed;
     top: 0;
     width: 100%;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+    background: var(--glass-bg);
+    backdrop-filter: blur(46.5px);
     z-index: 1000;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--glass-border);
     transition: all 0.3s ease;
 }
 
@@ -48,13 +59,17 @@ body {
 .nav-logo a {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #2563eb;
+    color: var(--text-primary);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .nav-logo a:hover {
-    color: #1d4ed8;
+    transform: scale(1.05);
 }
 
 .nav-menu {
@@ -64,15 +79,20 @@ body {
 }
 
 .nav-link {
-    color: #333;
+    color: var(--text-primary);
     text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease;
     position: relative;
+    padding: 8px 16px;
+    border-radius: 8px;
 }
 
 .nav-link:hover {
-    color: #2563eb;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    color: var(--text-primary);
 }
 
 .nav-link::after {
@@ -108,86 +128,165 @@ body {
 /* 首页英雄区域 */
 .hero {
     padding: 120px 0 80px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: #000000;
+    color: var(--text-primary);
     min-height: 100vh;
     display: flex;
     align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 动态渐变背景 */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 97, 97, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 211, 97, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(149, 255, 160, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(149, 185, 255, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 60% 20%, rgba(215, 149, 255, 0.4) 0%, transparent 50%);
+    filter: blur(40px);
+    animation: gradientMove 10s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes gradientMove {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.1) rotate(5deg);
+    }
 }
 
 .hero-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
+    text-align: center;
+    position: relative;
+    z-index: 1;
 }
 
 .hero-title {
-    font-size: 3.5rem;
+    font-family: 'Panchang', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 5.5rem;
     font-weight: 700;
     margin-bottom: 1rem;
-    line-height: 1.2;
+    line-height: 0.9;
+    text-align: center;
+    text-transform: capitalize;
+    background: var(--gradient-primary);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleGlow 3s ease-in-out infinite alternate, gradientShift 8s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+    0% {
+        filter: brightness(1);
+    }
+    100% {
+        filter: brightness(1.2);
+    }
 }
 
 .highlight {
-    color: #fbbf24;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 .hero-subtitle {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     margin-bottom: 1.5rem;
-    opacity: 0.9;
+    color: var(--text-secondary);
+    text-align: center;
+    font-weight: 400;
 }
 
 .hero-description {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     margin-bottom: 2rem;
-    opacity: 0.8;
-    line-height: 1.7;
+    color: var(--text-muted);
+    line-height: 1.8;
+    text-align: center;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .hero-buttons {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2rem;
 }
 
 .btn {
-    padding: 12px 24px;
-    border-radius: 8px;
+    padding: 16px 32px;
+    border-radius: 12px;
     text-decoration: none;
     font-weight: 600;
-    transition: all 0.3s ease;
-    display: inline-block;
+    transition: all 0.4s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     border: none;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-primary {
-    background: #fbbf24;
-    color: #1f2937;
+    background: var(--gradient-primary);
+    color: var(--text-primary);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
 }
 
 .btn-primary:hover {
-    background: #f59e0b;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(251, 191, 36, 0.3);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    filter: brightness(1.1);
 }
 
 .btn-secondary {
-    background: transparent;
-    color: white;
-    border: 2px solid white;
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
-    background: white;
-    color: #1f2937;
-    transform: translateY(-2px);
+    background: var(--glass-border);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
 }
 
 .hero-image {
