@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="给小宝的特别礼物 - 充满爱意的惊喜">
+    <meta name="keywords" content="礼物, 小宝, 惊喜, 爱意">
+    <title>给小宝的礼物</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Panchang:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #000000;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .gift-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .gift-hero {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 80px 20px;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 97, 97, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 211, 97, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(149, 255, 160, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(149, 185, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 60% 20%, rgba(215, 149, 255, 0.2) 0%, transparent 50%);
+        }
+
+        .gift-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(255, 97, 97, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(255, 211, 97, 0.1) 0%, transparent 50%);
+            animation: backgroundShift 8s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.05) rotate(2deg);
+            }
+        }
+
+        .gift-content {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .gift-title {
+            font-family: 'Panchang', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: conic-gradient(from 180deg at 50% 50%, #FF6161 0deg, #FFD361 70deg, #95FFA0 162deg, #95B9FF 234deg, #D795FF 310deg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% {
+                filter: brightness(1);
+            }
+            100% {
+                filter: brightness(1.2);
+            }
+        }
+
+        .gift-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.6;
+        }
+
+        .gift-box-container {
+            position: relative;
+            margin: 3rem 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gift-box {
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            animation: giftFloat 4s ease-in-out infinite;
+        }
+
+        .gift-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 30px 60px rgba(255, 255, 255, 0.1);
+        }
+
+        .gift-icon {
+            font-size: 6rem;
+            animation: giftPulse 2s ease-in-out infinite;
+        }
+
+        .gift-sparkles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .sparkle {
+            position: absolute;
+            font-size: 2rem;
+            animation: sparkleFloat 3s ease-in-out infinite;
+        }
+
+        .sparkle:nth-child(1) {
+            top: 15%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        .sparkle:nth-child(2) {
+            top: 15%;
+            right: 15%;
+            animation-delay: 0.5s;
+        }
+
+        .sparkle:nth-child(3) {
+            bottom: 15%;
+            left: 15%;
+            animation-delay: 1s;
+        }
+
+        .sparkle:nth-child(4) {
+            bottom: 15%;
+            right: 15%;
+            animation-delay: 1.5s;
+        }
+
+        .sparkle:nth-child(5) {
+            top: 50%;
+            left: 5%;
+            animation-delay: 2s;
+        }
+
+        .sparkle:nth-child(6) {
+            top: 50%;
+            right: 5%;
+            animation-delay: 2.5s;
+        }
+
+        .gift-message {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 2rem 0;
+            padding: 0 2rem;
+        }
+
+        .gift-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+        }
+
+        .gift-btn {
+            padding: 15px 30px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.4s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gift-btn-primary {
+            background: conic-gradient(from 180deg at 50% 50%, #FF6161 0deg, #FFD361 70deg, #95FFA0 162deg, #95B9FF 234deg, #D795FF 310deg);
+            color: #0b0b0b;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .gift-btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .gift-btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .gift-btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            filter: brightness(1.1);
+        }
+
+        .gift-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .gift-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
+        }
+
+        .floating-hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 1.5rem;
+            color: rgba(255, 97, 97, 0.6);
+            animation: heartFloat 6s ease-in-out infinite;
+        }
+
+        .heart:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .heart:nth-child(2) {
+            left: 20%;
+            animation-delay: 1s;
+        }
+
+        .heart:nth-child(3) {
+            left: 30%;
+            animation-delay: 2s;
+        }
+
+        .heart:nth-child(4) {
+            left: 40%;
+            animation-delay: 3s;
+        }
+
+        .heart:nth-child(5) {
+            left: 50%;
+            animation-delay: 4s;
+        }
+
+        .heart:nth-child(6) {
+            left: 60%;
+            animation-delay: 5s;
+        }
+
+        .heart:nth-child(7) {
+            left: 70%;
+            animation-delay: 0.5s;
+        }
+
+        .heart:nth-child(8) {
+            left: 80%;
+            animation-delay: 1.5s;
+        }
+
+        .heart:nth-child(9) {
+            left: 90%;
+            animation-delay: 2.5s;
+        }
+
+        @keyframes heartFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes giftFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes giftPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes sparkleFloat {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.3);
+            }
+        }
+
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 1000;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .gift-title {
+                font-size: 2.5rem;
+            }
+
+            .gift-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .gift-box {
+                width: 250px;
+                height: 250px;
+            }
+
+            .gift-icon {
+                font-size: 4rem;
+            }
+
+            .gift-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .gift-btn {
+                width: 200px;
+                justify-content: center;
+            }
+
+            .back-button {
+                top: 20px;
+                left: 20px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gift-page">
+        <a href="index.html" class="back-button">← 返回首页</a>
+        
+        <div class="floating-hearts">
+            <div class="heart">💖</div>
+            <div class="heart">💕</div>
+            <div class="heart">💗</div>
+            <div class="heart">💝</div>
+            <div class="heart">💖</div>
+            <div class="heart">💕</div>
+            <div class="heart">💗</div>
+            <div class="heart">💝</div>
+            <div class="heart">💖</div>
+        </div>
+
+        <div class="gift-hero">
+            <div class="gift-content">
+                <h1 class="gift-title">给小宝的礼物</h1>
+                <p class="gift-subtitle">一个充满爱意和惊喜的特别礼物</p>
+                
+                <div class="gift-box-container">
+                    <div class="gift-box" onclick="openGift()">
+                        <div class="gift-icon">🎁</div>
+                        <div class="gift-sparkles">
+                            <span class="sparkle">✨</span>
+                            <span class="sparkle">✨</span>
+                            <span class="sparkle">✨</span>
+                            <span class="sparkle">✨</span>
+                            <span class="sparkle">✨</span>
+                            <span class="sparkle">✨</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gift-message" id="giftMessage">
+                    点击上面的礼物盒，发现一个充满爱意的惊喜世界！
+                    每一个细节都用心制作，每一份爱都值得珍藏。
+                </div>
+
+                <div class="gift-buttons">
+                    <button class="gift-btn gift-btn-primary" onclick="openGift()">
+                        <span>打开礼物</span>
+                        <span>🎁</span>
+                    </button>
+                    <a href="故事书/我的恐龙故事书/index.html" class="gift-btn gift-btn-secondary">
+                        <span>我的恐龙故事书</span>
+                        <span>📖</span>
+                    </a>
+                    
+                    <a href="index.html" class="gift-btn gift-btn-secondary">
+                        <span>返回首页</span>
+                        <span>🏠</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let giftOpened = false;
+        
+        function openGift() {
+            if (giftOpened) return;
+            
+            giftOpened = true;
+            const giftBox = document.querySelector('.gift-box');
+            const giftMessage = document.getElementById('giftMessage');
+            
+            // 添加打开动画
+            giftBox.style.transform = 'scale(1.2) rotate(5deg)';
+            giftBox.style.boxShadow = '0 40px 80px rgba(255, 255, 255, 0.2)';
+            
+            setTimeout(() => {
+                giftBox.style.transform = 'scale(1) rotate(0deg)';
+                
+                // 更新礼物内容
+                const giftIcon = giftBox.querySelector('.gift-icon');
+                giftIcon.innerHTML = '💝';
+                giftIcon.style.fontSize = '4rem';
+                
+                // 更新消息
+                giftMessage.innerHTML = `
+                    <strong>🎉 礼物已打开！</strong><br><br>
+                    亲爱的小宝，这是专门为你准备的特别礼物！<br><br>
+                    💖 愿你永远快乐、健康、充满爱<br>
+                    🌟 愿你的人生充满美好的惊喜<br>
+                    🎈 愿你的每一天都像今天一样特别<br><br>
+                    <em>爱你的家人 ❤️</em>
+                `;
+                
+                // 添加更多爱心动画
+                createHeartBurst();
+                
+            }, 500);
+        }
+        
+        function createHeartBurst() {
+            const hearts = ['💖', '💕', '💗', '💝', '💘', '💞'];
+            const giftBox = document.querySelector('.gift-box');
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+                    heart.style.position = 'absolute';
+                    heart.style.fontSize = '2rem';
+                    heart.style.left = '50%';
+                    heart.style.top = '50%';
+                    heart.style.transform = 'translate(-50%, -50%)';
+                    heart.style.pointerEvents = 'none';
+                    heart.style.zIndex = '1000';
+                    heart.style.animation = 'heartBurst 2s ease-out forwards';
+                    
+                    giftBox.appendChild(heart);
+                    
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 2000);
+                }, i * 100);
+            }
+        }
+        
+        // 添加爱心爆发动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes heartBurst {
+                0% {
+                    transform: translate(-50%, -50%) scale(0);
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(1) translateY(-100px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 页面加载动画
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.8s ease';
+            
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

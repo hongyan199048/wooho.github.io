@@ -1,0 +1,27 @@
+{
+  "title": "翠翠的火山历险记",
+  "author": "红岩",
+  "coverImage": "assets/sample-cover.jpg",
+  "pages": [
+    {
+      "title": "出发",
+      "content": "清晨，阳光爬上山头。小恐龙翠翠从洞口探出脑袋，决定去看看远处那座会冒烟的火山。"
+    },
+    {
+      "title": "丛林朋友",
+      "content": "在茂密的蕨类之间，翠翠遇到了机灵的小猴和温柔的腕龙。大家给她准备了水袋与藤蔓绳。",
+      "image": "assets/sample-forest.jpg"
+    },
+    {
+      "title": "火山轰鸣",
+      "content": "轰隆！大地抖了抖。火山口升起灰白的烟，偶尔喷出红色的火星。翠翠深呼吸，鼓起勇气继续前进。",
+      "image": "assets/sample-volcano.jpg"
+    },
+    {
+      "title": "回家",
+      "content": "傍晚的风温柔下来。翠翠把看到的一切讲给大家听。大家围坐在一起，望着遥远的火山，微笑着进入梦乡。"
+    }
+  ]
+}
+
+

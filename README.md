@@ -40,10 +40,15 @@
 
 ```
 个人网站/
-├── index.html          # 主页面文件
-├── styles.css          # 样式文件
-├── script.js           # JavaScript功能文件
-└── README.md           # 项目说明文档
+├── index.html           # 主页面
+├── styles.css           # 全站样式
+├── script.js            # 全站脚本
+├── storybook.html       # 电子书页面
+├── storybook.css        # 电子书样式
+├── storybook.js         # 电子书脚本
+├── assets/
+│   └── story.json      # 示例故事数据（可替换）
+└── README.md            # 项目说明
 ```
 
 ## 🚀 快速开始
@@ -183,3 +188,30 @@ transition: all 0.3s ease; /* 0.3s 为动画持续时间 */
 ---
 
 **⭐ 如果这个项目对您有帮助，请给它一个星标！**
+
+---
+
+## 📚 电子书（本地阅读）
+`storybook.html` 支持用 JSON 数据渲染你在 Gemini 里生成的故事。功能：
+- 目录导航、上一页/下一页、左右方向键
+- 可选封面图、图片插图
+- 浏览器内置中文朗读（点击“🔊”按钮）
+
+使用步骤：
+1. 将图片放入 `assets/` 目录（或其它可访问路径）。
+2. 复制 `assets/story.json` 为你的文件并按结构填写：
+```json
+{
+  "title": "书名",
+  "author": "作者名",
+  "coverImage": "assets/cover.jpg",
+  "pages": [
+    { "title": "第1页", "content": "正文...", "image": "assets/p1.jpg" },
+    { "title": "第2页", "content": "正文..." }
+  ]
+}
+```
+3. 打开页面：
+   - 直接访问 `storybook.html` 将加载默认的 `assets/story.json`；
+   - 或使用 `storybook.html?data=assets/my-story.json` 指定你的数据文件。
+

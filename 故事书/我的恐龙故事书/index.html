@@ -1,0 +1,128 @@
+
+            <!DOCTYPE html>
+            <html lang="zh-CN">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>我的恐龙故事书</title>
+                <link rel="stylesheet" href="style.css">
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+            </head>
+            <body>
+                <div id="root">
+                    <div class="loading-container"><p>正在加载故事...</p></div>
+                </div>
+                <script>
+                    let storyPages = [];
+                    let currentPage = 0;
+                    const root = document.getElementById('root');
+
+                    function renderPage() {
+                        if (!root || storyPages.length === 0) return;
+                        const page = storyPages[currentPage];
+                        root.innerHTML = `
+                            <main class="storybook-container">
+                                <div class="story-page">
+                                    <div class="book">
+                                        <div class="spread ${animationClass || ''}">
+                                            <section class="page left">
+                                                <div class="paper">
+                                                    <div class="inner">
+                                                        <img src="${page.imageUrl}" alt="${page.imagePrompt}">
+                                                    </div>
+                                                </div>
+                                            </section>
+                                            <section class="page right">
+                                                <div class="paper">
+                                                    <div class="inner">
+                                                        <p>${page.pageText}</p>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </div>
+                                    <div class="page-indicator">${currentPage + 1} / ${storyPages.length}</div>
+                                </div>
+                            </main>
+                        `;
+
+                        // 进入动画
+                        // 翻页动画结束后清理动画类
+                        const spread = document.querySelector('.spread');
+                        if (spread) {
+                          spread.addEventListener('transitionend', ()=>{ spread.classList.remove('flip-next','flip-prev'); }, { once:true });
+                        }
+
+                        // 键盘导航
+                        document.onkeydown = (e) => {
+                            const key = e.key;
+                            if (key === 'ArrowLeft' || key === 'PageUp') handlePrev();
+                            if (key === 'ArrowRight' || key === 'PageDown' || key === ' ') handleNext();
+                        };
+
+                        // 触摸滑动
+                        const pageEl = document.querySelector('.story-page');
+                        if (pageEl) {
+                            let startX = 0, startY = 0, moved = false;
+                            pageEl.addEventListener('touchstart', (ev) => {
+                                const t = ev.touches[0];
+                                startX = t.clientX; startY = t.clientY; moved = false;
+                            }, { passive: true });
+                            pageEl.addEventListener('touchmove', () => { moved = true; }, { passive: true });
+                            pageEl.addEventListener('touchend', (ev) => {
+                                if (!moved) return;
+                                const t = ev.changedTouches[0];
+                                const dx = t.clientX - startX;
+                                const dy = Math.abs(t.clientY - startY);
+                                if (Math.abs(dx) > 40 && dy < 80) {
+                                    if (dx < 0) handleNext(); else handlePrev();
+                                }
+                            });
+                        }
+                    }
+
+                    function handlePrev() {
+                        if (currentPage > 0) {
+                          animationClass = 'flip-prev';
+                          currentPage--; renderPage();
+                        }
+                    }
+
+                    function handleNext() {
+                        if (currentPage < storyPages.length - 1) {
+                          animationClass = 'flip-next';
+                          currentPage++; renderPage();
+                        }
+                    }
+
+                    let animationClass = '';
+                    document.addEventListener('DOMContentLoaded', () => {
+                        fetch('story.json')
+                            .then(response => response.json())
+                            .then(data => {
+                                storyPages = data;
+                                renderPage();
+                                // 预加载下一页图片
+                                const preload = (idx) => {
+                                    const next = idx + 1;
+                                    if (storyPages[next] && storyPages[next].imageUrl) {
+                                        const img = new Image();
+                                        img.src = storyPages[next].imageUrl;
+                                    }
+                                };
+                                const origRender = renderPage;
+                                renderPage = function() { origRender(); preload(currentPage); };
+                            })
+                            .catch(error => {
+                                console.error('Error loading story:', error);
+                                if (root) {
+                                    root.innerHTML = '<div class="error-container"><p>加载故事失败 (story.json) 😥</p></div>';
+                                }
+                            });
+                    });
+                </script>
+            </body>
+            </html>
+        
