@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin=""/>
+    <title>Zenith</title>
+    <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .animate-fade-in {
+                animation: fade-in 1s ease-in-out forwards;
+            }
+            .animate-slide-up {
+                animation: slide-up 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            }
+            .delay-200 {
+                animation-delay: 200ms;
+            }
+            .delay-400 {
+                animation-delay: 400ms;
+            }
+            .delay-600 {
+                animation-delay: 600ms;
+            }
+            @keyframes fade-in {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+            @keyframes slide-up {
+                from {
+                    transform: translateY(50px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#7ee82b",
+                        "background-light": "#ffffff",
+                        "background-dark": "#0A0A0A",
+                        "card-dark": "#161B22"
+                    },
+                    fontFamily: {
+                        sans: ['PingFang SC', 'PingFang HK', 'Hiragino Sans GB', 'Microsoft YaHei', 'sans-serif'],
+                        display: ['PingFang SC', 'PingFang HK', 'Hiragino Sans GB', 'Microsoft YaHei', 'sans-serif']
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    }
+                }
+            }
+        };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-sans text-gray-800 dark:text-gray-200">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden lg:flex-row">
+<div class="lg:w-1/2 lg:h-screen lg:flex lg:flex-col lg:sticky lg:top-0">
+<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap px-6 sm:px-10 py-6 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-lg lg:relative lg:bg-transparent dark:lg:bg-transparent lg:backdrop-blur-none">
+<div class="flex items-center gap-3 animate-fade-in">
+<a class="text-gray-900 dark:text-white text-xl font-bold tracking-tight" href="#">Tim</a>
+</div>
+<div class="flex items-center gap-8 animate-fade-in">
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 text-sm font-medium" href="#" data-en="Work" data-zh="作品">Work</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 text-sm font-medium" href="#" data-en="Insights" data-zh="感悟">Insights</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 text-sm font-medium" href="#" data-en="Contact" data-zh="联系">Contact</a>
+<button id="language-switcher" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 text-sm font-medium cursor-pointer">
+<span data-en="EN" data-zh="中">EN</span>
+</button>
+</nav>
+<button class="flex items-center justify-center rounded-full h-10 w-10 bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50 transition-colors md:hidden">
+<span class="material-symbols-outlined text-xl">menu</span>
+</button>
+</div>
+</header>
+<main class="flex-1 flex items-center px-6 sm:px-10 lg:px-20 xl:px-24">
+<div class="max-w-lg mx-auto lg:mx-0">
+<div class="flex flex-col items-start space-y-12 opacity-0 animate-slide-up">
+<h1 class="text-gray-900 dark:text-white text-5xl md:text-7xl font-bold tracking-tighter leading-tight font-display" data-en="Personal Experience" data-zh="个人经历">
+                        个人经历
+                    </h1>
+    <p class="text-gray-600 dark:text-gray-400 text-base md:text-lg font-normal leading-relaxed" data-en="I am the CPO of Guoguang Shunneng, with 10 years of experience in the new energy sector, having served as System Manager at SAIC Group's New Energy R&D Center, Hardware R&D Manager at NIO's rival Hozon Auto, and System Integration Expert at a solid-state battery unicorn." data-zh="我是国广顺能cpo，在新能源领域从业10年，先后在上汽集团新能源研发中心担任系统经理、造车新势力合众汽车担任硬件研发经理、在固态电池独角兽担任系统集成专家。">
+                        我是国广顺能cpo，在新能源领域从业10年，先后在上汽集团新能源研发中心担任系统经理、造车新势力合众汽车担任硬件研发经理、在固态电池独角兽担任系统集成专家。
+                    </p>
+</div>
+</div>
+</main>
+<footer class="px-6 sm:px-10 lg:px-20 xl:px-24 py-12">
+<div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+<p class="text-gray-500 dark:text-gray-400 text-sm">© 2024 Zenith. All rights reserved.</p>
+<div class="flex justify-center gap-6">
+<a class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="#">
+<svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+<path d="M22.46 6.42a9.42 9.42 0 01-2.7.74 4.7 4.7 0 002.06-2.6c-.91.54-1.92.93-2.99 1.14a4.69 4.69 0 00-7.98 4.28A13.3 13.3 0 011.67 4.2a4.69 4.69 0 001.45 6.26c-.79-.02-1.53-.24-2.18-.6v.06a4.69 4.69 0 003.76 4.6c-.39.1-.8.15-1.22.15-.3 0-.59-.03-.88-.08a4.69 4.69 0 004.38 3.25 9.42 9.42 0 01-5.83 2.01c-.38 0-.75-.02-1.12-.07a13.25 13.25 0 007.18 2.1c8.61 0 13.32-7.14 13.32-13.32 0-.2 0-.41-.02-.61a9.49 9.49 0 002.32-2.4z"></path>
+</svg>
+</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="#">
+<svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+<path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-12 15H5v-9h2v9zM8 8.5C8 7.67 7.33 7 6.5 7S5 7.67 5 8.5 5.67 10 6.5 10s1.5-.67 1.5-1.5zM19 18h-2v-4.5c0-1.38-1.12-2.5-2.5-2.5S12 12.12 12 13.5V18h-2v-9h2v1.25c.5-.9 1.5-1.5 2.5-1.5 1.93 0 3.5 1.57 3.5 3.5V18z"></path>
+</svg>
+</a>
+</div>
+</div>
+</footer>
+</div>
+<div class="lg:w-1/2 lg:h-screen lg:overflow-y-auto px-6 sm:px-10 lg:px-8 xl:px-12 py-24 md:py-36">
+<section class="opacity-0 animate-slide-up delay-400">
+<div class="max-w-2xl mx-auto">
+    <h2 class="text-gray-900 dark:text-white text-3xl font-bold tracking-tight mb-8" data-en="Projects" data-zh="项目">Projects</h2>
+    <div class="space-y-10">
+        <div class="flex flex-col gap-4">
+            <a class="block font-display text-xl font-semibold text-gray-900 dark:text-white hover:underline" href="#" data-en="Project Alpha" data-zh="项目阿尔法">Project Alpha</a>
+            <p class="text-gray-500 dark:text-gray-400 text-base" data-en="A mobile app for fitness enthusiasts, focused on user engagement and personalized tracking." data-zh="一款面向健身爱好者的移动应用，专注于用户参与度和个性化追踪。">A mobile app for fitness enthusiasts, focused on user engagement and personalized tracking.</p>
+        </div>
+        <div class="flex flex-col gap-4">
+            <a class="block font-display text-xl font-semibold text-gray-900 dark:text-white hover:underline" href="#" data-en="Project Beta" data-zh="项目贝塔">Project Beta</a>
+            <p class="text-gray-500 dark:text-gray-400 text-base" data-en="A web platform designed for creative professionals to showcase their portfolios and connect with clients." data-zh="一个为创意专业人士设计的网络平台，用于展示作品集并与客户建立联系。">A web platform designed for creative professionals to showcase their portfolios and connect with clients.</p>
+        </div>
+    </div>
+</div>
+</section>
+<section class="mt-24 md:mt-32 opacity-0 animate-slide-up delay-600">
+<div class="max-w-2xl mx-auto">
+    <h2 class="text-gray-900 dark:text-white text-3xl font-bold tracking-tight mb-12" data-en="Insights" data-zh="感悟">Insights</h2>
+    <div class="space-y-10">
+        <a class="flex flex-col items-start gap-4 group" href="#">
+            <p class="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300 group-hover:text-primary" data-en="The Future of Design Systems" data-zh="设计系统的未来">The Future of Design Systems</p>
+            <p class="text-base text-gray-500 dark:text-gray-400" data-en="Exploring the evolution of design systems and their impact on product development." data-zh="探索设计系统的演变及其对产品开发的影响。">Exploring the evolution of design systems and their impact on product development.</p>
+        </a>
+        <a class="flex flex-col items-start gap-4 group" href="#">
+            <p class="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300 group-hover:text-primary" data-en="Designing for Accessibility" data-zh="无障碍设计">Designing for Accessibility</p>
+            <p class="text-base text-gray-500 dark:text-gray-400" data-en="Best practices for creating inclusive and accessible digital products for all users." data-zh="为所有用户创建包容性和无障碍数字产品的最佳实践。">Best practices for creating inclusive and accessible digital products for all users.</p>
+        </a>
+    </div>
+</div>
+</section>
+</div>
+</div>
+<script>
+// 语言切换功能
+let currentLanguage = 'en'; // 默认英文
+
+// 切换语言函数
+function switchLanguage(lang) {
+    currentLanguage = lang;
+    
+    // 更新所有带有data属性的元素
+    const elements = document.querySelectorAll('[data-en][data-zh]');
+    elements.forEach(element => {
+        element.textContent = element.getAttribute('data-' + lang);
+    });
+    
+    // 保存语言偏好到localStorage
+    localStorage.setItem('preferredLanguage', lang);
+}
+
+// 初始化语言
+function initLanguage() {
+    const savedLanguage = localStorage.getItem('preferredLanguage');
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'zh')) {
+        switchLanguage(savedLanguage);
+    }
+}
+
+// 语言切换按钮事件
+document.addEventListener('DOMContentLoaded', function() {
+    const languageSwitcher = document.getElementById('language-switcher');
+    
+    languageSwitcher.addEventListener('click', function() {
+        const newLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+        switchLanguage(newLanguage);
+    });
+    
+    // 初始化语言
+    initLanguage();
+});
+</script>
+</body>
+</html>
