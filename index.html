@@ -3,231 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta charset="utf-8"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin=""/>
     <title>Tim</title>
     <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&family=Material+Symbols+Outlined&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .animate-fade-in {
-                animation: fade-in 1s ease-in-out forwards;
-            }
-            .animate-slide-up {
-                animation: slide-up 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-            }
-            .delay-200 {
-                animation-delay: 200ms;
-            }
-            .delay-400 {
-                animation-delay: 400ms;
-            }
-            .delay-600 {
-                animation-delay: 600ms;
-            }
-            @keyframes fade-in {
-                from {
-                    opacity: 0;
-                }
-                to {
-                    opacity: 1;
-                }
-            }
+            .animate-fade-in { animation: fade-in 0.8s ease forwards; }
+            .animate-slide-up { animation: slide-up 0.7s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+            .delay-200 { animation-delay: 200ms; }
+            .delay-400 { animation-delay: 400ms; }
+            .delay-600 { animation-delay: 600ms; }
+            @keyframes fade-in { from { opacity:0; } to { opacity:1; } }
             @keyframes slide-up {
-                from {
-                    transform: translateY(50px);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateY(0);
-                    opacity: 1;
-                }
+                from { transform: translateY(32px); opacity:0; }
+                to   { transform: translateY(0);    opacity:1; }
             }
         }
-        
-        /* Grid background for left section */
+
+        /* ── Left panel grid ── */
         .grid-wrapper {
             min-height: 100%;
             width: 100%;
             position: relative;
-            background-color: #f8fafc;
+            background-color: #f5f2ed;
         }
-        
         .grid-background {
             position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
+            inset: 0;
             z-index: 0;
-            background-image: linear-gradient(to right, #fff143 1px, transparent 1px),
-                linear-gradient(to bottom, #fff143 1px, transparent 1px);
-            background-size: 20px 30px;
-            -webkit-mask-image: radial-gradient(
-                ellipse 70% 60% at 50% 0%,
-                #000 60%,
-                transparent 100%
-            );
-            mask-image: radial-gradient(
-                ellipse 70% 60% at 50% 0%,
-                #000 60%,
-                transparent 100%
-            );
+            background-image:
+                linear-gradient(to right, rgba(26,26,26,0.07) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(26,26,26,0.07) 1px, transparent 1px);
+            background-size: 24px 32px;
+            -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 0%, #000 55%, transparent 100%);
+            mask-image:         radial-gradient(ellipse 80% 65% at 50% 0%, #000 55%, transparent 100%);
         }
-        
-        /* Dark mode grid background */
-        .dark .grid-wrapper {
-            background-color: #0A0A0A;
-        }
-        
-        .dark .grid-background {
-            background-image: linear-gradient(to right, #fff143 1px, transparent 1px),
-                linear-gradient(to bottom, #fff143 1px, transparent 1px);
-        }
-        
-        /* Mouse hover effect for grid - changes grid color */
         .grid-hover-effect {
             position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
+            inset: 0;
             z-index: 1;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.3s ease;
-            background-image: linear-gradient(to right, #9333ea 1px, transparent 1px),
-                linear-gradient(to bottom, #9333ea 1px, transparent 1px);
-            background-size: 20px 30px;
+            transition: opacity 0.25s ease;
+            background-image:
+                linear-gradient(to right, rgba(26,26,26,0.18) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(26,26,26,0.18) 1px, transparent 1px);
+            background-size: 24px 32px;
             -webkit-mask-image: radial-gradient(
-                ellipse 200px 200px at var(--circle-x, 50%) var(--circle-y, 50%),
-                #000 0%,
-                rgba(0,0,0,0.8) 30%,
-                rgba(0,0,0,0.4) 60%,
-                transparent 100%
+                ellipse 180px 180px at var(--circle-x,50%) var(--circle-y,50%),
+                #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%
             );
             mask-image: radial-gradient(
-                ellipse 200px 200px at var(--circle-x, 50%) var(--circle-y, 50%),
-                #000 0%,
-                rgba(0,0,0,0.8) 30%,
-                rgba(0,0,0,0.4) 60%,
-                transparent 100%
+                ellipse 180px 180px at var(--circle-x,50%) var(--circle-y,50%),
+                #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%
             );
         }
-        
-        .grid-hover-effect.active {
-            opacity: 1;
+        .grid-hover-effect.active { opacity: 1; }
+
+        /* ── Right panel card ── */
+        .project-card {
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #e0ddd8;
+            border-radius: 3px;
+            box-shadow: 0 1px 4px rgba(26,26,26,0.06);
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .project-card:hover {
+            border-color: #c5c0b8;
+            box-shadow: 0 3px 12px rgba(26,26,26,0.1);
+        }
+        .insight-link {
+            padding: 16px 0;
+            border-bottom: 1px solid #e0ddd8;
+            transition: border-color 0.2s;
+        }
+        .insight-link:hover { border-color: #c5c0b8; }
+        .insight-link:last-child { border-bottom: none; }
+
+        .section-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #a0a0a0;
+            margin-bottom: 24px;
         }
     </style>
     <script>
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: "#7ee82b",
-                        "background-light": "#ffffff",
-                        "background-dark": "#0A0A0A",
-                        "card-dark": "#161B22"
+                        bg:       "#f5f2ed",
+                        "bg-card":"#ffffff",
+                        "text-main":"#1a1a1a",
+                        "text-sec":"#6b6b6b",
+                        "text-dim":"#a0a0a0",
+                        "border-warm":"#e0ddd8",
+                        "border-hover":"#c5c0b8",
+                        "bg-muted":"#ebe7e1",
                     },
                     fontFamily: {
-                        sans: ['PingFang SC', 'PingFang HK', 'Hiragino Sans GB', 'Microsoft YaHei', 'sans-serif'],
-                        display: ['PingFang SC', 'PingFang HK', 'Hiragino Sans GB', 'Microsoft YaHei', 'sans-serif']
+                        sans:    ['Inter', '-apple-system', 'sans-serif'],
+                        display: ['Share Tech Mono', 'monospace'],
+                        mono:    ['Share Tech Mono', 'monospace'],
                     },
                     borderRadius: {
-                        DEFAULT: "0.25rem",
-                        lg: "0.5rem",
-                        xl: "0.75rem",
+                        DEFAULT: "0.1875rem",
+                        sm: "0.1875rem",
+                        md: "0.375rem",
                         full: "9999px"
+                    },
+                    boxShadow: {
+                        card: "0 1px 4px rgba(26,26,26,0.07)",
+                        "card-hover": "0 3px 12px rgba(26,26,26,0.1)",
                     }
                 }
             }
         };
     </script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-sans text-gray-800 dark:text-gray-200">
+<body class="bg-bg font-sans text-text-main" style="-webkit-font-smoothing:antialiased;">
 <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden lg:flex-row">
+
+<!-- ── Left: sticky bio panel ── -->
 <div class="lg:w-1/2 lg:h-screen lg:flex lg:flex-col lg:sticky lg:top-0 grid-wrapper">
 <div class="grid-background"></div>
 <div class="grid-hover-effect" id="gridHoverEffect"></div>
-<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap px-6 sm:px-10 py-6 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-lg lg:relative lg:bg-transparent dark:lg:bg-transparent lg:backdrop-blur-none relative z-10">
-<div class="flex items-center gap-3 animate-fade-in">
-<a class="text-gray-900 dark:text-white text-xl font-bold tracking-tight" href="#">Tim</a>
-                            </div>
-<div class="flex items-center gap-8 animate-fade-in">
-<nav class="hidden md:flex items-center gap-8">
-<a class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 text-sm font-medium" href="#" data-en="Work" data-zh="作品">Work</a>
-<a class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 text-sm font-medium" href="#" data-en="Insights" data-zh="感悟">Insights</a>
-<a class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 text-sm font-medium" href="#" data-en="Contact" data-zh="联系">Contact</a>
-<button id="language-switcher" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 text-sm font-medium cursor-pointer">
-<span data-en="EN" data-zh="中">EN</span>
-</button>
-</nav>
-<button class="flex items-center justify-center rounded-full h-10 w-10 bg-gray-100 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/50 transition-colors md:hidden">
-<span class="material-symbols-outlined text-xl">menu</span>
-</button>
-                        </div>
+
+<header class="sticky top-0 z-50 flex items-center justify-between px-6 sm:px-10 py-5 bg-bg/80 backdrop-blur-md border-b border-border-warm lg:relative lg:bg-transparent lg:backdrop-blur-none lg:border-none relative z-10">
+    <div class="animate-fade-in">
+        <a class="font-mono text-base font-normal tracking-widest text-text-main uppercase" href="#">Tim</a>
+    </div>
+    <div class="flex items-center gap-6 animate-fade-in">
+        <nav class="hidden md:flex items-center gap-6">
+            <a class="text-text-sec hover:text-text-main transition-colors duration-200 text-sm font-light" href="#" data-en="Work" data-zh="作品">Work</a>
+            <a class="text-text-sec hover:text-text-main transition-colors duration-200 text-sm font-light" href="#" data-en="Insights" data-zh="感悟">Insights</a>
+            <a class="text-text-sec hover:text-text-main transition-colors duration-200 text-sm font-light" href="#" data-en="Contact" data-zh="联系">Contact</a>
+            <button id="language-switcher" class="text-text-sec hover:text-text-main transition-colors duration-200 text-sm font-light cursor-pointer border border-border-warm rounded px-2.5 py-1 hover:border-border-hover">
+                <span data-en="EN" data-zh="中">EN</span>
+            </button>
+        </nav>
+        <button class="flex items-center justify-center rounded h-9 w-9 border border-border-warm text-text-sec hover:border-border-hover transition-colors md:hidden">
+            <span class="material-symbols-outlined text-lg">menu</span>
+        </button>
+    </div>
 </header>
-<main class="flex-1 flex items-center px-6 sm:px-10 lg:px-20 xl:px-24 relative z-10">
-<div class="max-w-lg mx-auto lg:mx-0">
-<div class="flex flex-col items-start space-y-12 opacity-0 animate-slide-up">
-<h1 class="text-gray-900 dark:text-white text-5xl md:text-7xl font-bold tracking-tighter leading-tight font-display" data-en="Building with AI" data-zh="以 AI 构建未来">
-                        Building with AI
-                    </h1>
-    <p class="text-gray-600 dark:text-gray-400 text-base md:text-lg font-light leading-relaxed" data-en="I believe AI is not just a tool — it is the infrastructure of the next era. I build products at the intersection of engineering and intelligence, turning complex workflows into seamless experiences. Every project here is a step toward a world where human creativity is amplified, not replaced." data-zh="我相信 AI 不只是工具，而是下一个时代的基础设施。我在工程与智能的交汇处构建产品，将复杂的工作流转化为流畅的体验。这里的每一个项目，都是迈向「人类创造力被放大而非取代」世界的一步。">
-                        I believe AI is not just a tool — it is the infrastructure of the next era. I build products at the intersection of engineering and intelligence, turning complex workflows into seamless experiences. Every project here is a step toward a world where human creativity is amplified, not replaced.
-                    </p>
-                            </div>
-                        </div>
+
+<main class="flex-1 flex items-center px-6 sm:px-10 lg:px-16 xl:px-20 relative z-10">
+    <div class="max-w-md mx-auto lg:mx-0">
+        <div class="flex flex-col items-start space-y-8 opacity-0 animate-slide-up">
+            <h1 class="font-display text-4xl md:text-6xl font-normal tracking-tight leading-tight text-text-main"
+                data-en="Building with AI" data-zh="以 AI 构建未来">
+                Building with AI
+            </h1>
+            <div class="w-12 h-px bg-border-hover"></div>
+            <p class="text-text-sec text-base font-light leading-relaxed"
+               data-en="I believe AI is not just a tool — it is the infrastructure of the next era. I build products at the intersection of engineering and intelligence, turning complex workflows into seamless experiences. Every project here is a step toward a world where human creativity is amplified, not replaced."
+               data-zh="我相信 AI 不只是工具，而是下一个时代的基础设施。我在工程与智能的交汇处构建产品，将复杂的工作流转化为流畅的体验。这里的每一个项目，都是迈向「人类创造力被放大而非取代」世界的一步。">
+                I believe AI is not just a tool — it is the infrastructure of the next era. I build products at the intersection of engineering and intelligence, turning complex workflows into seamless experiences. Every project here is a step toward a world where human creativity is amplified, not replaced.
+            </p>
+        </div>
+    </div>
 </main>
-<footer class="px-6 sm:px-10 lg:px-20 xl:px-24 py-12 relative z-10">
-<div class="flex flex-col sm:flex-row justify-between items-center gap-6">
-<p class="text-gray-500 dark:text-gray-400 text-sm">© 2024 Zenith. All rights reserved.</p>
-<div class="flex justify-center gap-6">
-<!-- 小红书图标 -->
-<a class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="https://www.xiaohongshu.com/user/profile/54e56a57e7798913e0cb2bd2" target="_blank" rel="noopener noreferrer" aria-label="小红书">
-<svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-<rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
-<text x="12" y="16" text-anchor="middle" font-family="PingFang SC, sans-serif" font-size="10" font-weight="bold">小</text>
-</svg>
-</a>
-<!-- X 图标 -->
-<a class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="https://x.com/home" target="_blank" rel="noopener noreferrer" aria-label="X">
-<svg aria-hidden="true" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
-</svg>
-</a>
-                            </div>
-                        </div>
+
+<footer class="px-6 sm:px-10 lg:px-16 xl:px-20 py-8 border-t border-border-warm relative z-10">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <p class="text-text-dim text-xs font-light tracking-wide">© 2025 Tim. All rights reserved.</p>
+        <div class="flex items-center gap-5">
+            <a class="text-text-dim hover:text-text-main transition-colors" href="https://www.xiaohongshu.com/user/profile/54e56a57e7798913e0cb2bd2" target="_blank" rel="noopener noreferrer" aria-label="小红书">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <text x="12" y="16" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="600">小</text>
+                </svg>
+            </a>
+            <a class="text-text-dim hover:text-text-main transition-colors" href="https://x.com/home" target="_blank" rel="noopener noreferrer" aria-label="X">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
 </footer>
-                    </div>
-<div class="lg:w-1/2 lg:h-screen lg:overflow-y-auto px-6 sm:px-10 lg:px-8 xl:px-12 py-24 md:py-36">
+</div>
+
+<!-- ── Right: scrollable content ── -->
+<div class="lg:w-1/2 lg:h-screen lg:overflow-y-auto bg-bg border-l border-border-warm px-6 sm:px-10 lg:px-10 xl:px-14 py-20 md:py-28">
+
 <section class="opacity-0 animate-slide-up delay-400">
-<div class="max-w-2xl mx-auto">
-    <h2 class="text-gray-900 dark:text-white text-3xl font-bold tracking-tight mb-8" data-en="Projects" data-zh="项目">Projects</h2>
-    <div class="space-y-10">
-        <div class="flex flex-col gap-4">
-            <a class="block font-display text-xl font-semibold text-gray-900 dark:text-white hover:underline" href="/stl-viewer/" target="_blank" data-en="STL Transform Studio" data-zh="STL 坐标编辑工具">STL Transform Studio</a>
-            <p class="text-gray-500 dark:text-gray-400 text-base font-light" data-en="A browser-based 3D engineering tool for importing, transforming, and exporting STL files. Supports coordinate system conversion, precision positioning, rotation, scaling, and one-click binary STL export — no installation required." data-zh="一款基于浏览器的 3D 工程工具，支持 STL 文件的导入、坐标系转换、精确定位与旋转缩放，并可一键导出二进制 STL——无需安装任何软件。">A browser-based 3D engineering tool for importing, transforming, and exporting STL files. Supports coordinate system conversion, precision positioning, rotation, scaling, and one-click binary STL export — no installation required.</p>
+    <div class="max-w-xl">
+        <p class="section-label" data-en="Projects" data-zh="项目">Projects</p>
+        <div class="space-y-4">
+            <a class="project-card flex flex-col gap-3 block no-underline" href="/stl-viewer/" target="_blank">
+                <div class="flex items-start justify-between gap-4">
+                    <span class="font-medium text-text-main text-base"
+                          data-en="STL Transform Studio" data-zh="STL 坐标编辑工具">STL Transform Studio</span>
+                    <svg class="h-4 w-4 text-text-dim flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/>
+                    </svg>
                 </div>
-            </div>
+                <p class="text-text-sec text-sm font-light leading-relaxed"
+                   data-en="A browser-based 3D engineering tool for importing, transforming, and exporting STL files. Supports coordinate system conversion, precision positioning, rotation, scaling, and one-click binary STL export — no installation required."
+                   data-zh="一款基于浏览器的 3D 工程工具，支持 STL 文件的导入、坐标系转换、精确定位与旋转缩放，并可一键导出二进制 STL——无需安装任何软件。">
+                    A browser-based 3D engineering tool for importing, transforming, and exporting STL files. Supports coordinate system conversion, precision positioning, rotation, scaling, and one-click binary STL export — no installation required.
+                </p>
+            </a>
         </div>
-    </section>
-<section class="mt-24 md:mt-32 opacity-0 animate-slide-up delay-600">
-<div class="max-w-2xl mx-auto">
-    <h2 class="text-gray-900 dark:text-white text-3xl font-bold tracking-tight mb-12" data-en="Insights" data-zh="感悟">Insights</h2>
-    <div class="space-y-10">
-        <a class="flex flex-col items-start gap-4 group" href="#">
-            <p class="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300 group-hover:text-primary" data-en="The Future of Design Systems" data-zh="设计系统的未来">The Future of Design Systems</p>
-            <p class="text-base text-gray-500 dark:text-gray-400 font-light" data-en="Exploring the evolution of design systems and their impact on product development." data-zh="探索设计系统的演变及其对产品开发的影响。">Exploring the evolution of design systems and their impact on product development.</p>
-        </a>
-        <a class="flex flex-col items-start gap-4 group" href="#">
-            <p class="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300 group-hover:text-primary" data-en="Designing for Accessibility" data-zh="无障碍设计">Designing for Accessibility</p>
-            <p class="text-base text-gray-500 dark:text-gray-400 font-light" data-en="Best practices for creating inclusive and accessible digital products for all users." data-zh="为所有用户创建包容性和无障碍数字产品的最佳实践。">Best practices for creating inclusive and accessible digital products for all users.</p>
-                </a>
-            </div>
+    </div>
+</section>
+
+<section class="mt-20 opacity-0 animate-slide-up delay-600">
+    <div class="max-w-xl">
+        <p class="section-label" data-en="Insights" data-zh="感悟">Insights</p>
+        <div>
+            <a class="insight-link flex flex-col gap-2 block no-underline py-4" href="#">
+                <span class="font-medium text-text-main text-base transition-colors hover:text-text-sec"
+                      data-en="The Future of Design Systems" data-zh="设计系统的未来">The Future of Design Systems</span>
+                <span class="text-text-sec text-sm font-light"
+                      data-en="Exploring the evolution of design systems and their impact on product development."
+                      data-zh="探索设计系统的演变及其对产品开发的影响。">Exploring the evolution of design systems and their impact on product development.</span>
+            </a>
+            <a class="insight-link flex flex-col gap-2 block no-underline py-4" href="#">
+                <span class="font-medium text-text-main text-base transition-colors hover:text-text-sec"
+                      data-en="Designing for Accessibility" data-zh="无障碍设计">Designing for Accessibility</span>
+                <span class="text-text-sec text-sm font-light"
+                      data-en="Best practices for creating inclusive and accessible digital products for all users."
+                      data-zh="为所有用户创建包容性和无障碍数字产品的最佳实践。">Best practices for creating inclusive and accessible digital products for all users.</span>
+            </a>
         </div>
-    </section>
+    </div>
+</section>
                             </div>
                         </div>
 <script>
