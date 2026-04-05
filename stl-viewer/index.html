@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STL Viewer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Top toolbar */
+        #toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: #16213e;
+            border-bottom: 1px solid #0f3460;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 100;
+            gap: 12px;
+        }
+        #toolbar h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e94560;
+            margin-right: 20px;
+        }
+        .btn {
+            padding: 6px 14px;
+            border: 1px solid #0f3460;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .btn:hover { background: #0f3460; border-color: #e94560; }
+        .btn.active { background: #e94560; border-color: #e94560; color: #fff; }
+
+        .separator {
+            width: 1px;
+            height: 24px;
+            background: #0f3460;
+        }
+
+        /* 3D viewport */
+        #viewport {
+            position: fixed;
+            top: 48px;
+            left: 0;
+            right: 320px;
+            bottom: 0;
+        }
+        #viewport canvas { display: block; }
+
+        /* Axis gizmo overlay */
+        #axis-gizmo {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            background: rgba(22, 33, 62, 0.7);
+            z-index: 20;
+        }
+
+        /* Right panel */
+        #panel {
+            position: fixed;
+            top: 48px;
+            right: 0;
+            width: 320px;
+            bottom: 0;
+            background: #16213e;
+            border-left: 1px solid #0f3460;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .panel-section {
+            margin-bottom: 16px;
+        }
+        .panel-section h3 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #0f3460;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+        .info-label { color: #888; }
+        .info-value { color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 12px; }
+
+        /* Coordinate transform controls */
+        .transform-group {
+            margin-bottom: 12px;
+        }
+        .transform-group label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+        .input-row {
+            display: flex;
+            gap: 6px;
+        }
+        .input-row .axis-input {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input-row .axis-label {
+            font-size: 10px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .axis-x { color: #ff4444; }
+        .axis-y { color: #44ff44; }
+        .axis-z { color: #4488ff; }
+        .input-row input {
+            width: 100%;
+            padding: 4px 6px;
+            background: #1a1a2e;
+            border: 1px solid #0f3460;
+            color: #e0e0e0;
+            border-radius: 3px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+        .input-row input:focus { outline: none; border-color: #e94560; }
+        .input-row input[type="number"] { cursor: ew-resize; }
+
+        .btn-apply {
+            width: 100%;
+            margin-top: 8px;
+            padding: 8px;
+            background: #e94560;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-apply:hover { background: #c73e54; }
+
+        /* Drop overlay */
+        #drop-overlay {
+            display: none;
+            position: fixed;
+            top: 48px;
+            left: 0;
+            right: 320px;
+            bottom: 0;
+            background: rgba(233, 69, 96, 0.15);
+            border: 3px dashed #e94560;
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: #e94560;
+            pointer-events: none;
+        }
+
+        /* Welcome hint */
+        #welcome {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #555;
+            pointer-events: none;
+        }
+        #welcome .icon { font-size: 64px; margin-bottom: 16px; }
+        #welcome p { font-size: 14px; }
+
+        /* Axes legend */
+        #axes-legend {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            font-size: 12px;
+            color: #888;
+            background: rgba(22, 33, 62, 0.8);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        #axes-legend span { margin-right: 10px; font-weight: 600; }
+
+        select {
+            padding: 4px 8px;
+            background: #1a1a2e;
+            border: 1px solid #0f3460;
+            color: #e0e0e0;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div id="toolbar">
+    <h1>STL Viewer</h1>
+    <button class="btn" id="btn-import" data-i18n="btn-import">Import STL</button>
+    <input type="file" id="file-input" accept=".stl" style="display:none">
+
+    <div class="separator"></div>
+
+    <button class="btn" id="btn-wireframe" data-i18n="btn-wireframe">Wireframe</button>
+    <button class="btn" id="btn-stl-origin" data-i18n="btn-stl-origin">STL Origin</button>
+    <button class="btn" id="btn-grid" data-i18n="btn-grid">Grid</button>
+    <button class="btn" id="btn-fit-view" data-i18n="btn-fit-view">Fit View</button>
+
+    <div class="separator"></div>
+
+    <button class="btn" id="btn-export-stl" data-i18n="btn-export-stl" style="background:#e94560; border-color:#e94560; color:#fff;">Export STL</button>
+
+    <label style="font-size:12px; color:#888;" data-i18n="label-color">Color:</label>
+    <input type="color" id="model-color" value="#e94560" style="width:32px; height:24px; border:none; cursor:pointer; background:none;">
+
+    <div class="separator"></div>
+
+    <label style="font-size:12px; color:#888;" data-i18n="label-opacity">Opacity:</label>
+    <input type="range" id="opacity-slider" min="0.05" max="1" step="0.05" value="1" style="width:80px; cursor:pointer; accent-color:#e94560;">
+    <span id="opacity-value" style="font-size:12px; color:#e0e0e0; min-width:32px;">100%</span>
+
+    <div class="separator"></div>
+
+    <button class="btn" id="btn-lang" data-i18n="btn-lang" style="min-width:52px;">中文</button>
+</div>
+
+<!-- 3D Viewport -->
+<div id="viewport">
+    <div id="welcome">
+        <div class="icon">&#128206;</div>
+        <p data-i18n="welcome-hint">Click "Import STL" or drag &amp; drop an STL file here</p>
+    </div>
+    <div id="axes-legend" style="display:none;">
+        <span class="axis-x">X</span>
+        <span class="axis-y">Y</span>
+        <span class="axis-z">Z (Up)</span>
+        <span data-i18n="axes-hint">| Scroll: Zoom | Left drag: Rotate | Right drag: Pan</span>
+    </div>
+    <canvas id="axis-gizmo"></canvas>
+</div>
+
+<!-- Drop overlay -->
+<div id="drop-overlay" data-i18n="drop-overlay">Drop STL file here</div>
+
+<!-- Right Panel -->
+<div id="panel">
+    <!-- File Info -->
+    <div class="panel-section">
+        <h3 data-i18n="section-file-info">File Info</h3>
+        <div id="file-info">
+            <div class="info-row"><span class="info-label" data-i18n="label-filename">File Name</span><span class="info-value" id="info-filename">-</span></div>
+            <div class="info-row"><span class="info-label" data-i18n="label-format">Format</span><span class="info-value" id="info-format">-</span></div>
+            <div class="info-row"><span class="info-label" data-i18n="label-filesize">File Size</span><span class="info-value" id="info-filesize">-</span></div>
+            <div class="info-row"><span class="info-label" data-i18n="label-triangles">Triangles</span><span class="info-value" id="info-triangles">-</span></div>
+            <div class="info-row"><span class="info-label" data-i18n="label-vertices">Vertices</span><span class="info-value" id="info-vertices">-</span></div>
+        </div>
+    </div>
+
+    <!-- Bounding Box -->
+    <div class="panel-section">
+        <h3 data-i18n="section-bbox">Bounding Box</h3>
+        <div id="bbox-info">
+            <div class="info-row"><span class="info-label" data-i18n="label-width">Width (X)</span><span class="info-value" id="info-width">-</span></div>
+            <div class="info-row"><span class="info-label" data-i18n="label-height">Height (Y)</span><span class="info-value" id="info-height">-</span></div>
+            <div class="info-row"><span class="info-label" data-i18n="label-depth">Depth (Z)</span><span class="info-value" id="info-depth">-</span></div>
+            <div class="info-row"><span class="info-label" data-i18n="label-min">Min (X,Y,Z)</span><span class="info-value" id="info-min">-</span></div>
+            <div class="info-row"><span class="info-label" data-i18n="label-max">Max (X,Y,Z)</span><span class="info-value" id="info-max">-</span></div>
+            <div class="info-row"><span class="info-label" data-i18n="label-center">Center</span><span class="info-value" id="info-center">-</span></div>
+        </div>
+    </div>
+
+    <!-- Coordinate System -->
+    <div class="panel-section">
+        <h3 data-i18n="section-coord">Coordinate System Preset</h3>
+        <div class="transform-group">
+            <label data-i18n="coord-preset-label">Source coordinate convention</label>
+            <select id="coord-preset" style="width:100%; padding:6px; margin-bottom:6px;">
+                <option value="none" data-i18n="coord-preset-none">-- Select preset --</option>
+                <option value="z-up" data-i18n="coord-preset-z-up">Z-Up (SolidWorks / AutoCAD / Blender) - no change</option>
+                <option value="y-up" data-i18n="coord-preset-y-up">Y-Up → Z-Up (Unity / Three.js)</option>
+                <option value="x-up" data-i18n="coord-preset-x-up">X-Up → Z-Up</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Transform -->
+    <div class="panel-section">
+        <h3 data-i18n="section-transform">Custom Transform</h3>
+
+        <div class="transform-group">
+            <label data-i18n="label-position">Position (mm)</label>
+            <div class="input-row">
+                <div class="axis-input">
+                    <span class="axis-label axis-x">X</span>
+                    <input type="number" id="pos-x" value="0" step="1">
+                </div>
+                <div class="axis-input">
+                    <span class="axis-label axis-y">Y</span>
+                    <input type="number" id="pos-y" value="0" step="1">
+                </div>
+                <div class="axis-input">
+                    <span class="axis-label axis-z">Z</span>
+                    <input type="number" id="pos-z" value="0" step="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="transform-group">
+            <label data-i18n="label-rotation">Rotation (deg)</label>
+            <div class="input-row">
+                <div class="axis-input">
+                    <span class="axis-label axis-x">X</span>
+                    <input type="number" id="rot-x" value="0" step="5">
+                </div>
+                <div class="axis-input">
+                    <span class="axis-label axis-y">Y</span>
+                    <input type="number" id="rot-y" value="0" step="5">
+                </div>
+                <div class="axis-input">
+                    <span class="axis-label axis-z">Z</span>
+                    <input type="number" id="rot-z" value="0" step="5">
+                </div>
+            </div>
+        </div>
+
+        <div class="transform-group">
+            <label data-i18n="label-scale">Scale (Uniform)</label>
+            <div class="input-row">
+                <div class="axis-input">
+                    <input type="number" id="scale-val" value="1" step="0.1" min="0.01">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-apply" id="btn-center-origin" data-i18n="btn-center-origin" style="background:#0f3460; margin-top:4px;">Center to Origin</button>
+        <button class="btn-apply" id="btn-reset-transform" data-i18n="btn-reset-transform" style="background:#0f3460; margin-top:4px;">Reset All</button>
+    </div>
+</div>
+
+<!-- i18n -->
+<script>
+    const I18N = {
+        en: {
+            'btn-import':         'Import STL',
+            'btn-wireframe':      'Wireframe',
+            'btn-stl-origin':     'STL Origin',
+            'btn-grid':           'Grid',
+            'btn-fit-view':       'Fit View',
+            'btn-export-stl':     'Export STL',
+            'label-color':        'Color:',
+            'label-opacity':      'Opacity:',
+            'btn-lang':           '中文',
+            'welcome-hint':       'Click "Import STL" or drag & drop an STL file here',
+            'axes-hint':          '| Scroll: Zoom | Left drag: Rotate | Right drag: Pan',
+            'drop-overlay':       'Drop STL file here',
+            'section-file-info':  'File Info',
+            'section-bbox':       'Bounding Box',
+            'section-coord':      'Coordinate System Preset',
+            'section-transform':  'Custom Transform',
+            'label-filename':     'File Name',
+            'label-format':       'Format',
+            'label-filesize':     'File Size',
+            'label-triangles':    'Triangles',
+            'label-vertices':     'Vertices',
+            'label-width':        'Width (X)',
+            'label-height':       'Height (Y)',
+            'label-depth':        'Depth (Z)',
+            'label-min':          'Min (X,Y,Z)',
+            'label-max':          'Max (X,Y,Z)',
+            'label-center':       'Center',
+            'coord-preset-label': 'Source coordinate convention',
+            'coord-preset-none':  '-- Select preset --',
+            'coord-preset-z-up':  'Z-Up (SolidWorks / AutoCAD / Blender) - no change',
+            'coord-preset-y-up':  'Y-Up \u2192 Z-Up (Unity / Three.js)',
+            'coord-preset-x-up':  'X-Up \u2192 Z-Up',
+            'label-position':     'Position (mm)',
+            'label-rotation':     'Rotation (deg)',
+            'label-scale':        'Scale (Uniform)',
+            'btn-center-origin':  'Center to Origin',
+            'btn-reset-transform':'Reset All',
+        },
+        zh: {
+            'btn-import':         '导入 STL',
+            'btn-wireframe':      '线框模式',
+            'btn-stl-origin':     'STL 原点',
+            'btn-grid':           '网格',
+            'btn-fit-view':       '适应视图',
+            'btn-export-stl':     '导出 STL',
+            'label-color':        '颜色：',
+            'label-opacity':      '透明度：',
+            'btn-lang':           'English',
+            'welcome-hint':       '点击「导入 STL」或将 STL 文件拖放到此处',
+            'axes-hint':          '| 滚轮：缩放 | 左键拖拽：旋转 | 右键拖拽：平移',
+            'drop-overlay':       '将 STL 文件拖放到此处',
+            'section-file-info':  '文件信息',
+            'section-bbox':       '包围盒',
+            'section-coord':      '坐标系预设',
+            'section-transform':  '自定义变换',
+            'label-filename':     '文件名',
+            'label-format':       '格式',
+            'label-filesize':     '文件大小',
+            'label-triangles':    '三角面数',
+            'label-vertices':     '顶点数',
+            'label-width':        '宽度 (X)',
+            'label-height':       '高度 (Y)',
+            'label-depth':        '深度 (Z)',
+            'label-min':          '最小值 (X,Y,Z)',
+            'label-max':          '最大值 (X,Y,Z)',
+            'label-center':       '中心点',
+            'coord-preset-label': '来源坐标约定',
+            'coord-preset-none':  '-- 选择预设 --',
+            'coord-preset-z-up':  'Z 轴朝上（SolidWorks / AutoCAD / Blender）- 无需转换',
+            'coord-preset-y-up':  'Y 轴朝上 \u2192 Z 轴朝上（Unity / Three.js）',
+            'coord-preset-x-up':  'X 轴朝上 \u2192 Z 轴朝上',
+            'label-position':     '位置 (mm)',
+            'label-rotation':     '旋转（度）',
+            'label-scale':        '缩放（均匀）',
+            'btn-center-origin':  '居中到原点',
+            'btn-reset-transform':'重置全部',
+        }
+    };
+
+    let currentLang = 'en';
+
+    function applyI18n() {
+        const t = I18N[currentLang];
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key] !== undefined) el.textContent = t[key];
+        });
+    }
+
+    function toggleLang() {
+        currentLang = currentLang === 'en' ? 'zh' : 'en';
+        applyI18n();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('btn-lang').addEventListener('click', toggleLang);
+        applyI18n();
+    });
+</script>
+
+<!-- Three.js via ES Module -->
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+}
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
+    import { TransformControls } from 'three/addons/controls/TransformControls.js';
+    import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+
+    // ---- Scene setup ----
+    const viewport = document.getElementById('viewport');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a2e);
+
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 100000);
+    camera.up.set(0, 0, 1); // Z-up
+    camera.position.set(150, 100, 80);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    viewport.appendChild(renderer.domElement);
+
+    const controls = new TrackballControls(camera, renderer.domElement);
+    controls.rotateSpeed = 3.0;
+    controls.zoomSpeed = 1.5;
+    controls.panSpeed = 1.0;
+
+    // ---- Axis gizmo (top-right corner) ----
+    const gizmoCanvas = document.getElementById('axis-gizmo');
+    const gizmoRenderer = new THREE.WebGLRenderer({ canvas: gizmoCanvas, alpha: true, antialias: true });
+    gizmoRenderer.setPixelRatio(window.devicePixelRatio);
+    gizmoRenderer.setSize(100, 100);
+    gizmoRenderer.setClearColor(0x000000, 0);
+
+    const gizmoScene = new THREE.Scene();
+    const gizmoCamera = new THREE.OrthographicCamera(-2, 2, 2, -2, 0.1, 10);
+    gizmoCamera.position.set(0, 0, 5);
+
+    // Create axis lines
+    const gizmoGroup = new THREE.Group();
+
+    function makeGizmoAxis(dir, color) {
+        const mat = new THREE.LineBasicMaterial({ color: color, linewidth: 2 });
+        const geo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(0, 0, 0),
+            dir.clone().multiplyScalar(1.5)
+        ]);
+        return new THREE.Line(geo, mat);
+    }
+
+    function makeGizmoLabel(text, color) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.font = 'bold 48px sans-serif';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, 32, 32);
+        const tex = new THREE.CanvasTexture(canvas);
+        const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false });
+        const sprite = new THREE.Sprite(mat);
+        sprite.scale.set(0.4, 0.4, 1);
+        return sprite;
+    }
+
+    const gizmoAxes = [
+        { dir: new THREE.Vector3(1, 0, 0), color: '#ff4444', label: 'X' },
+        { dir: new THREE.Vector3(0, 1, 0), color: '#44ff44', label: 'Y' },
+        { dir: new THREE.Vector3(0, 0, 1), color: '#4488ff', label: 'Z' },
+    ];
+
+    gizmoAxes.forEach(({ dir, color, label }) => {
+        const line = makeGizmoAxis(dir, color);
+        gizmoGroup.add(line);
+
+        const lbl = makeGizmoLabel(label, color);
+        lbl.position.copy(dir.clone().multiplyScalar(1.8));
+        gizmoGroup.add(lbl);
+    });
+
+    gizmoScene.add(gizmoGroup);
+
+    // Lights (adjusted for Z-up)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight1.position.set(1, 1, 2);
+    scene.add(dirLight1);
+    const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.3);
+    dirLight2.position.set(-1, -0.5, -1);
+    scene.add(dirLight2);
+
+    // Grid (XY plane, Z-up)
+    const gridHelper = new THREE.GridHelper(200, 20, 0xffffff, 0x888888);
+    gridHelper.rotation.x = Math.PI / 2; // Rotate to XY plane
+    scene.add(gridHelper);
+    let gridVisible = true;
+
+    // STL Origin axes — shows where the STL file's (0,0,0) is
+    const stlAxesGroup = new THREE.Group();
+    stlAxesGroup.visible = false;
+    scene.add(stlAxesGroup);
+    let stlOriginVisible = false;
+
+    // ---- State ----
+    let currentMesh = null;
+    let wireframeMode = false;
+    let originalGeometry = null;
+    let loadedFileName = 'exported';
+
+    // ---- TransformControls (drag gizmo on mesh) ----
+    const transformControls = new TransformControls(camera, renderer.domElement);
+    transformControls.setMode('translate');
+    transformControls.setSpace('world');
+    transformControls.visible = false;
+    scene.add(transformControls);
+
+    // Disable orbit controls while dragging the gizmo
+    transformControls.addEventListener('dragging-changed', e => {
+        controls.enabled = !e.value;
+    });
+
+    // Sync position inputs when gizmo moves the mesh
+    transformControls.addEventListener('objectChange', () => {
+        if (!currentMesh) return;
+        document.getElementById('pos-x').value = parseFloat(currentMesh.position.x.toFixed(4));
+        document.getElementById('pos-y').value = parseFloat(currentMesh.position.y.toFixed(4));
+        document.getElementById('pos-z').value = parseFloat(currentMesh.position.z.toFixed(4));
+        updateBBoxDisplay();
+    });
+
+    // Raycaster for click-to-select
+    const raycaster = new THREE.Raycaster();
+    raycaster.params.Mesh.threshold = 0;
+    const mouse = new THREE.Vector2();
+
+    function onViewportClick(e) {
+        if (!currentMesh) return;
+        // Ignore if TransformControls is being dragged
+        if (transformControls.dragging) return;
+
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObject(currentMesh, false);
+
+        if (intersects.length > 0) {
+            // Attach transform controls to the mesh
+            transformControls.attach(currentMesh);
+            transformControls.visible = true;
+        } else {
+            // Clicked empty space — detach
+            transformControls.detach();
+            transformControls.visible = false;
+        }
+    }
+
+    renderer.domElement.addEventListener('click', onViewportClick);
+
+    // Create STL origin axes (at world origin 0,0,0)
+    function createStlOriginAxes(geometry) {
+        // Clear old children
+        while (stlAxesGroup.children.length) {
+            const c = stlAxesGroup.children[0];
+            stlAxesGroup.remove(c);
+            if (c.geometry) c.geometry.dispose();
+            // ArrowHelper has line + cone as children with their own materials
+            c.traverse(child => {
+                if (child.material) child.material.dispose();
+            });
+        }
+
+        const bbox = geometry.boundingBox;
+        const size = new THREE.Vector3();
+        bbox.getSize(size);
+        const center = new THREE.Vector3();
+        bbox.getCenter(center);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const arrowLen = maxDim * 0.3;
+        const headLen = arrowLen * 0.2;
+        const headWid = arrowLen * 0.06;
+        const origin = new THREE.Vector3(0, 0, 0);
+
+        // Helper: create an ArrowHelper that renders on top without Z-fighting
+        function makeArrow(dir, color) {
+            const arrow = new THREE.ArrowHelper(dir, origin, arrowLen, color, headLen, headWid);
+            // line part
+            arrow.line.material.depthTest = false;
+            arrow.line.material.transparent = true;
+            arrow.line.renderOrder = 999;
+            // cone (arrowhead) part — DoubleSide prevents disappearing at certain view angles
+            arrow.cone.material.depthTest = false;
+            arrow.cone.material.transparent = true;
+            arrow.cone.material.side = THREE.DoubleSide;
+            arrow.cone.renderOrder = 999;
+            return arrow;
+        }
+
+        stlAxesGroup.add(makeArrow(new THREE.Vector3(1, 0, 0), 0xff4444));
+        stlAxesGroup.add(makeArrow(new THREE.Vector3(0, 1, 0), 0x44ff44));
+        stlAxesGroup.add(makeArrow(new THREE.Vector3(0, 0, 1), 0x4488ff));
+
+        // Dashed line from STL origin (0,0,0) to bbox center
+        if (center.length() > 0.001) {
+            const lineMat = new THREE.LineDashedMaterial({
+                color: 0xffff44,
+                dashSize: maxDim * 0.03,
+                gapSize: maxDim * 0.02,
+                depthTest: false,
+                transparent: true
+            });
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([origin, center]);
+            const line = new THREE.Line(lineGeo, lineMat);
+            line.computeLineDistances();
+            line.renderOrder = 999;
+            stlAxesGroup.add(line);
+
+            // Small sphere at STL origin
+            const sphereGeo = new THREE.SphereGeometry(maxDim * 0.015, 8, 8);
+            const sphereMat = new THREE.MeshBasicMaterial({ color: 0xffff44, depthTest: false });
+            const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+            sphere.renderOrder = 999;
+            stlAxesGroup.add(sphere);
+        }
+    }
+
+    // ---- Resize ----
+    function resize() {
+        const w = viewport.clientWidth;
+        const h = viewport.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+        controls.handleResize();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // ---- Animation ----
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+
+        // Sync gizmo orientation with main camera
+        gizmoGroup.quaternion.copy(camera.quaternion).invert();
+
+        // Persistently hide negative-direction arrows from TransformControls
+        // (Three.js resets visibility each frame internally, so we override here)
+        if (transformControls.visible) {
+            transformControls.traverse(obj => {
+                if (obj.name === '-X' || obj.name === '-Y' || obj.name === '-Z') {
+                    obj.visible = false;
+                }
+            });
+        }
+
+        renderer.render(scene, camera);
+        gizmoRenderer.render(gizmoScene, gizmoCamera);
+    }
+    animate();
+
+    // ---- STL Loading ----
+    const loader = new STLLoader();
+
+    function loadSTL(buffer, fileName, fileSize) {
+        // Track filename for export
+        loadedFileName = fileName.replace(/\.stl$/i, '');
+
+        // Remove old mesh
+        if (currentMesh) {
+            scene.remove(currentMesh);
+            currentMesh.geometry.dispose();
+            currentMesh.material.dispose();
+            if (currentMesh.children.length) {
+                currentMesh.children.forEach(c => { c.geometry.dispose(); c.material.dispose(); });
+            }
+        }
+
+        const geometry = loader.parse(buffer);
+        geometry.computeVertexNormals();
+        geometry.computeBoundingBox();
+
+        originalGeometry = geometry.clone();
+
+        const color = document.getElementById('model-color').value;
+        const opacity = parseFloat(document.getElementById('opacity-slider').value);
+        const material = new THREE.MeshPhongMaterial({
+            color: color,
+            specular: 0x222222,
+            shininess: 40,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: opacity,
+        });
+
+        currentMesh = new THREE.Mesh(geometry, material);
+
+        // Wireframe overlay
+        const wireGeo = new THREE.WireframeGeometry(geometry);
+        const wireMat = new THREE.LineBasicMaterial({ color: 0x333355, transparent: true, opacity: 0.3 });
+        const wireLine = new THREE.LineSegments(wireGeo, wireMat);
+        wireLine.visible = wireframeMode;
+        currentMesh.add(wireLine);
+
+        scene.add(currentMesh);
+
+        // Fit camera
+        fitCamera(geometry);
+
+        // Update info
+        updateInfo(geometry, fileName, fileSize, buffer);
+
+        // Update STL origin axes
+        createStlOriginAxes(geometry);
+
+        // Hide welcome
+        document.getElementById('welcome').style.display = 'none';
+        document.getElementById('axes-legend').style.display = 'block';
+
+        // Reset transform inputs
+        resetTransformInputs();
+
+        // Update grid scale and camera clipping based on model size
+        const bbox = geometry.boundingBox;
+        const maxDim = Math.max(
+            bbox.max.x - bbox.min.x,
+            bbox.max.y - bbox.min.y,
+            bbox.max.z - bbox.min.z
+        );
+        gridHelper.scale.setScalar(Math.max(1, maxDim / 100));
+
+        camera.near = maxDim * 0.001;
+        camera.far = maxDim * 100;
+        camera.updateProjectionMatrix();
+    }
+
+    // ---- Animated camera transition ----
+    let _cameraAnim = null;
+
+    function animateCameraTo(fromPos, toPos, fromTarget, toTarget, duration) {
+        duration = duration || 700;
+        if (_cameraAnim) _cameraAnim.cancelled = true;
+        const anim = { cancelled: false };
+        _cameraAnim = anim;
+        const startTime = performance.now();
+
+        function step(now) {
+            if (anim.cancelled) return;
+            let t = Math.min((now - startTime) / duration, 1);
+            // ease in-out cubic
+            t = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+            camera.position.lerpVectors(fromPos, toPos, t);
+            controls.target.lerpVectors(fromTarget, toTarget, t);
+            controls.update();
+
+            if (t < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    function fitCamera(geometry) {
+        const bbox = geometry.boundingBox;
+        const center = new THREE.Vector3();
+        bbox.getCenter(center);
+        const size = new THREE.Vector3();
+        bbox.getSize(size);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const dist = maxDim * 2;
+
+        const toPos = new THREE.Vector3(
+            center.x + dist * 0.7,
+            center.y + dist * 0.7,
+            center.z + dist * 0.5
+        );
+        animateCameraTo(camera.position.clone(), toPos, controls.target.clone(), center);
+    }
+
+    function fitView() {
+        if (!currentMesh) return;
+
+        // Get world-space bounding box
+        const box = new THREE.Box3().setFromObject(currentMesh);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const fov = camera.fov * (Math.PI / 180);
+        const dist = maxDim / (2 * Math.tan(fov / 2)) * 1.5;
+
+        // Maintain current view direction, but retarget to mesh center
+        const direction = new THREE.Vector3().subVectors(camera.position, controls.target);
+        if (direction.length() < 0.001) direction.set(0.7, 0.7, 0.5);
+        direction.normalize();
+
+        const toPos = center.clone().addScaledVector(direction, dist);
+        animateCameraTo(camera.position.clone(), toPos, controls.target.clone(), center);
+    }
+
+    function detectFormat(buffer) {
+        // Check if it starts with "solid" (ASCII STL)
+        const header = new Uint8Array(buffer, 0, 5);
+        const text = String.fromCharCode(...header);
+        if (text === 'solid') {
+            // Could still be binary if "solid" appears in header
+            // Check if file size matches binary format
+            const dv = new DataView(buffer);
+            if (buffer.byteLength > 84) {
+                const numTriangles = dv.getUint32(80, true);
+                const expectedSize = 84 + numTriangles * 50;
+                if (expectedSize === buffer.byteLength) return 'Binary';
+            }
+            return 'ASCII';
+        }
+        return 'Binary';
+    }
+
+    function updateInfo(geometry, fileName, fileSize, buffer) {
+        const bbox = geometry.boundingBox;
+        const size = new THREE.Vector3();
+        bbox.getSize(size);
+        const center = new THREE.Vector3();
+        bbox.getCenter(center);
+
+        const triangles = geometry.attributes.position.count / 3;
+        const vertices = geometry.attributes.position.count;
+
+        const fmt = n => n.toFixed(2);
+        const fmtSize = bytes => {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        };
+
+        document.getElementById('info-filename').textContent = fileName;
+        document.getElementById('info-format').textContent = detectFormat(buffer);
+        document.getElementById('info-filesize').textContent = fmtSize(fileSize);
+        document.getElementById('info-triangles').textContent = triangles.toLocaleString();
+        document.getElementById('info-vertices').textContent = vertices.toLocaleString();
+
+        document.getElementById('info-width').textContent = fmt(size.x);
+        document.getElementById('info-height').textContent = fmt(size.y);
+        document.getElementById('info-depth').textContent = fmt(size.z);
+        document.getElementById('info-min').textContent = `${fmt(bbox.min.x)}, ${fmt(bbox.min.y)}, ${fmt(bbox.min.z)}`;
+        document.getElementById('info-max').textContent = `${fmt(bbox.max.x)}, ${fmt(bbox.max.y)}, ${fmt(bbox.max.z)}`;
+        document.getElementById('info-center').textContent = `${fmt(center.x)}, ${fmt(center.y)}, ${fmt(center.z)}`;
+    }
+
+    // ---- File import ----
+    document.getElementById('file-input').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => loadSTL(ev.target.result, file.name, file.size);
+        reader.readAsArrayBuffer(file);
+        e.target.value = '';
+    });
+
+    // Drag & drop
+    viewport.addEventListener('dragover', e => {
+        e.preventDefault();
+        document.getElementById('drop-overlay').style.display = 'flex';
+    });
+    viewport.addEventListener('dragleave', () => {
+        document.getElementById('drop-overlay').style.display = 'none';
+    });
+    viewport.addEventListener('drop', e => {
+        e.preventDefault();
+        document.getElementById('drop-overlay').style.display = 'none';
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.toLowerCase().endsWith('.stl')) {
+            const reader = new FileReader();
+            reader.onload = ev => loadSTL(ev.target.result, file.name, file.size);
+            reader.readAsArrayBuffer(file);
+        }
+    });
+
+    // ---- Toolbar actions ----
+    function toggleWireframe() {
+        wireframeMode = !wireframeMode;
+        document.getElementById('btn-wireframe').classList.toggle('active', wireframeMode);
+        if (currentMesh && currentMesh.children.length) {
+            currentMesh.children[0].visible = wireframeMode;
+        }
+    }
+
+    function toggleStlOrigin() {
+        stlOriginVisible = !stlOriginVisible;
+        stlAxesGroup.visible = stlOriginVisible;
+        document.getElementById('btn-stl-origin').classList.toggle('active', stlOriginVisible);
+    }
+
+    function toggleGrid() {
+        gridVisible = !gridVisible;
+        gridHelper.visible = gridVisible;
+        document.getElementById('btn-grid').classList.toggle('active', gridVisible);
+    }
+
+    // Color change
+    document.getElementById('model-color').addEventListener('input', e => {
+        if (currentMesh) {
+            currentMesh.material.color.set(e.target.value);
+        }
+    });
+
+    // Opacity change
+    document.getElementById('opacity-slider').addEventListener('input', e => {
+        const val = parseFloat(e.target.value);
+        document.getElementById('opacity-value').textContent = Math.round(val * 100) + '%';
+        if (currentMesh) {
+            currentMesh.material.opacity = val;
+        }
+    });
+
+    // ---- Transform ----
+    function applyTransform() {
+        if (!currentMesh) return;
+
+        const px = parseFloat(document.getElementById('pos-x').value) || 0;
+        const py = parseFloat(document.getElementById('pos-y').value) || 0;
+        const pz = parseFloat(document.getElementById('pos-z').value) || 0;
+
+        const rx = (parseFloat(document.getElementById('rot-x').value) || 0) * Math.PI / 180;
+        const ry = (parseFloat(document.getElementById('rot-y').value) || 0) * Math.PI / 180;
+        const rz = (parseFloat(document.getElementById('rot-z').value) || 0) * Math.PI / 180;
+
+        const s = parseFloat(document.getElementById('scale-val').value) || 1;
+
+        currentMesh.position.set(px, py, pz);
+        currentMesh.rotation.set(rx, ry, rz);
+        currentMesh.scale.set(s, s, s);
+
+        // Update bounding box info with transformed coordinates
+        currentMesh.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(currentMesh);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+
+        const fmt = n => n.toFixed(2);
+        document.getElementById('info-width').textContent = fmt(size.x);
+        document.getElementById('info-height').textContent = fmt(size.y);
+        document.getElementById('info-depth').textContent = fmt(size.z);
+        document.getElementById('info-min').textContent = `${fmt(box.min.x)}, ${fmt(box.min.y)}, ${fmt(box.min.z)}`;
+        document.getElementById('info-max').textContent = `${fmt(box.max.x)}, ${fmt(box.max.y)}, ${fmt(box.max.z)}`;
+        document.getElementById('info-center').textContent = `${fmt(center.x)}, ${fmt(center.y)}, ${fmt(center.z)}`;
+    }
+
+    function resetTransform() {
+        resetTransformInputs();
+        document.getElementById('coord-preset').value = 'none';
+        if (currentMesh && originalGeometry) {
+            // Restore original geometry
+            const restored = originalGeometry.clone();
+            currentMesh.geometry.dispose();
+            currentMesh.geometry = restored;
+            currentMesh.geometry.computeBoundingBox();
+
+            // Rebuild wireframe
+            if (currentMesh.children.length) {
+                const oldWire = currentMesh.children[0];
+                oldWire.geometry.dispose();
+                oldWire.material.dispose();
+                currentMesh.remove(oldWire);
+            }
+            const wireGeo = new THREE.WireframeGeometry(restored);
+            const wireMat = new THREE.LineBasicMaterial({ color: 0x333355, transparent: true, opacity: 0.3 });
+            const wireLine = new THREE.LineSegments(wireGeo, wireMat);
+            wireLine.visible = wireframeMode;
+            currentMesh.add(wireLine);
+
+            currentMesh.position.set(0, 0, 0);
+            currentMesh.rotation.set(0, 0, 0);
+            currentMesh.scale.set(1, 1, 1);
+
+            updateBBoxDisplay();
+            fitCamera(currentMesh.geometry);
+        }
+    }
+
+    // ---- Coordinate System Preset ----
+    function applyCoordPreset() {
+        if (!currentMesh || !originalGeometry) return;
+
+        const preset = document.getElementById('coord-preset').value;
+        if (preset === 'none' || preset === 'z-up') return;
+
+        // Start from original geometry
+        const geo = originalGeometry.clone();
+        const pos = geo.attributes.position;
+        const matrix = new THREE.Matrix4();
+
+        if (preset === 'y-up') {
+            // Y-Up → Z-Up: rotate 90° around X axis
+            // (x, y, z) → (x, -z, y)  i.e. Y becomes Z, Z becomes Y
+            matrix.makeRotationX(Math.PI / 2);
+        } else if (preset === 'x-up') {
+            // X-Up → Z-Up: rotate -90° around Y axis
+            // (x, y, z) → (z, y, -x)
+            matrix.makeRotationY(-Math.PI / 2);
+        }
+
+        geo.applyMatrix4(matrix);
+        geo.computeVertexNormals();
+        geo.computeBoundingBox();
+
+        // Replace geometry
+        currentMesh.geometry.dispose();
+        currentMesh.geometry = geo;
+
+        // Rebuild wireframe
+        if (currentMesh.children.length) {
+            const oldWire = currentMesh.children[0];
+            oldWire.geometry.dispose();
+            oldWire.material.dispose();
+            currentMesh.remove(oldWire);
+        }
+        const wireGeo = new THREE.WireframeGeometry(geo);
+        const wireMat = new THREE.LineBasicMaterial({ color: 0x333355, transparent: true, opacity: 0.3 });
+        const wireLine = new THREE.LineSegments(wireGeo, wireMat);
+        wireLine.visible = wireframeMode;
+        currentMesh.add(wireLine);
+
+        // Reset mesh transform
+        currentMesh.position.set(0, 0, 0);
+        currentMesh.rotation.set(0, 0, 0);
+        currentMesh.scale.set(1, 1, 1);
+        resetTransformInputs();
+
+        updateBBoxDisplay();
+        fitCamera(geo);
+    }
+
+    function updateBBoxDisplay() {
+        if (!currentMesh) return;
+        currentMesh.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(currentMesh);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+
+        const fmt = n => n.toFixed(2);
+        document.getElementById('info-width').textContent = fmt(size.x);
+        document.getElementById('info-height').textContent = fmt(size.y);
+        document.getElementById('info-depth').textContent = fmt(size.z);
+        document.getElementById('info-min').textContent = `${fmt(box.min.x)}, ${fmt(box.min.y)}, ${fmt(box.min.z)}`;
+        document.getElementById('info-max').textContent = `${fmt(box.max.x)}, ${fmt(box.max.y)}, ${fmt(box.max.z)}`;
+        document.getElementById('info-center').textContent = `${fmt(center.x)}, ${fmt(center.y)}, ${fmt(center.z)}`;
+    }
+
+    function resetTransformInputs() {
+        document.getElementById('pos-x').value = 0;
+        document.getElementById('pos-y').value = 0;
+        document.getElementById('pos-z').value = 0;
+        document.getElementById('rot-x').value = 0;
+        document.getElementById('rot-y').value = 0;
+        document.getElementById('rot-z').value = 0;
+        document.getElementById('scale-val').value = 1;
+    }
+
+    // ---- Center to Origin ----
+    function centerToOrigin() {
+        if (!currentMesh || !originalGeometry) return;
+
+        // Clone from original, apply coord preset if active, then translate center to origin
+        const geo = originalGeometry.clone();
+
+        // Apply coord preset matrix if any
+        const preset = document.getElementById('coord-preset').value;
+        const presetMatrix = new THREE.Matrix4();
+        if (preset === 'y-up') {
+            presetMatrix.makeRotationX(Math.PI / 2);
+        } else if (preset === 'x-up') {
+            presetMatrix.makeRotationY(-Math.PI / 2);
+        }
+        geo.applyMatrix4(presetMatrix);
+        geo.computeBoundingBox();
+
+        // Compute center offset
+        const center = new THREE.Vector3();
+        geo.boundingBox.getCenter(center);
+
+        // Translate geometry so center is at origin
+        const translateMatrix = new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z);
+        geo.applyMatrix4(translateMatrix);
+        geo.computeVertexNormals();
+        geo.computeBoundingBox();
+
+        // Replace geometry on mesh
+        currentMesh.geometry.dispose();
+        currentMesh.geometry = geo;
+
+        // Rebuild wireframe
+        if (currentMesh.children.length) {
+            const oldWire = currentMesh.children[0];
+            oldWire.geometry.dispose();
+            oldWire.material.dispose();
+            currentMesh.remove(oldWire);
+        }
+        const wireGeo = new THREE.WireframeGeometry(geo);
+        const wireMat = new THREE.LineBasicMaterial({ color: 0x333355, transparent: true, opacity: 0.3 });
+        const wireLine = new THREE.LineSegments(wireGeo, wireMat);
+        wireLine.visible = wireframeMode;
+        currentMesh.add(wireLine);
+
+        // Reset mesh Object3D transform
+        currentMesh.position.set(0, 0, 0);
+        currentMesh.rotation.set(0, 0, 0);
+        currentMesh.scale.set(1, 1, 1);
+        resetTransformInputs();
+
+        // Update display
+        updateBBoxDisplay();
+        createStlOriginAxes(geo);
+        fitCamera(geo);
+    }
+
+    // ---- Export STL ----
+    function bakeAndExportSTL() {
+        if (!currentMesh) return;
+
+        // Bake world transform (position + rotation + scale) into geometry.
+        // currentMesh.geometry already has coord-preset and center-to-origin
+        // transformations applied directly to vertices, so composing the
+        // Object3D transform here captures the complete final result.
+        currentMesh.updateMatrixWorld(true);
+        const geo = currentMesh.geometry.clone();
+        geo.applyMatrix4(currentMesh.matrixWorld);
+        geo.computeVertexNormals();
+
+        const pos = geo.attributes.position;
+        const numTriangles = pos.count / 3;
+
+        // Binary STL: 80 header + 4 count + N * (12 normal + 36 vertices + 2 attr)
+        const bufferSize = 80 + 4 + numTriangles * 50;
+        const buffer = new ArrayBuffer(bufferSize);
+        const dv = new DataView(buffer);
+
+        // Header (80 bytes)
+        const header = 'Binary STL exported by STL Viewer';
+        for (let i = 0; i < 80; i++) {
+            dv.setUint8(i, i < header.length ? header.charCodeAt(i) : 0);
+        }
+
+        // Triangle count
+        dv.setUint32(80, numTriangles, true);
+
+        let offset = 84;
+
+        for (let i = 0; i < numTriangles; i++) {
+            const i0 = i * 3;
+            const i1 = i0 + 1;
+            const i2 = i0 + 2;
+
+            const ax = pos.getX(i0), ay = pos.getY(i0), az = pos.getZ(i0);
+            const bx = pos.getX(i1), by = pos.getY(i1), bz = pos.getZ(i1);
+            const cx = pos.getX(i2), cy = pos.getY(i2), cz = pos.getZ(i2);
+
+            // Face normal from cross product
+            const e1x = bx - ax, e1y = by - ay, e1z = bz - az;
+            const e2x = cx - ax, e2y = cy - ay, e2z = cz - az;
+            let nx = e1y * e2z - e1z * e2y;
+            let ny = e1z * e2x - e1x * e2z;
+            let nz = e1x * e2y - e1y * e2x;
+            const len = Math.sqrt(nx * nx + ny * ny + nz * nz);
+            if (len > 0) { nx /= len; ny /= len; nz /= len; }
+
+            // Normal
+            dv.setFloat32(offset, nx, true); offset += 4;
+            dv.setFloat32(offset, ny, true); offset += 4;
+            dv.setFloat32(offset, nz, true); offset += 4;
+
+            // Vertex 1
+            dv.setFloat32(offset, ax, true); offset += 4;
+            dv.setFloat32(offset, ay, true); offset += 4;
+            dv.setFloat32(offset, az, true); offset += 4;
+
+            // Vertex 2
+            dv.setFloat32(offset, bx, true); offset += 4;
+            dv.setFloat32(offset, by, true); offset += 4;
+            dv.setFloat32(offset, bz, true); offset += 4;
+
+            // Vertex 3
+            dv.setFloat32(offset, cx, true); offset += 4;
+            dv.setFloat32(offset, cy, true); offset += 4;
+            dv.setFloat32(offset, cz, true); offset += 4;
+
+            // Attribute byte count
+            dv.setUint16(offset, 0, true); offset += 2;
+        }
+
+        // Download
+        const blob = new Blob([buffer], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = loadedFileName + '_exported.stl';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        geo.dispose();
+    }
+
+    // ---- Event bindings (module scope) ----
+    document.getElementById('btn-import').addEventListener('click', () => {
+        document.getElementById('file-input').click();
+    });
+    document.getElementById('btn-wireframe').addEventListener('click', toggleWireframe);
+    document.getElementById('btn-stl-origin').addEventListener('click', toggleStlOrigin);
+    document.getElementById('btn-grid').addEventListener('click', toggleGrid);
+    document.getElementById('btn-fit-view').addEventListener('click', fitView);
+    document.getElementById('btn-reset-transform').addEventListener('click', resetTransform);
+    document.getElementById('btn-center-origin').addEventListener('click', centerToOrigin);
+    document.getElementById('btn-export-stl').addEventListener('click', bakeAndExportSTL);
+
+    // Live update: coord preset change
+    document.getElementById('coord-preset').addEventListener('change', applyCoordPreset);
+
+    // Live update: transform inputs change
+    ['pos-x', 'pos-y', 'pos-z', 'rot-x', 'rot-y', 'rot-z', 'scale-val'].forEach(id => {
+        document.getElementById(id).addEventListener('input', applyTransform);
+    });
+
+    // Drag-to-change on number inputs
+    document.querySelectorAll('.input-row input[type="number"]').forEach(input => {
+        let dragging = false;
+        let startX = 0;
+        let startVal = 0;
+        const step = parseFloat(input.step) || 1;
+
+        input.addEventListener('mousedown', e => {
+            if (e.target !== input) return;
+            dragging = true;
+            startX = e.clientX;
+            startVal = parseFloat(input.value) || 0;
+            document.body.style.cursor = 'ew-resize';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', e => {
+            if (!dragging) return;
+            const dx = e.clientX - startX;
+            const newVal = startVal + dx * step * 0.5;
+            const rounded = Math.round(newVal / step) * step;
+            input.value = parseFloat(rounded.toFixed(4));
+            input.dispatchEvent(new Event('input'));
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (dragging) {
+                dragging = false;
+                document.body.style.cursor = '';
+            }
+        });
+    });
+
+    // Set initial button states (Grid is visible by default)
+    document.getElementById('btn-grid').classList.add('active');
+</script>
+</body>
+</html>
