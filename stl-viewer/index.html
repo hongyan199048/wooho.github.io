@@ -92,18 +92,6 @@
         }
         #viewport canvas { display: block; }
 
-        /* Grid decoration behind viewport */
-        #viewport::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(to right, rgba(255,241,67,0.04) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,241,67,0.04) 1px, transparent 1px);
-            background-size: 32px 32px;
-            pointer-events: none;
-            z-index: 0;
-        }
 
         /* Axis gizmo */
         #axis-gizmo {
@@ -315,7 +303,7 @@
     <button class="btn btn-export" id="btn-export-stl" data-i18n="btn-export-stl">Export STL</button>
 
     <label style="font-size:12px; color:#888;" data-i18n="label-color">Color:</label>
-    <input type="color" id="model-color" value="#7ee82b" style="width:32px; height:24px; border:none; cursor:pointer; background:none;">
+    <input type="color" id="model-color" value="#666AF0" style="width:32px; height:24px; border:none; cursor:pointer; background:none;">
 
     <div class="separator"></div>
 
@@ -1377,9 +1365,9 @@
     // Live update: coord preset change
     document.getElementById('coord-preset').addEventListener('change', applyCoordPreset);
 
-    // Live update: transform inputs change
+    // Transform inputs: apply on Enter or blur (not on every keystroke)
     ['pos-x', 'pos-y', 'pos-z', 'rot-x', 'rot-y', 'rot-z', 'scale-val'].forEach(id => {
-        document.getElementById(id).addEventListener('input', applyTransform);
+        document.getElementById(id).addEventListener('change', applyTransform);
     });
 
     // Drag-to-change + double-click-to-edit on number inputs
@@ -1398,11 +1386,11 @@
             input.select();
         });
 
-        // Blur: exit edit mode, apply value
+        // Blur: exit edit mode, fire change to apply value
         input.addEventListener('blur', () => {
             editMode = false;
             input.style.cursor = 'ew-resize';
-            input.dispatchEvent(new Event('input'));
+            input.dispatchEvent(new Event('change'));
         });
 
         // Enter confirms; Escape cancels
@@ -1429,7 +1417,8 @@
             const newVal = startVal + dx * step * 0.5;
             const rounded = Math.round(newVal / step) * step;
             input.value = parseFloat(rounded.toFixed(4));
-            input.dispatchEvent(new Event('input'));
+            // Drag gives real-time feedback by calling directly (bypasses 'change' gate)
+            applyTransform();
         });
 
         document.addEventListener('mouseup', () => {
