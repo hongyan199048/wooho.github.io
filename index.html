@@ -2,346 +2,292 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta charset="utf-8"/>
-    <title>Tim</title>
+    <title>100 Tools. 100x You. — Tim</title>
+    <meta name="description" content="100 browser-based tools built to amplify your productivity 100x. No installs. No friction. Just open and work.">
     <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&family=Material+Symbols+Outlined&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .animate-fade-in { animation: fade-in 0.8s ease forwards; }
+            .animate-fade-in  { animation: fade-in  0.8s ease forwards; }
             .animate-slide-up { animation: slide-up 0.7s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+            .delay-100 { animation-delay: 100ms; }
             .delay-200 { animation-delay: 200ms; }
+            .delay-300 { animation-delay: 300ms; }
             .delay-400 { animation-delay: 400ms; }
-            .delay-600 { animation-delay: 600ms; }
-            @keyframes fade-in { from { opacity:0; } to { opacity:1; } }
+            .delay-500 { animation-delay: 500ms; }
+            @keyframes fade-in  { from { opacity:0; }               to { opacity:1; } }
             @keyframes slide-up {
-                from { transform: translateY(32px); opacity:0; }
+                from { transform: translateY(24px); opacity:0; }
                 to   { transform: translateY(0);    opacity:1; }
             }
         }
 
-        /* ── Left panel grid ── */
-        .grid-wrapper {
-            min-height: 100%;
-            width: 100%;
-            position: relative;
-            background-color: #f5f2ed;
-        }
-        .grid-background {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
+        /* ── Grid background ── */
+        .grid-bg {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background-image:
-                linear-gradient(to right, rgba(26,26,26,0.07) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(26,26,26,0.07) 1px, transparent 1px);
-            background-size: 24px 32px;
-            -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 0%, #000 55%, transparent 100%);
-            mask-image:         radial-gradient(ellipse 80% 65% at 50% 0%, #000 55%, transparent 100%);
+                linear-gradient(to right,  rgba(26,26,26,0.06) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(26,26,26,0.06) 1px, transparent 1px);
+            background-size: 28px 28px;
+            -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 40%, transparent 100%);
+            mask-image:         radial-gradient(ellipse 90% 60% at 50% 0%, #000 40%, transparent 100%);
         }
-        .grid-hover-effect {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-            background-image:
-                linear-gradient(to right, rgba(26,26,26,0.18) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(26,26,26,0.18) 1px, transparent 1px);
-            background-size: 24px 32px;
-            -webkit-mask-image: radial-gradient(
-                ellipse 180px 180px at var(--circle-x,50%) var(--circle-y,50%),
-                #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%
-            );
-            mask-image: radial-gradient(
-                ellipse 180px 180px at var(--circle-x,50%) var(--circle-y,50%),
-                #000 0%, rgba(0,0,0,0.6) 50%, transparent 100%
-            );
-        }
-        .grid-hover-effect.active { opacity: 1; }
 
-        /* ── Right panel card ── */
-        .project-card {
-            padding: 20px;
+        /* ── Tool card ── */
+        .tool-card {
             background: #fff;
             border: 1px solid #e0ddd8;
-            border-radius: 3px;
-            box-shadow: 0 1px 4px rgba(26,26,26,0.06);
-            transition: box-shadow 0.2s, border-color 0.2s;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(26,26,26,0.05);
+            transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .project-card:hover {
-            border-color: #c5c0b8;
-            box-shadow: 0 3px 12px rgba(26,26,26,0.1);
+        .tool-card:hover {
+            border-color: #b8b3ab;
+            box-shadow: 0 4px 16px rgba(26,26,26,0.09);
+            transform: translateY(-1px);
         }
-        .insight-link {
-            padding: 16px 0;
-            border-bottom: 1px solid #e0ddd8;
-            transition: border-color 0.2s;
+        .tool-card.coming-soon {
+            background: #faf8f5;
+            cursor: default;
+            opacity: 0.65;
         }
-        .insight-link:hover { border-color: #c5c0b8; }
-        .insight-link:last-child { border-bottom: none; }
+        .tool-card.coming-soon:hover {
+            border-color: #e0ddd8;
+            box-shadow: 0 1px 3px rgba(26,26,26,0.05);
+            transform: none;
+        }
 
+        /* ── Tag chip ── */
+        .tag {
+            display: inline-block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            padding: 2px 7px;
+            border-radius: 2px;
+            background: #f0ede8;
+            color: #888;
+        }
+        .tag.live {
+            background: #e8f0eb;
+            color: #2d6a4f;
+        }
+
+        /* ── Section label ── */
         .section-label {
             font-family: 'Share Tech Mono', monospace;
             font-size: 11px;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            color: #a0a0a0;
-            margin-bottom: 24px;
+            color: #b0a89e;
         }
+
+        /* ── Nav ── */
+        .nav-link {
+            font-size: 13px;
+            font-weight: 300;
+            color: #888;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+        .nav-link:hover { color: #1a1a1a; }
     </style>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        bg:       "#f5f2ed",
-                        "bg-card":"#ffffff",
-                        "text-main":"#1a1a1a",
-                        "text-sec":"#6b6b6b",
-                        "text-dim":"#a0a0a0",
-                        "border-warm":"#e0ddd8",
-                        "border-hover":"#c5c0b8",
-                        "bg-muted":"#ebe7e1",
+                        bg:      "#f5f2ed",
+                        card:    "#ffffff",
+                        main:    "#1a1a1a",
+                        sec:     "#6b6b6b",
+                        dim:     "#a0a0a0",
+                        border:  "#e0ddd8",
+                        hover:   "#c5c0b8",
+                        muted:   "#faf8f5",
                     },
                     fontFamily: {
                         sans:    ['Inter', '-apple-system', 'sans-serif'],
-                        display: ['Share Tech Mono', 'monospace'],
                         mono:    ['Share Tech Mono', 'monospace'],
                     },
-                    borderRadius: {
-                        DEFAULT: "0.1875rem",
-                        sm: "0.1875rem",
-                        md: "0.375rem",
-                        full: "9999px"
-                    },
-                    boxShadow: {
-                        card: "0 1px 4px rgba(26,26,26,0.07)",
-                        "card-hover": "0 3px 12px rgba(26,26,26,0.1)",
-                    }
                 }
             }
         };
     </script>
 </head>
-<body class="bg-bg font-sans text-text-main" style="-webkit-font-smoothing:antialiased;">
-<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden lg:flex-row">
+<body class="bg-bg font-sans text-main" style="-webkit-font-smoothing:antialiased; color:#1a1a1a;">
 
-<!-- ── Left: sticky bio panel ── -->
-<div class="lg:w-1/2 lg:h-screen lg:flex lg:flex-col lg:sticky lg:top-0 grid-wrapper">
-<div class="grid-background"></div>
-<div class="grid-hover-effect" id="gridHoverEffect"></div>
+<!-- fixed grid background -->
+<div class="grid-bg"></div>
 
-<header class="sticky top-0 z-50 flex items-center justify-between px-6 sm:px-10 py-5 bg-bg/80 backdrop-blur-md border-b border-border-warm lg:relative lg:bg-transparent lg:backdrop-blur-none lg:border-none relative z-10">
-    <div class="animate-fade-in">
-        <a class="font-mono text-base font-normal tracking-widest text-text-main uppercase" href="#">Tim</a>
-    </div>
-    <div class="flex items-center gap-6 animate-fade-in">
-        <nav class="hidden md:flex items-center gap-6">
-            <a class="text-text-sec hover:text-text-main transition-colors duration-200 text-sm font-light" href="#" data-en="Work" data-zh="作品">Work</a>
-            <a class="text-text-sec hover:text-text-main transition-colors duration-200 text-sm font-light" href="#" data-en="Insights" data-zh="感悟">Insights</a>
-            <a class="text-text-sec hover:text-text-main transition-colors duration-200 text-sm font-light" href="#" data-en="Contact" data-zh="联系">Contact</a>
-            <button id="language-switcher" class="text-text-sec hover:text-text-main transition-colors duration-200 text-sm font-light cursor-pointer border border-border-warm rounded px-2.5 py-1 hover:border-border-hover">
-                <span data-en="EN" data-zh="中">EN</span>
-            </button>
-        </nav>
-        <button class="flex items-center justify-center rounded h-9 w-9 border border-border-warm text-text-sec hover:border-border-hover transition-colors md:hidden">
-            <span class="material-symbols-outlined text-lg">menu</span>
+<!-- ── Navbar ── -->
+<nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-10 lg:px-16 h-14 bg-[#f5f2ed]/85 backdrop-blur-md border-b border-[#e0ddd8]">
+    <a href="/" class="font-mono text-sm tracking-[0.18em] uppercase text-[#1a1a1a]">Tim</a>
+    <div class="flex items-center gap-5">
+        <a href="#tools" class="nav-link" data-en="Tools" data-zh="工具">Tools</a>
+        <a href="#about" class="nav-link" data-en="About" data-zh="关于">About</a>
+        <button id="lang-btn" class="nav-link border border-[#e0ddd8] rounded px-2.5 py-1 hover:border-[#c5c0b8] cursor-pointer bg-transparent">
+            <span data-en="中文" data-zh="EN">中文</span>
         </button>
     </div>
-</header>
+</nav>
 
-<main class="flex-1 flex items-center px-6 sm:px-10 lg:px-16 xl:px-20 relative z-10">
-    <div class="max-w-md mx-auto lg:mx-0">
-        <div class="flex flex-col items-start space-y-8 opacity-0 animate-slide-up">
-            <h1 class="font-display text-4xl md:text-6xl font-normal tracking-tight leading-tight text-text-main"
-                data-en="Building with AI" data-zh="以 AI 构建未来">
-                Building with AI
-            </h1>
-            <div class="w-12 h-px bg-border-hover"></div>
-            <p class="text-text-sec text-base font-light leading-relaxed"
-               data-en="I believe AI is not just a tool — it is the infrastructure of the next era. I build products at the intersection of engineering and intelligence, turning complex workflows into seamless experiences. Every project here is a step toward a world where human creativity is amplified, not replaced."
-               data-zh="我相信 AI 不只是工具，而是下一个时代的基础设施。我在工程与智能的交汇处构建产品，将复杂的工作流转化为流畅的体验。这里的每一个项目，都是迈向「人类创造力被放大而非取代」世界的一步。">
-                I believe AI is not just a tool — it is the infrastructure of the next era. I build products at the intersection of engineering and intelligence, turning complex workflows into seamless experiences. Every project here is a step toward a world where human creativity is amplified, not replaced.
-            </p>
+<!-- ── Hero ── -->
+<section class="relative z-10 pt-40 pb-24 px-6 sm:px-10 lg:px-16 text-center">
+    <div class="max-w-2xl mx-auto">
+        <p class="section-label mb-6 opacity-0 animate-fade-in" data-en="A SOLO BUILDER PROJECT" data-zh="独立开发者项目">A SOLO BUILDER PROJECT</p>
+        <h1 class="font-mono text-4xl sm:text-5xl md:text-6xl font-normal leading-tight text-[#1a1a1a] mb-6 opacity-0 animate-slide-up delay-100">
+            100 Tools.<br>100x You.
+        </h1>
+        <p class="text-[#6b6b6b] text-base font-light leading-relaxed max-w-lg mx-auto mb-10 opacity-0 animate-slide-up delay-200"
+           data-en="100 browser-based tools, each built to remove friction from one specific workflow. No install. No signup. Open and go."
+           data-zh="100 个基于浏览器的工具，每一个都专注消除一种工作流的摩擦。无需安装，无需注册，打开即用。">
+            100 browser-based tools, each built to remove friction from one specific workflow. No install. No signup. Open and go.
+        </p>
+        <div class="flex items-center justify-center gap-3 opacity-0 animate-fade-in delay-300">
+            <span class="font-mono text-sm text-[#2d6a4f]">001 / 100</span>
+            <div class="w-32 h-px bg-[#e0ddd8] relative">
+                <div class="absolute left-0 top-0 h-full bg-[#2d6a4f]" style="width:1%"></div>
+            </div>
+            <span class="font-mono text-xs text-[#b0a89e]">1% complete</span>
         </div>
     </div>
-</main>
+</section>
 
-<footer class="px-6 sm:px-10 lg:px-16 xl:px-20 py-8 border-t border-border-warm relative z-10">
-    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p class="text-text-dim text-xs font-light tracking-wide">© 2025 Tim. All rights reserved.</p>
+<!-- ── Tools Grid ── -->
+<section id="tools" class="relative z-10 px-6 sm:px-10 lg:px-16 pb-32">
+    <div class="max-w-5xl mx-auto">
+        <p class="section-label mb-10 opacity-0 animate-slide-up delay-300" data-en="THE TOOLS" data-zh="工具库">THE TOOLS</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <!-- #001 Live -->
+            <a href="/stl-transform-studio/" class="tool-card opacity-0 animate-slide-up delay-300">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-xs text-[#b0a89e]">#001</span>
+                    <span class="tag live" data-en="LIVE" data-zh="已上线">LIVE</span>
+                </div>
+                <div>
+                    <p class="font-medium text-[#1a1a1a] text-sm leading-snug mb-1.5"
+                       data-en="STL Transform Studio" data-zh="STL 坐标编辑工具">STL Transform Studio</p>
+                    <p class="text-[#6b6b6b] text-xs font-light leading-relaxed"
+                       data-en="Import, transform, and export STL files directly in the browser. Precision positioning, rotation, scaling &amp; binary export."
+                       data-zh="在浏览器中导入、变换并导出 STL 文件，支持精确定位、旋转缩放与二进制导出。">
+                        Import, transform, and export STL files directly in the browser. Precision positioning, rotation, scaling &amp; binary export.
+                    </p>
+                </div>
+                <div class="flex items-center gap-1 mt-auto pt-2">
+                    <span class="tag" data-en="3D" data-zh="三维">3D</span>
+                    <span class="tag" data-en="Engineering" data-zh="工程">Engineering</span>
+                </div>
+            </a>
+
+            <!-- #002–#009 Coming soon placeholders -->
+            <div class="tool-card coming-soon">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-xs text-[#c5c0b8]">#002</span>
+                    <span class="tag" data-en="SOON" data-zh="即将上线">SOON</span>
+                </div>
+                <p class="text-[#b0a89e] text-xs font-mono" data-en="Coming soon..." data-zh="即将上线...">Coming soon...</p>
+            </div>
+
+            <div class="tool-card coming-soon">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-xs text-[#c5c0b8]">#003</span>
+                    <span class="tag" data-en="SOON" data-zh="即将上线">SOON</span>
+                </div>
+                <p class="text-[#b0a89e] text-xs font-mono" data-en="Coming soon..." data-zh="即将上线...">Coming soon...</p>
+            </div>
+
+            <div class="tool-card coming-soon">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-xs text-[#c5c0b8]">#004</span>
+                    <span class="tag" data-en="SOON" data-zh="即将上线">SOON</span>
+                </div>
+                <p class="text-[#b0a89e] text-xs font-mono" data-en="Coming soon..." data-zh="即将上线...">Coming soon...</p>
+            </div>
+
+            <div class="tool-card coming-soon">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-xs text-[#c5c0b8]">#005</span>
+                    <span class="tag" data-en="SOON" data-zh="即将上线">SOON</span>
+                </div>
+                <p class="text-[#b0a89e] text-xs font-mono" data-en="Coming soon..." data-zh="即将上线...">Coming soon...</p>
+            </div>
+
+            <div class="tool-card coming-soon">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-xs text-[#c5c0b8]">#006</span>
+                    <span class="tag" data-en="SOON" data-zh="即将上线">SOON</span>
+                </div>
+                <p class="text-[#b0a89e] text-xs font-mono" data-en="Coming soon..." data-zh="即将上线...">Coming soon...</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ── About ── -->
+<section id="about" class="relative z-10 px-6 sm:px-10 lg:px-16 pb-32 border-t border-[#e0ddd8]">
+    <div class="max-w-lg mx-auto pt-20">
+        <p class="section-label mb-8" data-en="THE BUILDER" data-zh="关于我">THE BUILDER</p>
+        <p class="text-[#6b6b6b] text-sm font-light leading-loose mb-8"
+           data-en="I'm Tim. I build tools that get out of your way. Each of the 100 tools here is designed around one constraint: solve one problem, load in under 3 seconds, require zero setup. If it needs an account, it doesn't belong here."
+           data-zh="我是 Tim。我构建那些不会妨碍你的工具。这里的每一个工具都遵循一个原则：只解决一个问题，3秒内加载完毕，零配置启动。如果需要注册账号，它就不属于这里。">
+            I'm Tim. I build tools that get out of your way. Each of the 100 tools here is designed around one constraint: solve one problem, load in under 3 seconds, require zero setup. If it needs an account, it doesn't belong here.
+        </p>
         <div class="flex items-center gap-5">
-            <a class="text-text-dim hover:text-text-main transition-colors" href="https://www.xiaohongshu.com/user/profile/54e56a57e7798913e0cb2bd2" target="_blank" rel="noopener noreferrer" aria-label="小红书">
+            <a href="https://www.xiaohongshu.com/user/profile/54e56a57e7798913e0cb2bd2" target="_blank" rel="noopener noreferrer"
+               class="text-[#a0a0a0] hover:text-[#1a1a1a] transition-colors" aria-label="小红书">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
                     <text x="12" y="16" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="600">小</text>
                 </svg>
             </a>
-            <a class="text-text-dim hover:text-text-main transition-colors" href="https://x.com/home" target="_blank" rel="noopener noreferrer" aria-label="X">
+            <a href="https://x.com/home" target="_blank" rel="noopener noreferrer"
+               class="text-[#a0a0a0] hover:text-[#1a1a1a] transition-colors" aria-label="X">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
             </a>
         </div>
     </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="relative z-10 border-t border-[#e0ddd8] px-6 sm:px-10 lg:px-16 py-8">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="font-mono text-xs text-[#b0a89e]">© 2025 Tim — wooho.cc</p>
+        <p class="font-mono text-xs text-[#c5c0b8]" data-en="001 / 100 tools launched" data-zh="已上线 001 / 100 个工具">001 / 100 tools launched</p>
+    </div>
 </footer>
-</div>
 
-<!-- ── Right: scrollable content ── -->
-<div class="lg:w-1/2 lg:h-screen lg:overflow-y-auto bg-bg border-l border-border-warm px-6 sm:px-10 lg:px-10 xl:px-14 py-20 md:py-28">
-
-<section class="opacity-0 animate-slide-up delay-400">
-    <div class="max-w-xl">
-        <p class="section-label" data-en="Projects" data-zh="项目">Projects</p>
-        <div class="space-y-4">
-            <a class="project-card flex flex-col gap-3 block no-underline" href="/stl-viewer/" target="_blank">
-                <div class="flex items-start justify-between gap-4">
-                    <span class="font-medium text-text-main text-base"
-                          data-en="STL Transform Studio" data-zh="STL 坐标编辑工具">STL Transform Studio</span>
-                    <svg class="h-4 w-4 text-text-dim flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/>
-                    </svg>
-                </div>
-                <p class="text-text-sec text-sm font-light leading-relaxed"
-                   data-en="A browser-based 3D engineering tool for importing, transforming, and exporting STL files. Supports coordinate system conversion, precision positioning, rotation, scaling, and one-click binary STL export — no installation required."
-                   data-zh="一款基于浏览器的 3D 工程工具，支持 STL 文件的导入、坐标系转换、精确定位与旋转缩放，并可一键导出二进制 STL——无需安装任何软件。">
-                    A browser-based 3D engineering tool for importing, transforming, and exporting STL files. Supports coordinate system conversion, precision positioning, rotation, scaling, and one-click binary STL export — no installation required.
-                </p>
-            </a>
-        </div>
-    </div>
-</section>
-
-<section class="mt-20 opacity-0 animate-slide-up delay-600">
-    <div class="max-w-xl">
-        <p class="section-label" data-en="Insights" data-zh="感悟">Insights</p>
-        <div>
-            <a class="insight-link flex flex-col gap-2 block no-underline py-4" href="#">
-                <span class="font-medium text-text-main text-base transition-colors hover:text-text-sec"
-                      data-en="The Future of Design Systems" data-zh="设计系统的未来">The Future of Design Systems</span>
-                <span class="text-text-sec text-sm font-light"
-                      data-en="Exploring the evolution of design systems and their impact on product development."
-                      data-zh="探索设计系统的演变及其对产品开发的影响。">Exploring the evolution of design systems and their impact on product development.</span>
-            </a>
-            <a class="insight-link flex flex-col gap-2 block no-underline py-4" href="#">
-                <span class="font-medium text-text-main text-base transition-colors hover:text-text-sec"
-                      data-en="Designing for Accessibility" data-zh="无障碍设计">Designing for Accessibility</span>
-                <span class="text-text-sec text-sm font-light"
-                      data-en="Best practices for creating inclusive and accessible digital products for all users."
-                      data-zh="为所有用户创建包容性和无障碍数字产品的最佳实践。">Best practices for creating inclusive and accessible digital products for all users.</span>
-            </a>
-        </div>
-    </div>
-</section>
-                            </div>
-                        </div>
 <script>
-// 语言切换功能
-let currentLanguage = 'en'; // 默认英文
+// ── Language toggle ──
+let lang = localStorage.getItem('lang') || 'en';
 
-// 切换语言函数
-function switchLanguage(lang) {
-    currentLanguage = lang;
-    
-    // 更新所有带有data属性的元素
-    const elements = document.querySelectorAll('[data-en][data-zh]');
-    elements.forEach(element => {
-        element.textContent = element.getAttribute('data-' + lang);
+function applyLang(l) {
+    lang = l;
+    document.querySelectorAll('[data-en][data-zh]').forEach(el => {
+        el.textContent = el.getAttribute('data-' + l);
     });
-    
-    // 保存语言偏好到localStorage
-    localStorage.setItem('preferredLanguage', lang);
+    localStorage.setItem('lang', l);
 }
 
-// 初始化语言
-function initLanguage() {
-    const savedLanguage = localStorage.getItem('preferredLanguage');
-    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'zh')) {
-        switchLanguage(savedLanguage);
-    }
-}
-
-// 语言切换按钮事件
-document.addEventListener('DOMContentLoaded', function() {
-    const languageSwitcher = document.getElementById('language-switcher');
-    
-    languageSwitcher.addEventListener('click', function() {
-        const newLanguage = currentLanguage === 'en' ? 'zh' : 'en';
-        switchLanguage(newLanguage);
-    });
-    
-    // 初始化语言
-    initLanguage();
-    
-    // 网格鼠标悬停效果 - 带滞后跟随
-    const gridWrapper = document.querySelector('.grid-wrapper');
-    const gridHoverEffect = document.getElementById('gridHoverEffect');
-    
-    if (gridWrapper && gridHoverEffect) {
-        // 可调整的滞后时间（毫秒）
-        const lagTime = 3000; // 可以调整这个值来改变滞后程度
-        
-        let mouseX = 50; // 鼠标X位置（百分比）
-        let mouseY = 50; // 鼠标Y位置（百分比）
-        let circleX = 50; // 圆圈X位置（百分比）
-        let circleY = 50; // 圆圈Y位置（百分比）
-        let animationId = null;
-        
-        // 平滑跟随动画
-        function animateCircle() {
-            const speed = 0.05; // 跟随速度，可以调整（0.05-0.2之间效果较好）
-            
-            // 计算圆圈位置与鼠标位置的差值
-            const deltaX = mouseX - circleX;
-            const deltaY = mouseY - circleY;
-            
-            // 如果差值很小，停止动画
-            if (Math.abs(deltaX) < 0.1 && Math.abs(deltaY) < 0.1) {
-                circleX = mouseX;
-                circleY = mouseY;
-                gridHoverEffect.style.setProperty('--circle-x', circleX + '%');
-                gridHoverEffect.style.setProperty('--circle-y', circleY + '%');
-                return;
-            }
-            
-            // 更新圆圈位置
-            circleX += deltaX * speed;
-            circleY += deltaY * speed;
-            
-            // 应用新位置
-            gridHoverEffect.style.setProperty('--circle-x', circleX + '%');
-            gridHoverEffect.style.setProperty('--circle-y', circleY + '%');
-            
-            // 继续动画
-            animationId = requestAnimationFrame(animateCircle);
-        }
-        
-        gridWrapper.addEventListener('mousemove', function(e) {
-            const rect = gridWrapper.getBoundingClientRect();
-            mouseX = ((e.clientX - rect.left) / rect.width) * 100;
-            mouseY = ((e.clientY - rect.top) / rect.height) * 100;
-            
-            gridHoverEffect.classList.add('active');
-            
-            // 启动跟随动画
-            if (!animationId) {
-                animateCircle();
-            }
-        });
-        
-        gridWrapper.addEventListener('mouseleave', function() {
-            gridHoverEffect.classList.remove('active');
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-                animationId = null;
-            }
-        });
-    }
+document.getElementById('lang-btn').addEventListener('click', () => {
+    applyLang(lang === 'en' ? 'zh' : 'en');
 });
+
+// init
+if (lang === 'zh') applyLang('zh');
 </script>
 </body>
 </html>
