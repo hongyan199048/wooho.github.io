@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVIDIA Isaac Sim 机器人设置教程 — 100x Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --bg: #f5f2ed;
+            --bg-card: #ffffff;
+            --text: #1a1a1a;
+            --text-sec: #6b6b6b;
+            --text-dim: #a0a0a0;
+            --border: #e0ddd8;
+            --border-hover: #c5c0b8;
+            --muted: #faf8f5;
+            --accent: #1a1a1a;
+            --font-mono: 'Share Tech Mono', monospace;
+            --sidebar-width: 268px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: rgba(245, 242, 237, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 200;
+        }
+
+        .navbar-left a {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-sec);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .navbar-left a:hover { color: var(--text); }
+
+        .navbar-center {
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            font-size: 13px;
+            color: var(--text);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .navbar-right {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #b0a89e;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - 50px);
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            z-index: 100;
+            padding: 0 0 20px;
+        }
+
+        .sidebar-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #b0a89e;
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 4px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar li { margin: 0; }
+
+        .sidebar a {
+            display: block;
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 300;
+            border-left: 2px solid transparent;
+            padding: 7px 20px;
+            transition: all 0.15s;
+            line-height: 1.4;
+        }
+
+        .sidebar a:hover {
+            color: var(--text);
+            border-left-color: var(--text);
+            background: var(--bg);
+        }
+
+        .sidebar a.active {
+            color: var(--text);
+            border-left-color: var(--text);
+        }
+
+        .sidebar .level-badge {
+            font-size: 9px;
+            padding: 1px 5px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        /* ── Main Content ── */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 40px 48px;
+            margin-top: 50px;
+            max-width: 860px;
+        }
+
+        /* ── Typography ── */
+        h1 {
+            font-family: var(--font-mono);
+            font-size: 28px;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+            font-weight: normal;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin: 32px 0 14px;
+        }
+
+        h3 {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+            margin: 24px 0 10px;
+        }
+
+        h4 {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-sec);
+            margin: 18px 0 8px;
+        }
+
+        h5 {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-sec);
+            margin: 14px 0 6px;
+        }
+
+        p { margin: 10px 0; }
+        ul, ol { margin: 10px 0 10px 28px; }
+        li { margin: 5px 0; }
+
+        a {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        a:hover { color: var(--text-sec); }
+
+        /* ── Code ── */
+        code {
+            background: #f0ede8;
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 0.85em;
+            padding: 1px 5px;
+            border-radius: 2px;
+        }
+
+        pre {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 16px;
+            overflow-x: auto;
+            margin: 14px 0;
+        }
+
+        pre code {
+            background: none;
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ── Tutorial Section ── */
+        .tutorial-section {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin: 28px 0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(26, 26, 26, 0.05);
+        }
+
+        .tutorial-header {
+            background: var(--text);
+            color: #f5f2ed;
+            padding: 18px 24px;
+        }
+
+        .tutorial-header h2 {
+            color: #f5f2ed;
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .tutorial-header p {
+            color: #a0a0a0;
+            font-size: 13px;
+            margin: 6px 0 0;
+            font-weight: 300;
+        }
+
+        .tutorial-body {
+            padding: 24px;
+            background: var(--bg-card);
+        }
+
+        /* ── Callouts ── */
+        .note {
+            background: #f0f7f2;
+            border-left: 3px solid #2d6a4f;
+            padding: 12px 16px;
+            margin: 14px 0;
+            border-radius: 0 3px 3px 0;
+        }
+        .note strong { color: #2d6a4f; }
+
+        .warning {
+            background: #fdf5ec;
+            border-left: 3px solid #b07030;
+            padding: 12px 16px;
+            margin: 14px 0;
+            border-radius: 0 3px 3px 0;
+        }
+        .warning strong { color: #b07030; }
+
+        .tip {
+            background: #eef3f8;
+            border-left: 3px solid #3a6ea8;
+            padding: 12px 16px;
+            margin: 14px 0;
+            border-radius: 0 3px 3px 0;
+        }
+        .tip strong { color: #3a6ea8; }
+
+        /* ── Level Badges ── */
+        .level-badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-weight: normal;
+        }
+        .level-beginner { background: #e8f0eb; color: #2d6a4f; }
+        .level-intermediate { background: #f5f0e8; color: #8a5e2a; }
+        .level-advanced { background: #f0e8e8; color: #8a2a2a; }
+
+        /* ── Images ── */
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 4px rgba(26, 26, 26, 0.06);
+            margin: 15px 0;
+        }
+
+        .img-caption {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 12px;
+            margin: -10px 0 15px;
+        }
+
+        /* ── Table ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 9px 12px;
+            text-align: left;
+        }
+        th {
+            background: var(--bg);
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* ── Intro paragraph ── */
+        .intro-p {
+            font-size: 14px;
+            color: var(--text-sec);
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        /* ── Footer ── */
+        .page-footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-dim);
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+            font-size: 13px;
+        }
+        .page-footer a { color: var(--text-sec); }
+
+        /* ── Scroll-to-top ── */
+        .top-link {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--text);
+            color: #f5f2ed;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(26, 26, 26, 0.15);
+            z-index: 200;
+            transition: opacity 0.2s;
+        }
+        .top-link:hover { opacity: 0.75; color: #f5f2ed; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .navbar-center { display: none; }
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="/">← wooho.cc</a>
+    </div>
+    <div class="navbar-center">NVIDIA Isaac Sim 机器人设置教程</div>
+    <div class="navbar-right">#002</div>
+</nav>
+
+<!-- ── Sidebar ── -->
+<div class="sidebar">
+    <div class="sidebar-title">Isaac Sim<br>机器人教程</div>
+    <ul>
+        <li><a href="#tut1">第1课：场景设置 <span class="level-badge level-beginner">入门</span></a></li>
+        <li><a href="#tut2">第2课：组装简单机器人 <span class="level-badge level-beginner">入门</span></a></li>
+        <li><a href="#tut3">第3课：为基本机器人添加关节 <span class="level-badge level-beginner">入门</span></a></li>
+        <li><a href="#tut4">第4课：为机器人添加相机和传感器 <span class="level-badge level-beginner">入门</span></a></li>
+        <li><a href="#tut5">第5课：装配移动机器人 <span class="level-badge level-beginner">入门</span></a></li>
+        <li><a href="#tut6">第6课：设置机械臂 <span class="level-badge level-intermediate">中级</span></a></li>
+        <li><a href="#tut7">第7课：配置机械臂 <span class="level-badge level-intermediate">中级</span></a></li>
+        <li><a href="#tut8">第8课：生成机器人配置文件 <span class="level-badge level-intermediate">中级</span></a></li>
+        <li><a href="#tut9">第9课：抓取放置示例 <span class="level-badge level-intermediate">中级</span></a></li>
+        <li><a href="#tut10">第10课：装配闭环结构 <span class="level-badge level-advanced">高级</span></a></li>
+        <li><a href="#tut11">第11课：调节关节驱动增益 <span class="level-badge level-advanced">高级</span></a></li>
+        <li><a href="#tut12">第12课：资产优化 <span class="level-badge level-advanced">高级</span></a></li>
+        <li><a href="#tut13">第13课：为运动策略装配腿式机器人 <span class="level-badge level-advanced">高级</span></a></li>
+    </ul>
+</div>
+
+<!-- ── Main Content ── -->
+<div class="main-content">
+<a id="top"></a>
+<h1>NVIDIA Isaac Sim 机器人设置教程系列</h1>
+<p class="intro-p">
+    原文来源：<a href="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/robot_setup_tutorials/index.html" target="_blank">NVIDIA Isaac Sim Documentation v5.1.0</a><br>
+    本教程系列涵盖从入门到高级的机器人数字孪生构建流程，使用 NVIDIA Isaac Sim 的图形界面功能。
+</p>
+
+<!-- ==================== TUTORIAL 1 ==================== -->
+<div class="tutorial-section" id="tut1">
+<div class="tutorial-header">
+    <h2>第1课：场景设置 <span class="level-badge level-beginner">入门</span></h2>
+    <p>学习使用 Isaac Sim GUI 构建支持物理仿真的虚拟世界</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>本教程教您使用 Isaac Sim GUI 提供的工具构建支持物理仿真的虚拟世界，包括：</p>
+<ul>
+    <li>设置全局场景属性</li>
+    <li>设置全局物理属性</li>
+    <li>添加地面平面</li>
+    <li>添加灯光</li>
+</ul>
+
+<h3>前提条件</h3>
+<p>要从干净的 Isaac Sim 场景开始，转到 <strong>File</strong> 菜单并点击 <strong>New</strong>。提供的场景有一个默认的 <code>World</code> Xform 和一个 <code>defaultLight</code>，两者都可以在视口右侧的场景树中找到。</p>
+
+<h3>设置场景属性</h3>
+<p>在向场景添加任何内容之前，请验证当前场景属性设置是否符合您的预期约定。</p>
+<ol>
+    <li>转到 <strong>Edit > Preferences</strong> 打开 Preferences 面板。</li>
+    <li>浏览 Omniverse Kit 中按类别分组的多种设置类型。</li>
+    <li>从左侧列选择 <strong>Stage</strong> 并查看以下属性：
+        <ul>
+            <li>确定 <em>Up</em>（上方）的轴。Isaac Sim 中的默认值是 Z。如果您的资产是在具有不同上轴的程序中创建的，这会导致导入的资产发生旋转。</li>
+            <li>场景单位。2022.1 之前的 Isaac Sim 版本场景单位为厘米，但现在默认为米。但是，Omniverse Kit 的默认单位仍然是厘米。如果您看到 USD 单位似乎相差 100 倍，请记住这一点。</li>
+            <li>默认旋转顺序。默认设置为先绕 Z 轴旋转，然后是 Y 轴，最后是 X 轴。</li>
+        </ul>
+    </li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_preferences.png" alt="Preferences面板">
+<div class="img-caption">Preferences 面板中的场景设置</div>
+
+<h3>创建物理场景</h3>
+<p>要添加 <strong>Physics Scene</strong> 以模拟真实世界的物理效果，包括重力和物理时间步长：</p>
+<ol>
+    <li>转到菜单栏，点击 <strong>Create > Physics > Physics Scene</strong>。</li>
+    <li>验证 <strong>PhysicsScene</strong> 已添加到场景树中。</li>
+    <li>点击它检查其属性。您可以看到重力设置为 <em>Earth Gravity</em>（地球重力）的大小，即 <code>9.8</code> 米每二次方秒。记住默认长度单位是米。</li>
+    <li>除非您正在模拟数百个刚体和机器人，否则使用 CPU 物理更高效：
+        <ul>
+            <li>打开 Physics Scene 的 <strong>Property</strong> 标签</li>
+            <li>取消勾选 <strong>Enable GPU dynamics</strong></li>
+            <li>将 <strong>Broadphase</strong> 类型设置为 <strong>MBP</strong></li>
+        </ul>
+    </li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_base_ref_gui_physics_properties.png" alt="物理场景属性">
+<div class="img-caption">Physics Scene 属性设置</div>
+
+<h3>添加地面平面</h3>
+<p>地面平面可以防止任何启用物理的对象掉落到其下方。地面平面的碰撞属性无限延伸，即使该平面仅在每个方向上可见 25 米。</p>
+<p>要向虚拟环境添加地面平面：</p>
+<ol>
+    <li>转到顶部菜单栏，点击 <strong>Create > Physics > Ground Plane</strong>。</li>
+    <li>通过点击 <img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_eyecon.png" alt="eyecon" style="display:inline; width:20px; margin:0; box-shadow:none; border:none; vertical-align:middle;"> 并选择 <strong>Grid</strong> 来打开网格，使地面平面更容易看到。</li>
+</ol>
+
+<h3>灯光</h3>
+<p>每个新的 Stage 都预填充了一个 <code>defaultLight</code>，否则您将看不到任何东西。此默认灯光是场景中 <code>Environment</code> Xform 的子级，可以在场景上下文树中找到。</p>
+<p>要创建额外的聚光灯：</p>
+<ol>
+    <li>添加一个地面平面（如果还没有的话），以便我们可以看到灯光的反射：<strong>Create > Physics > Ground Plane</strong>。</li>
+    <li>转到 <strong>Create > Light > Sphere Light</strong>。</li>
+    <li>在场景中定位灯光：
+        <ul>
+            <li>在右上方的 <strong>Stage</strong> 标签中，在场景树中选择新创建的灯光。</li>
+            <li>在底部的 <strong>Property</strong> 标签中，在 <strong>Transform</strong> 部分使用 <strong>Translate</strong> 工具将其移动到地面上方的位置，例如 <code>(0, 0, 7)</code>。</li>
+            <li>在 <strong>Property</strong> 标签中，在 <strong>Transform</strong> 部分，使用 <strong>Orient</strong> 工具将旋转设置为 <code>(0, 0, 0)</code>。</li>
+        </ul>
+    </li>
+    <li>修改灯光颜色、亮度和范围属性：
+        <ul>
+            <li>在 <strong>Property</strong> 标签中，在 <strong>Main > Color</strong> 中更改其颜色，点击颜色条并选择您喜欢的颜色。例如浅绿色 <code>(RGB: 0.5, 1.0, 0.5)</code>。</li>
+            <li>在 <strong>Property</strong> 标签中，将 <strong>Main > Intensity</strong> 更改为 <strong>1e6</strong>；<strong>Main > Radius</strong> 更改为 <strong>0.05</strong>。</li>
+            <li>在 <strong>Shaping</strong> 部分，将 <strong>cone:angle</strong> 更改为 <strong>45</strong> 度，<strong>cone:softness</strong> 更改为 <strong>0.05</strong>。</li>
+        </ul>
+    </li>
+    <li>为了使新聚光灯更容易看到，我们将默认灯光的强度降低：转到其 <strong>Property</strong> 标签，将 <strong>Main > Intensity</strong> 设置为 <strong>300</strong>。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_lighting.png" alt="灯光设置">
+<div class="img-caption">灯光属性设置效果</div>
+
+<h3>总结</h3>
+<p>本教程介绍了创建适合物理仿真和测试 Isaac Sim 的虚拟世界的必要步骤。涵盖了以下主题：</p>
+<ul><li>添加地面平面、灯光和物理场景。</li></ul>
+
+<h4>下一步</h4>
+<p>继续 <a href="#tut2">第2课：组装简单机器人</a>，学习如何向 Isaac Sim 添加简单对象并编辑它们的属性。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 2 ==================== -->
+<div class="tutorial-section" id="tut2">
+<div class="tutorial-header">
+    <h2>第2课：组装简单机器人 <span class="level-badge level-beginner">入门</span></h2>
+    <p>学习添加和操作基本形状，启用物理属性，检查碰撞属性</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>本教程涵盖如何：</p>
+<ul>
+    <li>添加和操作基本形状</li>
+    <li>在对象中启用物理属性</li>
+    <li>检查碰撞属性</li>
+    <li>编辑物理属性（如摩擦力）</li>
+    <li>编辑材质属性（如颜色和反射率）</li>
+</ul>
+
+<h3>前提条件</h3>
+<ul><li>在开始本教程之前，完成 <a href="#tut1">第1课：场景设置</a>。</li></ul>
+
+<h3>向场景添加对象</h3>
+<p>向场景"添加对象"有很多方法，但它们本质上都做相同的事情，即在场景上下文树中定义一个 USD 原语。目标是创建一个基本的双轮机器人。首先创建一些基本形状并修改它们的属性。车身使用立方体，车轮使用圆柱体。</p>
+
+<h4>创建机器人车身</h4>
+<ol>
+    <li>通过右键点击场景，选择 <strong>Create > Xform</strong> 创建一个 Xform。</li>
+    <li>通过右键点击选择 <strong>Rename</strong> 将其重命名为 <strong>body</strong>。</li>
+    <li>将 Xform 的平移固定为 <code>(0, 0, 1)</code>：点击属性面板中的 <strong>Translate</strong> 部分，设置 <strong>X</strong> 为 <code>0</code>，<strong>Y</strong> 为 <code>0</code>，<strong>Z</strong> 为 <code>1</code>。</li>
+    <li>在顶部菜单栏点击 <strong>Create > Shape > Cube</strong> 创建一个立方体。您应该看到立方体和 <strong>Move</strong> <strong>gizmo</strong>（红、蓝、绿色箭头）出现在视口窗口中。</li>
+    <li>点击并拖动蓝色箭头将立方体抬升到地面平面上方。</li>
+    <li>在应用程序左侧，点击 Scale 图标（或在选中立方体时按 R 键）激活缩放控件。</li>
+    <li>点击并拖动控件的红色部分在 x 方向上缩放立方体。</li>
+    <li>将立方体放置在特定位置。导航到属性面板中的 <strong>Transform > Scale</strong>，将缩放设置为 <code>(1, 2, 0.5)</code>。</li>
+    <li>将立方体拖动到 <strong>Body</strong> Xform 下。</li>
+</ol>
+
+<h4>创建机器人车轮</h4>
+<ol>
+    <li>通过右键点击场景，选择 <strong>Create > Xform</strong> 创建一个 Xform。将 <strong>Translate</strong> 设置为 <code>(1.5, 0, 1)</code>，<strong>Orient</strong> 设置为 <code>90, 0, 0</code>，使车轮 Xform 绕 x 轴旋转 90 度。</li>
+    <li>将其重命名为 <strong>wheel_left</strong>。</li>
+    <li>在顶部菜单栏点击 <strong>Create > Shape > Cylinder</strong> 创建一个圆柱体。</li>
+    <li>在属性面板中，滚动到 <strong>Geometry</strong> 部分。将其 <strong>Radius</strong> 更改为 <code>0.5</code>，<strong>Height</strong> 更改为 <code>1.0</code>。</li>
+    <li>将圆柱体拖动到 <strong>wheel_left</strong> Xform 下。</li>
+    <li>将圆柱体重命名为 <strong>wheel_left</strong>。</li>
+    <li>通过右键点击场景树中的 <code>wheel_left</code> Xform，选择 <strong>Duplicate</strong> 来复制它，并将其移动到 <code>x = -1.5</code>，同时保持所有其他参数不变。</li>
+    <li>将复制的 Xform 重命名为 <strong>wheel_right</strong>。</li>
+    <li>将复制的圆柱体重命名为 <strong>wheel_right</strong>。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_simple_objs_body.png" alt="简单对象车身">
+<div class="img-caption">基本机器人车身和车轮</div>
+
+<h3>添加物理属性</h3>
+<p>到目前为止添加的立方体和圆柱体严格来说是视觉原语，没有附加任何物理或碰撞属性。当您按 <strong>Play</strong> 开始仿真并且重力被施加时，这些对象不会移动，因为它们不受物理影响。</p>
+<p>要使机器人具有物理特性，将其转换为带有碰撞属性的刚体：</p>
+<ol>
+    <li>通过按住 <code>Ctrl + Shift</code> 键点击场景树上的立方体和两个圆柱体来选择它们，或者如果它们在树上连续列出，则只需按 <code>Shift</code>。</li>
+    <li>在 <strong>Property</strong> 标签中，点击 <code>+ Add</code> 按钮。</li>
+    <li>选择 <strong>Physics > Rigid Body with Colliders Preset</strong>。</li>
+    <li>按 <strong>Play</strong> 并验证所有三个对象都落到地面。</li>
+</ol>
+
+<div class="note">
+    <strong>注意：</strong><strong>Rigid Body with Colliders Preset</strong> 会自动将 Rigid Body API 和 Collision API 添加到对象。这两个 API 可以单独应用，因为您可以拥有以下对象：
+    <ul>
+        <li>具有质量并受重力影响，但没有碰撞属性，因此您可以穿过它们</li>
+        <li>可以被碰撞但悬挂在空中且不受重力影响</li>
+    </ul>
+</div>
+
+<h4>检查碰撞网格</h4>
+<p>要可视化检查对象碰撞网格的轮廓：</p>
+<ol>
+    <li>在视口顶部找到眼睛图标。</li>
+    <li>点击 <strong>Show By Type > Physics > Colliders > All</strong>。</li>
+    <li>验证紫色轮廓出现在任何应用了碰撞 API 的对象周围。例如，验证长方体、圆柱体和平面是否都有紫色轮廓。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_collision.png" alt="碰撞网格">
+<div class="img-caption">碰撞网格可视化</div>
+
+<h4>添加接触和摩擦参数</h4>
+<p>要修改摩擦属性，您必须创建不同的物理材质，然后将其分配给所需对象。</p>
+<ol>
+    <li>转到菜单栏，点击 <strong>Create > Physics > Physics Material</strong>。</li>
+    <li>在弹出框中选择 <strong>Rigid Body Material</strong>。一个新的 <code>PhysicsMaterial</code> 出现在场景树上。</li>
+    <li>在其属性标签中调整参数，如摩擦系数和恢复系数。</li>
+</ol>
+<p>要将分配的物理材质应用到对象：</p>
+<ol>
+    <li>在场景树中选择对象。</li>
+    <li>在 <strong>Property</strong> 标签中找到 <strong>Materials on Selected Model</strong> 菜单项。</li>
+    <li>在下拉菜单中选择所需的材质。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_materials.png" alt="物理材质">
+<div class="img-caption">物理材质设置</div>
+
+<h3>材质属性</h3>
+<p>对象可能反射之前添加的聚光灯的颜色，但它实际上没有分配任何颜色。您可以通过关闭聚光灯来确认这一点。</p>
+<p>要更改对象的颜色，创建不同的材质，然后将其分配给对象，就像物理材质一样。例如，创建两种不同的材质，一种用于车身，一种用于车轮。</p>
+<ol>
+    <li>点击 <strong>Create > Materials > OmniPBR</strong> 两次。</li>
+    <li>右键点击场景树上新添加的材质，将它们重命名为 <strong>body</strong> 和 <strong>wheel</strong>。</li>
+    <li>通过转到其 <strong>Property</strong> 标签中的 <strong>Materials on selected models</strong> 项，从下拉菜单中选择匹配的材质，将相应的刚体分配给新创建的材质。</li>
+    <li>更改新材质的属性。在场景树上选择其中一个，更改其在 <em>Material and Shader / Albedo</em> 中的基础颜色，并调整其反射率粗糙度等。</li>
+    <li>验证您看到汽车上相应部件的颜色相应变化。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_new_materials.png" alt="新材质">
+<div class="img-caption">应用新材质后的效果</div>
+
+<h3>总结</h3>
+<p>本教程结束时，您应该有一个带有一个车身和两个车轮的机器人，类似于位于 <strong>Samples > Rigging > MockRobot</strong> 文件夹中的 <code>mock_robot_no_joints</code> 资产。</p>
+<h4>下一步</h4>
+<p>继续到 <a href="#tut3">第3课：为基本机器人添加关节</a>，学习如何将这些几何体变成可移动的汽车。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 3 ==================== -->
+<div class="tutorial-section" id="tut3">
+<div class="tutorial-header">
+    <h2>第3课：为基本机器人添加关节 <span class="level-badge level-beginner">入门</span></h2>
+    <p>学习使用关节连接刚体，添加关节驱动和关节属性，添加关节链（Articulation）</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>本教程详细介绍如何装配双轮移动机器人，涵盖：</p>
+<ul>
+    <li>组织场景树层次结构</li>
+    <li>在两个刚体之间添加关节</li>
+    <li>添加关节驱动和关节属性</li>
+    <li>添加关节链（Articulation）</li>
+    <li>通过关节速度控制器移动机器人</li>
+</ul>
+
+<h3>前提条件</h3>
+<ul>
+    <li>在开始本教程之前，完成 <a href="#tut2">第2课：组装简单机器人</a>。</li>
+    <li>或者从 Content Browser 加载位于 <code>Isaac Sim/Samples/Rigging/MockRobot/mock_robot_no_joints</code> 的检查点资产。不要将其作为引用加载，因为您必须对文件进行永久修改。</li>
+</ul>
+
+<h3>添加关节</h3>
+<ol>
+    <li>如果您继续使用 GUI 教程并有自己的 <code>mock_robot.usd</code> 保存的文件，请使用 <strong>File > Open</strong> 打开它。否则，从 Content Browser 加载位于 <code>Isaac Sim/Samples/Rigging/MockRobot/mock_robot_no_joints</code> 的资产。</li>
+    <li>为了组织，创建一个 Scope 来存储关节：右键点击 <strong>Create > Scope</strong>，将其重命名为 <strong>Joints</strong>。</li>
+    <li>要在两个主体之间添加关节，必须首先同时选择它们。在上下文树窗口中点击 body 和 wheel parent transform。对于我们的模拟机器人，选择立方体对象 <code>body</code>，然后按住 <code>Ctrl</code> 键，选择圆柱体对象 <code>wheel_left</code>。</li>
+    <li>在两个主体高亮显示后，右键点击并选择 <strong>Create > Physics > Joints > Revolute Joint</strong>。<code>RevoluteJoint</code> 出现在场景树中 <code>wheel_left</code> 下。将其重命名为 <code>wheel_joint_left</code>。</li>
+    <li>在 <strong>Property</strong> 标签中验证 <strong>body0</strong> 是 <code>/mock_robot/body/body</code>（立方体），<strong>body1</strong> 是 <code>/mock_robot/wheel_left/wheel_left</code>（圆柱体）。</li>
+    <li>将关节的 X 轴设置为 <strong>Local Rotation 0</strong> 为 <code>0.0</code>，<strong>Local Rotation 1</strong> 为 <code>-90.0</code>，以考虑车身和圆柱体之间的变换差异。</li>
+    <li>将关节的 <strong>Axis</strong> 更改为 <strong>Y</strong>。因为机器人没有局部旋转 <code>0</code>，关节与车身处于相同的姿态。</li>
+    <li>为了组织，将刚创建的关节拖动到 <strong>Joints</strong> scope 下。</li>
+    <li>对右侧车轮关节重复前面五个步骤。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_rigging_mockrobot_joints.png" alt="关节设置">
+<div class="img-caption">机器人关节设置</div>
+
+<p>在添加关节之前，三个刚体在按 <strong>Play</strong> 后分别落到地面。现在有关节连接，主体就像连接了旋转关节一样一起落下。要看到它们像用旋转关节连接一样一起移动，您可以按住 <code>Shift</code> 键并在视口中点击并拖动机器人的任何部分来拖动机器人。</p>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_rigging_mockrobot_interaction.webp" alt="拖动机器人">
+<div class="img-caption">拖动关节连接的机器人</div>
+
+<h3>添加关节驱动</h3>
+<p>添加关节添加了机械连接。要能够控制和驱动关节，必须添加关节驱动 API。选择两个关节，在 <strong>Property</strong> 标签中点击 <code>+ Add</code> 按钮，选择 <strong>Physics > Angular Drive</strong> 同时为两个关节添加驱动。</p>
+<ul>
+    <li><strong>位置控制：</strong>对于位置控制关节，设置高刚度和相对较低或零阻尼。</li>
+    <li><strong>速度控制：</strong>对于速度控制关节，设置高阻尼和零刚度。</li>
+</ul>
+<p>对于车轮上的关节，速度控制更有意义，因此将两个车轮的 <strong>Damping</strong> 设置为 <strong>1e4</strong>，<strong>Target Velocity</strong> 设置为 <strong>200 rad/s</strong>。如果您使用的是有限制范围的关节，可以在 <strong>Property</strong> 标签中的 <strong>Raw USD Properties > Lower (Upper) Limit</strong> 下设置。按 <strong>Play</strong> 看模拟移动机器人驶离。</p>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_rigging_mockrobot_joint_drives.webp" alt="关节驱动">
+<div class="img-caption">关节驱动配置</div>
+
+<h3>添加关节链（Articulation）</h3>
+<p>即使直接驱动关节可以移动机器人，但这并不是计算效率最高的方式。将物体转换为 <em>articulation</em>（关节链）可以实现更高的仿真精度、更少的关节误差，并能处理关节连接体之间更大的质量比。</p>
+<p>要将一系列连接的刚体和关节转换为关节链，设置一个 <em>articulation root</em> 来锚定关节链树：</p>
+<ol>
+    <li>在场景树上选择 <code>mock_robot</code>。</li>
+    <li>在 <strong>Property</strong> 标签中打开 <strong>+ Add</strong>。</li>
+    <li>添加 <strong>Physics > Articulation Root</strong>。</li>
+</ol>
+<p>验证结果机器人与 Content Browser 中 <code>Isaac Sim/Samples/Rigging/MockRobot/mock_robot_rigged</code> 提供的资产匹配。</p>
+
+<h3>添加控制器</h3>
+<p>在关节成为关节链的一部分后，您可以使用工具测试机器人的运动。</p>
+<ol>
+    <li>创建另一个 Scope：右键点击 <strong>Create > Scope</strong>，将其重命名为 <strong>Graphs</strong>。这将用于存储 ActionGraph。</li>
+    <li>将 <strong>Graphs</strong> scope 拖到场景树中 <code>mock_robot</code> Xform 下。</li>
+    <li>转到 <strong>Tools > Robotics > Omnigraph Controllers > Joint Velocity</strong> 向场景添加速度控制器图。</li>
+    <li>点击 <strong>Robot Prim</strong> 的 <strong>Add</strong> 按钮，选择具有 Articulation Root API 的 prim，在本例中是 <code>/mock_robot</code>。</li>
+    <li>对于 Graph Path，写入 <code>mock_robot/Graphs/Velocity_Controller</code>，将 ActionGraph 放在上面的 <strong>Graphs</strong> scope 中。</li>
+    <li>点击 <strong>OK</strong> 创建图。</li>
+    <li>要移动机器人，按 <strong>Play</strong> 开始仿真。如果有任何默认位置或速度目标设置，机器人会立即开始向这些目标移动。要更改关节命令，在场景树中选择 <strong>/Graphs/velocity_controller</strong> 下的 <code>JointCommandArray</code>，并在属性窗口中更改 <code>input0</code> 和 <code>input1</code> 参数。</li>
+</ol>
+
+<div class="note">
+    <strong>注意：</strong>关节控制器使用 <strong>弧度（radians）</strong>，而您在场景树上选择单个关节时在 Drive API 下找到的默认 USD 属性是<strong>度（degrees）</strong>。
+</div>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_rigging_mockrobot_controller.png" alt="控制器">
+<div class="img-caption">添加关节速度控制器</div>
+
+<h3>总结</h3>
+<p>在本教程中，您学习了使用关节连接刚体、添加关节驱动来控制关节、将关节链转换为关节链，以及使用关节速度控制器控制机器人。</p>
+<h4>下一步</h4>
+<p>继续 <a href="#tut4">第4课：为机器人添加相机和传感器</a>，学习如何向汽车添加相机。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 4 ==================== -->
+<div class="tutorial-section" id="tut4">
+<div class="tutorial-header">
+    <h2>第4课：为机器人添加相机和传感器 <span class="level-badge level-beginner">入门</span></h2>
+    <p>学习添加相机传感器并将其附加到机器人上</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<ul>
+    <li>添加相机</li>
+    <li>将相机附加到几何体</li>
+</ul>
+
+<h3>前提条件</h3>
+<ul>
+    <li>完成 <a href="#tut3">第3课：为基本机器人添加关节</a>。</li>
+    <li>查看<a href="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/reference_material/reference_conventions.html#isaac-sim-cameras" target="_blank">相机坐标系和轴的介绍</a>。</li>
+</ul>
+<p>使用 <code>Isaac Sim/Samples/Rigging/MockRobot/mock_robot_rigged.usd</code> 文件开始本教程，以获得标准化的设置。</p>
+
+<h3>添加相机</h3>
+<p>要添加相机：</p>
+<ol>
+    <li>转到菜单栏，选择 <strong>Create > Camera</strong>。相机出现在场景树上，代表相机视图的灰色线框出现在场景中。</li>
+    <li>您可以像移动和旋转场景中任何其他对象一样移动和旋转相机的变换。</li>
+</ol>
+
+<div class="note">
+    <strong>注意：</strong>相机图标在视口中默认隐藏。要查看相机图标，转到视口顶部边缘的 <strong>eye</strong> 菜单，选择 <strong>Show By Type > Cameras</strong>。相机图标出现在视口中。
+</div>
+
+<p>您也可以通过将当前视口中的视图移动到您选择的视图，然后转到视口显示左上角的 <strong>Camera</strong> 按钮，选择 <strong>Camera > Create from View</strong> 来添加相机。新相机出现在 Stage 树上，可以在 <strong>Camera</strong> 按钮中选择的相机会列出。</p>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_base_ref_gui_camera_widget.png" alt="相机控件">
+<div class="img-caption">相机创建和管理控件</div>
+
+<h3>检查相机</h3>
+<p>使用相机检查器扩展来检查相机图像并根据需要修改相机状态：</p>
+<ol>
+    <li>选择 <strong>Tools > Robotics > Camera Inspector</strong>。</li>
+    <li>验证您可以在下拉列表中看到相机。点击 <strong>Refresh</strong> 按钮查找新相机。</li>
+    <li>选择要检查的相机。根据需要创建新视口，并获取和设置相机姿态。</li>
+</ol>
+
+<h3>将相机附加到机器人</h3>
+<ol>
+    <li>将新添加的相机重命名为 <code>car_camera</code>。</li>
+    <li>如果能看到所需的相机输入流以及它相对于机器人的位置（从外部相机看）会更容易放置相机。转到菜单栏点击 <strong>Window > Viewports > Viewport 2</strong> 打开第二个视口窗口。将出现一个新视口。</li>
+    <li>将一个视口保持在 <strong>Perspective</strong> 相机视图，将另一个切换到 <em>car_camera</em> 视图。在视口顶部边缘找到 <strong>Cameras</strong> 菜单，切换到 <strong>Camera > car_camera</strong>。</li>
+    <li>验证您有车载相机视图和场景概览。</li>
+    <li>通过将 prim 拖到 <code>body</code> 下，将相机附加到机器人的车身。相机与车身一起移动。您可能需要再次切换视口的相机视图。</li>
+    <li>将相机稍微向下指并使其面向前方，以便您可以看到汽车和地面。将相机变换平移设置为 <code>x=-6, y=0, z=2.2</code>，方向为 <code>x=0, y=-80, z=-90</code>，缩放为 <code>x=1, y=1, z=1</code>。</li>
+    <li>验证您看到视口显示车载相机视图在机器人车身和地面之间分割窗口，以及在 <em>Perspective</em> 相机视口中相机相对于机器人的位置和方向。</li>
+    <li>按 <strong>Play</strong>。机器人上的车载相机随机器人一起移动。</li>
+</ol>
+
+<div class="tip">
+    <strong>提示：</strong>如果在显示时移动了相机视图，它会更改相机的属性。相反，在具有正确偏移量的父级上附加一个 prim，然后将相机附加到该新 prim。这样，如果相机位置被意外移动，可以通过将所有位置和方向参数相对于该 prim 归零来重置。
+</div>
+
+<h3>总结</h3>
+<p>在本教程中，您学习了如何使用相机检查器扩展，以及如何向机器人添加相机。</p>
+<h4>下一步</h4>
+<p>继续到 <a href="#tut5">第5课：装配移动机器人</a>，学习如何装配更复杂的机器人。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 5 ==================== -->
+<div class="tutorial-section" id="tut5">
+<div class="tutorial-header">
+    <h2>第5课：装配移动机器人 <span class="level-badge level-beginner">入门</span></h2>
+    <p>学习将未装配的叉车 USD 资产转换为可通过 Isaac Sim 命令移动和驱动的叉车</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>在本教程中，将未装配的叉车 USD 资产转换为可通过 Isaac Sim 命令移动和驱动的叉车。<em>30 分钟教程</em></p>
+
+<h3>入门</h3>
+<p><strong>前提条件</strong></p>
+<ul>
+    <li>完成<a href="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/introduction/quickstart_index.html" target="_blank">快速教程</a>系列。</li>
+    <li>完成<a href="#tut2">组装简单机器人</a>和<a href="#tut4">添加传感器和相机</a>教程。</li>
+</ul>
+<p><strong>参考 USD</strong></p>
+<ul>
+    <li>未装配叉车：<code>Isaac Sim/Samples/Rigging/Forklift/forklift_b_unrigged_cm.usd</code></li>
+    <li>已装配叉车：<code>Isaac Sim/Samples/Rigging/Forklift/forklift_b_rigged_cm.usd</code></li>
+</ul>
+
+<h3>识别关节</h3>
+<p>叉车总共有 7 个自由度（DOF）：</p>
+<ul>
+    <li>前部四个较小的滚轮：它们有未驱动的旋转关节，每个有一个绕单轴旋转的自由度。</li>
+    <li>叉架相对于叉车主车身有线性运动（上下移动以拾取堆叠在托盘上的物体），这意味着叉架和车身之间有一个驱动的移动关节。</li>
+    <li>后部的大轮负责推动叉车并使其转向。有两个与此轮相关的驱动关节：
+        <ul>
+            <li>一个旋转关节使车轮绕其中心轴旋转，提供前后运动。</li>
+            <li>后轮底座和叉车车身之间的旋转关节，提供转向的枢轴。</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>组织层次结构</h3>
+<p>打开 Content Browser 中的未装配叉车资产：<code>Isaac Sim/Samples/Rigging/Forklift/forklift_b_unrigged_cm.usd</code>。</p>
+<p>所有作为父 prim 子级的网格在父 prim 移动时预期一起移动。例如，贴纸和链条是叉车车身的一部分，无论车身由多少螺钉或块组成，整个车身都可以被视为该机器人的单个链接。将它们全部组织在单个父 'body' prim 下。</p>
+<p>为叉车组织 prims：</p>
+<ol>
+    <li>创建两个 XForms，命名为 <code>body</code> 和 <code>lift</code>。</li>
+    <li>将组成叉车车身的所有网格移动到 <code>body</code> Xform 下，操作室网格移动到 <code>lift</code> Xform 下。</li>
+    <li>为 <code>back wheel</code>、<code>back wheel swivel</code> 创建新的 Xforms，为每个前滚轮支撑创建单独的 prims。</li>
+    <li>为四个前滚轮创建新的 Xforms。命名为 <code>roller_front_left</code>、<code>roller_front_right</code>、<code>roller_back_left</code> 和 <code>roller_back_right</code>。</li>
+    <li>确保所有上述 Xforms 都通过点击 <strong>Add > Physics > Rigid Body</strong> 设置为刚体。</li>
+    <li>对于每个车轮，选择网格，在其属性标签下的 <strong>Transform</strong> 中，有两个组件 <code>Translate</code> 和 <code>Translate:pivot</code>。新创建的 Xform 的变换必须是这两个组件的总和。</li>
+    <li>车轮网格的 <code>Translate</code> 需要设置为相应网格的 <code>Translate:pivot</code> 属性的负值。</li>
+    <li>将相应的网格移动到 XForm 下。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_4.5_full_tut_gui_rig_forklift_2.png" alt="叉车层次结构">
+<div class="img-caption">叉车层次结构组织</div>
+
+<h3>分配碰撞网格</h3>
+<p>要确保为网格正确设置碰撞属性。如果没有设置碰撞属性，那么当机器人移动时，它可能会根据关节配置发生自穿。</p>
+<p>车身和提升架的正确碰撞网格已为提供的 USD 设置好，因此您不需要手动设置它们。</p>
+<p>对于车轮，碰撞近似方法略有不同：使用圆柱体来近似碰撞网格，以避免运动颠簸。</p>
+<ol>
+    <li>转到 <strong>Create > Shape > Cylinder</strong>。</li>
+    <li>将缩放设置为 <code>X=0.16, Y=0.16, Z=0.08</code>，沿 <code>Y=90</code> 定向。</li>
+    <li>右键点击并创建此圆柱体的四个副本，每个对应一个前滚轮。</li>
+    <li>将圆柱体拖到相应车轮的 Xform 下，并将所有轴的变换更改为 <code>0</code>。</li>
+    <li>右键点击圆柱体并 <strong>Add > Physics > Collider</strong>。</li>
+    <li>对后轮执行相同过程，将圆柱体缩放修改为 <code>X=0.3, Y=0.3, Z=0.1</code>，沿 <code>Y=90</code> 定向。</li>
+</ol>
+
+<h3>添加关节和驱动</h3>
+
+<h4>移动关节（Prismatic Joint）</h4>
+<ol>
+    <li>选择 <code>lift</code> Xform，按住 <strong>Ctrl</strong> 键选择 <code>body</code> Xform。右键点击 <strong>Create > Physics > Joints > Prismatic Joint</strong>。</li>
+    <li>找到新创建的移动关节，选择它。在属性标签中，将轴设置为 <strong>Z</strong> 轴。</li>
+    <li>在 <strong>Property > Physics > Prismatic Joint</strong> 标签中设置下限和上限，暂时设置为 <code>-15</code> 和 <code>200</code>。</li>
+    <li>左键点击关节，选择 <strong>Add > Physics > Linear Drive</strong> 添加线性驱动。</li>
+    <li>在 <strong>Property > Physics > Drive > Linear</strong> 标签中，设置目标位置为 <code>-15</code>，阻尼为 <code>10000</code>，刚度为 <code>100000</code>。</li>
+    <li>右键点击场景创建 Scope，命名为 <code>lift_joint</code>。将移动关节拖到 scope 下。</li>
+</ol>
+
+<h4>旋转关节（Revolute Joints）</h4>
+<p>对于所有滚轮支撑车轮，创建旋转关节：</p>
+<ol>
+    <li>选择 <code>body</code> XForm，按住 <strong>Ctrl</strong> 键选择任何滚轮车轮 XForms。右键点击 <strong>Create > Physics > Joint > Revolute Joint</strong>。</li>
+    <li>确保关节位置与车轮的旋转轴匹配，并将旋转轴设置为 "X"。</li>
+    <li>对其余三个滚轮支撑执行相同操作。</li>
+    <li>创建 Scope 命名为 <code>roller_joints</code>，将滚轮关节拖到 scope 下。</li>
+</ol>
+<p>接下来，添加最后两个关节，负责驱动和转向叉车：</p>
+<ol>
+    <li>选择 <code>back_wheel_swivel</code> 和 <code>back_wheel</code> XForms，在它们之间添加旋转关节。关节位置必须与后轮中心匹配。</li>
+    <li>添加角驱动：Damping=10000, stiffness=100。</li>
+    <li>选择 <code>body</code> 和 <code>back_wheel_swivel</code> XForm，在它们之间添加旋转关节。确保旋转轴设置为 <code>Z</code>。</li>
+    <li>将关节轴更改为 Z 轴，下限和上限为 <code>-60</code> 和 <code>60</code>（这是轮底座旋转的角度范围，以度为单位）。</li>
+    <li>添加角驱动：Damping = 100, stiffness = 100000。</li>
+    <li>转到 <strong>Create > Scope</strong>，命名为 <code>back_wheel_joints</code>，将后轮关节拖到 scope 下。</li>
+    <li>在按 <strong>Play</strong> 之前，记得添加 Physics Scene 和 Ground Plane。</li>
+</ol>
+
+<h3>添加关节链（Articulation）</h3>
+<p>最后一步是向叉车添加关节链，并将所有关节放入单个关节链中。右键点击 'SMV_Forklift_B01_01' Xform 并 <strong>Add > Physics > Articulation Root</strong>。在属性中，取消勾选 <strong>Self collision</strong>。</p>
+
+<h3>总结</h3>
+<p>在本教程中，您将一个未装配的叉车 USD 资产进行了：组织结构、添加碰撞、关节和驱动，将其转换为可通过 Isaac Sim 命令移动和驱动的叉车。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 6 ==================== -->
+<div class="tutorial-section" id="tut6">
+<div class="tutorial-header">
+    <h2>第6课：设置机械臂 <span class="level-badge level-intermediate">中级</span></h2>
+    <p>从 URDF 文件导入 UR10e 机器人和 Robotiq 2F-140 夹爪，并将它们连接在一起</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>这是四课机械臂系列的第一课。本教程展示如何从 Universal Robots 导入 UR10e 机器人和 Robotiq 的 2F-140 夹爪到 NVIDIA Isaac Sim，并将它们连接在一个关节链下。<em>30 分钟教程</em></p>
+
+<h3>前提条件</h3>
+<ul>
+    <li>如果您是 NVIDIA Isaac Sim 新手，在开始本教程之前完成<a href="#tut1">轮式机器人设置教程</a>。</li>
+    <li>查看 <a href="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_ros.html" target="_blank">ROS 2 安装</a>。</li>
+    <li>查看 <a href="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/importer_exporter/ext_isaacsim_asset_importer_urdf.html" target="_blank">URDF 导入器扩展</a>教程。</li>
+    <li>在 ROS sourced 终端中，使用以下命令安装 xacro（仅 Linux）：<code>sudo apt install ros-$ROS_DISTRO-xacro</code></li>
+</ul>
+
+<h3>构建和安装 UR 描述包（仅 Linux）</h3>
+<p>Isaac Sim 5.1 需要 Python 3.11，ROS 2 UR 描述包不原生支持，因此我们需要从源代码构建包。</p>
+
+<h4>克隆 UR 描述包</h4>
+<ol>
+    <li>从 <a href="https://github.com/UniversalRobots/Universal_Robots_ROS2_Description" target="_blank">Universal Robots ROS 2 Description 仓库</a>克隆 UR 描述包。
+        <pre><code>git clone https://github.com/UniversalRobots/Universal_Robots_ROS2_Description.git</code></pre>
+    </li>
+    <li>切换到与您的 ROS 发行版匹配的分支。
+        <pre><code>git checkout humble  # ROS 2 Humble
+git checkout jazzy   # ROS 2 Jazzy</code></pre>
+    </li>
+    <li>将仓库复制到您的 Isaac Sim ROS Workspace <code>src</code> 文件夹。</li>
+</ol>
+
+<h4>使用 Python 3.11 构建 UR 描述包</h4>
+<ol>
+    <li>转到 Isaac Sim ROS Workspace，运行以下命令使用 Python 3.11 构建 UR 描述包：
+        <pre><code>./build_ros.sh</code></pre>
+    </li>
+    <li>Source Python 3.11 ROS 环境并启动 Isaac Sim：
+        <pre><code>source build_ws/&lt;ROS distro&gt;/&lt;ROS distro&gt;_ws/install/local_setup.bash
+source build_ws/&lt;ROS distro&gt;/isaac_sim_ros_ws/install/local_setup.bash
+./path/to/isaac-sim.sh</code></pre>
+    </li>
+</ol>
+
+<h3>导入 UR10e 机器人（仅 Linux）</h3>
+
+<h4>启用 ROS 2 Robot Description URDF Importer Extension</h4>
+<ol>
+    <li>转到 <code>Window > Extensions</code>。</li>
+    <li>在搜索框中输入 <code>URDF</code>，找到 <code>ROS 2 Robot Description URDF Importer Extension</code>。</li>
+    <li>如果找不到，从搜索框中移除 <code>@feature</code> 过滤器。</li>
+    <li>如果仍然找不到，确保 Isaac Sim 是从 ROS sourced 的同一终端启动的。</li>
+    <li>点击标记为 <code>ENABLE</code> 的切换按钮启用扩展。</li>
+    <li>勾选 <code>AUTOLOAD</code> 复选框。</li>
+</ol>
+
+<h4>启动 URDF 发布者 Topic</h4>
+<ol>
+    <li>在系统 ROS sourced 终端中，启动 UR10e 描述：
+        <pre><code>ros2 launch ur_description view_ur.launch.py ur_type:=ur10e</code></pre>
+    </li>
+    <li>设置另一个终端用于 <code>rqt_graph</code>：<code>rqt_graph</code></li>
+</ol>
+
+<h4>将 UR10e 机器人导入 Isaac Sim</h4>
+<ol>
+    <li>转到 Isaac Sim。</li>
+    <li>导航到 <strong>File > Import from the ROS 2 URDF Node</strong>。
+        <ul>
+            <li>在 <strong>Node</strong> 字段中，输入 <code>robot_state_publisher</code>，点击 <strong>Refresh</strong>。</li>
+            <li>在 <strong>Model</strong> 字段中，选择所需输出（例如 <code>~/Desktop</code>）。</li>
+            <li>选择 <strong>Natural Frequency</strong> 进行关节配置。</li>
+            <li>选择下面列出的所有关节，然后将 <strong>Natural Frequency</strong> 设置为 <code>300</code>。</li>
+        </ul>
+    </li>
+    <li>点击 <strong>Import</strong>。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_ur10_importer.png" alt="UR10e导入">
+<div class="img-caption">UR10e 导入设置</div>
+
+<h3>导入 Robotiq 2F-140 夹爪（仅 Linux）</h3>
+
+<h4>将 XACRO 转换为 URDF</h4>
+<ol>
+    <li>从 <a href="https://github.com/ros-industrial-attic/robotiq/tree/kinetic-devel" target="_blank">ros-industrial-attic</a> 下载仓库。
+        <pre><code>git clone https://github.com/ros-industrial-attic/robotiq.git</code></pre>
+    </li>
+    <li>导航到 <code>robotiq/robotiq_2f_140_gripper_visualization/urdf</code> 文件夹，修改 xacro 文件中的路径引用为相对路径。</li>
+    <li>将 xacro 文件转换为 URDF 格式：
+        <pre><code>xacro robotiq_arg2f_140_model.xacro > robotiq_2f_140.urdf</code></pre>
+    </li>
+</ol>
+
+<h4>将 Robotiq 2F-140 夹爪导入 Isaac Sim</h4>
+<ol>
+    <li>转到 Isaac Sim，创建新场景：<strong>File > New</strong>。</li>
+    <li>导航到 <strong>File > Import</strong>。</li>
+    <li>选择 <code>robotiq_2f_140.urdf</code> 文件。</li>
+    <li>在导入设置中：
+        <ul>
+            <li>对于 <code>finger_joint</code>，设置 Natural Frequency 为 <code>300</code>。</li>
+            <li>对于其他 target 为 <code>Mimic</code> 的关节，设置 Natural Frequency 为 <code>2500</code>。</li>
+        </ul>
+    </li>
+    <li>点击 <code>Import</code> 完成过程。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_robotiq_importer.png" alt="夹爪导入">
+<div class="img-caption">Robotiq 2F-140 夹爪导入设置</div>
+
+<h3>连接 UR10e 机器人和 Robotiq 2F-140 夹爪</h3>
+<p>本节概述两种连接方法：</p>
+<ul>
+    <li><strong>选项 1</strong>：使用固定关节和共享关节链直接连接夹爪。</li>
+    <li><strong>选项 2</strong>：使用 Robot Assembler 和 Variant 连接末端执行器。</li>
+</ul>
+
+<h4>选项 1：使用 GUI 连接</h4>
+<ol>
+    <li>打开 UR10e USD 文件（<code>ur.usd</code>）。</li>
+    <li>将 <code>robotiq_2f_140.usd</code> 文件拖放到场景中。</li>
+    <li>将 <code>robotiq_2f_140.usd</code> prim 重命名为 <code>ee_link</code>。</li>
+    <li>将 <code>ee_link</code> xform 设置为 <code>wrist_3_link</code> 的位置和方向：
+        <ul>
+            <li>Translate: (1.18425, 0.2907, 0.06085)</li>
+            <li>Orient: (-90, 0, -90)</li>
+        </ul>
+    </li>
+    <li>选择 <code>ee_link/root_joint</code>。</li>
+    <li>在 Property Editor 的 <code>Physics Articulation Root</code> 部分，移除 <code>Articulation Root</code>。</li>
+    <li>在 <code>Joints</code> 部分，设置 <code>Body0</code> 为 <code>/ur/wrist_3_link</code>。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_connect_gripper_manual.png" alt="手动连接">
+<div class="img-caption">手动连接夹爪到机械臂</div>
+
+<h4>选项 2：使用 Robot Assembler 连接</h4>
+<ol>
+    <li>打开 UR10e USD 文件（<code>ur.usd</code>）。</li>
+    <li>将 <code>robotiq_2f_140.usd</code> 文件拖放到场景中。</li>
+    <li>将 <code>robotiq_2f_140</code> prim 重命名为 <code>ee_link</code>。</li>
+    <li>打开 Robot Assembler：<strong>Tools > Robotics > Asset Editor > Robot Assembler</strong>。
+        <ul>
+            <li>在 <strong>Base Robot</strong> 中，设置 <strong>Select Base Robot</strong> 为 <code>/ur</code>，<strong>Attach Point</strong> 为 <code>wrist_3_link</code>。</li>
+            <li>在 <strong>Attach Robot</strong> 中，设置 <strong>Select Attach Robot</strong> 为 <code>/ur/ee_link</code>，<strong>Attach Point</strong> 为 <code>robotiq_arg2f_base_link</code>。</li>
+            <li>设置 <strong>Assembly Namespace</strong> 为 <code>ee_link</code>。</li>
+        </ul>
+    </li>
+    <li>点击 <strong>Begin Assembling Process</strong>。</li>
+    <li>调整附着点方向，点击 <strong>Z +90</strong> 将夹爪绕 z 轴旋转 90 度。</li>
+    <li>点击 <strong>Assemble and Simulate</strong> 测试。</li>
+    <li>点击 <strong>End Simulation And Finish</strong> 完成。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_connect_gripper_assembler.png" alt="Robot Assembler">
+<div class="img-caption">使用 Robot Assembler 连接</div>
+
+<h4>运行仿真</h4>
+<ol>
+    <li>在 Stage 面板中，选择 <strong>ur</strong> prim。</li>
+    <li>在右下角的 Property Editor 中，找到 <strong>Variants</strong> 部分。</li>
+    <li>在 <strong>ee_link</strong> 旁边，选择 <strong>None</strong> 将夹爪从机器人上移除。</li>
+    <li>选择 <strong>robotiq_2f_140</strong> 将夹爪添加到机器人上。</li>
+    <li>保存资产：<strong>File > Save</strong> 或按 <strong>Ctrl+S</strong>。</li>
+</ol>
+
+<h3>总结</h3>
+<p>在本教程中，您将 Universal Robots 的 UR10e 机器人和 Robotiq 的 2F-140 夹爪从 URDF 文件导入到 NVIDIA Isaac Sim，并使用 GUI 和 Robot Assembler 将它们连接在一个关节链下。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 7 ==================== -->
+<div class="tutorial-section" id="tut7">
+<div class="tutorial-header">
+    <h2>第7课：配置机械臂 <span class="level-badge level-intermediate">中级</span></h2>
+    <p>学习配置物理、关节力限制和增益</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>这是四课机械臂系列的第二课。本教程展示如何配置 Universal Robots 的 UR10e 机器人和 Robotiq 的 2F-140 夹爪的物理、关节力限制和增益。<em>30 分钟教程</em></p>
+
+<h3>前提条件</h3>
+<ul><li>在开始本教程之前，查看 <a href="#tut6">第6课：设置机械臂</a>。</li></ul>
+
+<div class="note">
+    <strong>注意：</strong>如果未完成前面的教程，可以在 Content Browser 的 <code>Isaac Sim/Samples/Rigging/Manipulator/Import_Manipulator/ur10e/ur/ur_gripper.usd</code> 找到预构建资产。
+</div>
+
+<h3>为操作任务调整关节链</h3>
+<p>调整 UR10e 机器人的关节链，使其更稳定和精确。打开 UR10e 机器人的物理层（位于 <code>configuration</code> 文件夹中，后缀为 <code>_physics</code>）。</p>
+<ol>
+    <li>在 Stage 面板中，选择 <strong>ur/root_joint</strong> prim。</li>
+    <li>在右下角的 Property Editor 中，向下滚动到 <strong>Physics/Articulation</strong> 部分。</li>
+    <li>选择 <strong>Articulation Enabled</strong>。</li>
+    <li>将 <strong>Solver Position Iterations Count</strong> 增加到 <code>64</code>。</li>
+    <li>将 <strong>Solver Velocity Iterations Count</strong> 增加到 <code>4</code>。</li>
+    <li>将 <strong>Sleep Threshold</strong> 降低到 <code>0.00005</code>。</li>
+    <li>将 <strong>Stabilization Threshold</strong> 降低到 <code>0.00001</code>。</li>
+    <li>按 <strong>Ctrl + S</strong> 保存更改。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_articulation_properties.png" alt="关节链属性">
+<div class="img-caption">关节链属性设置</div>
+
+<h3>添加物理材质</h3>
+<ol>
+    <li>打开 2F-140 夹爪的物理层（后缀为 <code>_physics</code>）。</li>
+    <li>右键点击 <strong>robotiq_arg2f_140_model</strong> prim，选择 <strong>Create > Physics > Physics Material</strong>，选择 <strong>Rigid Body Material</strong>。</li>
+    <li>将物理材质拖到 <strong>robotiq_arg2f_140_model/Looks</strong> 文件夹。</li>
+    <li>在属性面板中，设置 <strong>static friction</strong> 为 <strong>1.0</strong>，<strong>dynamic friction</strong> 为 <strong>1.0</strong>。</li>
+    <li>将物理材质应用到夹爪指尖。选择 <code>colliders/left_inner_finger/mesh_1/box</code>，在属性面板中选择创建的物理材质。</li>
+    <li>对 <code>colliders/right_inner_finger/mesh_1/box</code> prim 重复相同过程。</li>
+</ol>
+
+<h3>配置关节力限制</h3>
+<ol>
+    <li>在 Stage 面板中，选择 <code>robotiq_arg2f_140_model/joints/finger_joint</code> prim。</li>
+    <li>在 Property Editor 中，向下滚动到 <code>Drive/Angular/Max Force</code> 部分。</li>
+    <li>将 <strong>Max Force</strong> 设置为 <code>200</code>。</li>
+    <li>按 <strong>Ctrl + S</strong> 保存更改。</li>
+</ol>
+
+<h3>检查机器人关节链</h3>
+<ol>
+    <li>打开 <strong>Physics Inspector</strong>：<strong>Tools > Physics > Physics Inspector</strong>。</li>
+    <li>选择场景中的 UR 关节链，点击圆形箭头图标刷新关节链。</li>
+    <li>尝试用蓝色滑块更改目标位置，验证 DOF 位置达到指定目标。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_physics_inspector.png" alt="Physics Inspector">
+<div class="img-caption">Physics Inspector 检查关节链</div>
+
+<h3>使用 Gain Tuner 调节增益</h3>
+<p>使用 Gain Tuner 扩展验证 UR 机器人和夹爪手指的增益。要临界阻尼机器人增益，设置 <code>Nat. Freq.</code> 为 <code>0.5</code>，<code>Damping Ratio</code> 为 <code>1.0</code>。</p>
+<ol>
+    <li>转到 <strong>Tools > Robotics > Asset Editors > Gain Tuner</strong>。</li>
+    <li>在 <strong>Gain Tuner</strong> 窗口的 <strong>Select Robot</strong> 下拉列表中，选择场景中的 <strong>ur</strong> 关节链。</li>
+    <li>在 <strong>Tune Gains</strong> 面板中，调整机器人和夹爪手指关节的增益。使用 <strong>Test Gains Settings</strong> 面板进行测试。</li>
+</ol>
+
+<div class="tip">
+    <strong>提示：</strong>如果难以调节整个机器人的增益，建议先确定一小部分关节的增益。
+    <ul>
+        <li>如果结果图显示机器人未达到目标位置，可以稍微增加 <code>Nat. Freq.</code>。</li>
+        <li>如果结果图显示机器人超过目标位置，可以稍微降低 <code>Nat. Freq.</code> 并增加 <code>Damping Ratio</code>。</li>
+        <li>禁用重力可以帮助更清晰地看到增益效果。</li>
+    </ul>
+</div>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_gain_tuner_ur10e.png" alt="Gain Tuner">
+<div class="img-caption">Gain Tuner 界面</div>
+
+<h3>总结</h3>
+<p>在本教程中，您学习了如何使用 Gain Tuner 配置 UR10e 机器人和 Robotiq 2F-140 夹爪的物理、关节力限制和增益。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 8 ==================== -->
+<div class="tutorial-section" id="tut8">
+<div class="tutorial-header">
+    <h2>第8课：生成机器人配置文件 <span class="level-badge level-intermediate">中级</span></h2>
+    <p>学习生成 UR10e 机器人和 2F-140 夹爪的机器人配置文件</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>这是四课机械臂系列的第三课。本教程展示如何为 UR10e 机器人和 2F-140 夹爪生成机器人配置文件。这些机器人配置文件提供有关机器人运动学、动力学和其他属性的信息，用于 RMPFlow、CuMotion 和 Lula 运动学求解器。<em>30 分钟教程</em></p>
+
+<h3>生成机器人 URDF</h3>
+
+<h4>启用 USD to URDF Exporter Extension</h4>
+<ol>
+    <li>转到 <strong>Window > Extensions</strong>。</li>
+    <li>输入 <strong>URDF</strong> 搜索，找到 <strong>Isaac Sim USD to URDF Exporter Extension</strong>。</li>
+    <li>点击 <strong>ENABLE</strong> 启用，勾选 <strong>AUTOLOAD</strong>。</li>
+</ol>
+
+<h4>导出 URDF 文件</h4>
+<ol>
+    <li>打开 <code>ur_gripper.usd</code> 资产。</li>
+    <li>点击 <strong>File > Export URDF</strong>。</li>
+    <li>将文件名保存为 <code>ur_gripper.urdf</code>。</li>
+    <li>选择 <strong>Mesh Directory Path</strong> 保存 URDF 网格。</li>
+    <li>点击 <strong>Export</strong>。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_export_urdf.png" alt="导出URDF">
+<div class="img-caption">导出 URDF 文件设置</div>
+
+<h3>生成 Lula 机器人描述文件和碰撞球</h3>
+
+<h4>启用 Lula Extension</h4>
+<ol>
+    <li>转到 <strong>Window > Extensions</strong>，搜索 <strong>Lula</strong>，启用 <strong>Isaac Sim Lula</strong> Extension。</li>
+</ol>
+
+<h4>准备机器人资产</h4>
+<p>Lula 机器人描述编辑器不支持可实例化网格。必须取消勾选所有 <code>visuals</code> 和 <code>collisions</code> prims 的 <strong>Instantiable</strong> 字段。</p>
+
+<h4>在 Lula 机器人描述编辑器中配置关节</h4>
+<ol>
+    <li>按 <strong>PLAY</strong> 开始仿真。</li>
+    <li>点击 <strong>Tools > Robotics > Lula Robot Description Editor</strong>。</li>
+    <li>在 <strong>Selection Panel</strong> 中，选择 <strong>ur</strong> 关节链。</li>
+    <li>向下滚动到 <strong>Set Joint Properties</strong> 部分。</li>
+    <li>对于每个 Universal Robots 关节，将 <strong>Joint Status</strong> 设置为 <strong>Active Joint</strong>。</li>
+    <li>将 Robotiq 2F-140 夹爪关节保持为 <strong>Fixed Joint</strong>。</li>
+</ol>
+
+<div class="warning">
+    <strong>重要：</strong><strong>不要停止仿真</strong>，您需要它来生成碰撞球。
+</div>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_lula_robot_description_editor.png" alt="Lula编辑器">
+<div class="img-caption">Lula 机器人描述编辑器</div>
+
+<h4>生成碰撞球</h4>
+<ol>
+    <li>转到 <strong>Link Sphere editor</strong> 部分。</li>
+    <li>在 <strong>Selection Panel/Select link</strong> 中选择链接（例如 <strong>upper_arm_link</strong>）。</li>
+    <li>在 <strong>Link Sphere editor/Generate Spheres/Select Mesh</strong> 下拉菜单中选择网格。</li>
+    <li>设置 <strong>Radius Offset</strong> 为 <code>0.03</code>。</li>
+    <li>设置 <strong>Number of Spheres</strong> 为 <code>8</code>。</li>
+    <li>点击 <strong>Generate Spheres</strong>，球体将变为青色表示已生成。</li>
+    <li>对 <strong>ur</strong> 关节链中的所有其他链接重复相同步骤。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_lula_link_sphere_editor.png" alt="碰撞球编辑器">
+<div class="img-caption">Link Sphere Editor 生成碰撞球</div>
+
+<h4>导出 Lula 机器人描述文件</h4>
+<ol>
+    <li>在 <strong>Lula Robot Description Editor</strong> 中，找到 <strong>Export To File</strong> 部分。</li>
+    <li>展开 <strong>Export to Lula Robot Description File</strong>，点击文件图标，指定文件名为 <code>ur10e.yaml</code>。</li>
+    <li>点击 <strong>Save</strong> 导出。</li>
+    <li>也可以通过 <strong>Export To File > Export to cuMotion XRDF</strong> 导出 cuMotion XRDF 文件，指定文件名为 <code>ur10e.xrdf</code>。</li>
+    <li>导出后停止仿真。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_lula_export_robot_description_file.png" alt="导出机器人描述文件">
+<div class="img-caption">导出 Lula 机器人描述文件</div>
+
+<h3>总结</h3>
+<p>在本教程中，您学习了如何使用 Lula Robot Description and XRDF Editor 和 USD to URDF Exporter Extension 为 UR10e 机器人和 2F-140 夹爪生成机器人配置文件。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 9 ==================== -->
+<div class="tutorial-section" id="tut9">
+<div class="tutorial-header">
+    <h2>第9课：抓取放置示例 <span class="level-badge level-intermediate">中级</span></h2>
+    <p>学习使用 UR10e 机器人和 2F-140 夹爪跟随目标并抓取方块</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>这是四课机械臂系列的最后一课。本教程将一切整合在一起，展示如何使用 UR10e 机器人和 2F-140 夹爪跟随目标并抓取方块。我们将使用 Lula 运动学求解器跟随目标，使用 RMPFlow 抓取方块。<em>30 分钟教程</em></p>
+
+<h3>前提条件</h3>
+<ul><li>在开始本教程之前，查看 <a href="#tut8">第8课：生成机器人配置文件</a>。</li></ul>
+
+<h3>夹爪控制示例</h3>
+<p>以下脚本使用 <code>Parallel Gripper</code> 类控制夹爪关节，使用 <code>Manipulator</code> 类控制机器人关节。步骤 0 到 400 缓慢关闭夹爪。步骤 400 到 800，缓慢打开夹爪，然后重置夹爪位置为 0。</p>
+
+<pre><code>from isaacsim import SimulationApp
+simulation_app = SimulationApp({"headless": False})
+
+import numpy as np
+from isaacsim.core.api import World
+from isaacsim.core.utils.stage import add_reference_to_stage
+from isaacsim.core.utils.types import ArticulationAction
+from isaacsim.robot.manipulators import SingleManipulator
+from isaacsim.robot.manipulators.grippers import ParallelGripper
+from isaacsim.storage.native import get_assets_root_path
+
+my_world = World(stage_units_in_meters=1.0)
+assets_root_path = get_assets_root_path()
+asset_path = assets_root_path + "/Isaac/Samples/Rigging/Manipulator/configure_manipulator/ur10e/ur/ur_gripper.usd"
+add_reference_to_stage(usd_path=asset_path, prim_path="/ur")
+
+gripper = ParallelGripper(
+    end_effector_prim_path="/ur/ee_link/robotiq_arg2f_base_link",
+    joint_prim_names=["finger_joint"],
+    joint_opened_positions=np.array([0]),
+    joint_closed_positions=np.array([40]),
+    action_deltas=np.array([-40]),
+    use_mimic_joints=True,
+)
+
+my_ur10 = my_world.scene.add(
+    SingleManipulator(
+        prim_path="/ur", name="ur10_robot",
+        end_effector_prim_path="/ur/ee_link/robotiq_arg2f_base_link",
+        gripper=gripper,
+    )
+)
+my_world.scene.add_default_ground_plane()
+my_world.reset()
+
+i = 0
+while simulation_app.is_running():
+    my_world.step(render=True)
+    if my_world.is_playing():
+        i += 1
+        gripper_positions = my_ur10.gripper.get_joint_positions()
+        if i &lt; 400:
+            my_ur10.gripper.apply_action(ArticulationAction(joint_positions=[gripper_positions[0] + 0.1]))
+        if i &gt; 400:
+            my_ur10.gripper.apply_action(ArticulationAction(joint_positions=[gripper_positions[0] - 0.1]))
+        if i == 800:
+            i = 0
+simulation_app.close()</code></pre>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_ur10e_gripper_control.webp" alt="夹爪控制">
+<div class="img-caption">夹爪控制示例</div>
+
+<h3>使用 Lula 运动学求解器跟随目标</h3>
+<p>创建使用 Lula 运动学求解器的跟随目标任务，您可以使用立方体指定目标位置，机器人将使其末端执行器移动到目标位置。</p>
+<p>运行脚本：<code>./python.sh standalone_examples/api/isaacsim.robot.manipulators/ur10e/follow_target_example.py</code></p>
+<p>将立方体移动到目标位置并运行脚本，查看机器人将其末端执行器移动到目标位置。</p>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_ur10e_follow_target.webp" alt="跟随目标">
+<div class="img-caption">使用 Lula IK 的跟随目标示例</div>
+
+<h3>RMPFlow 配置</h3>
+<p>使用 RMPFlow 控制末端执行器。<code>ur10e_rmpflow_common.yaml</code> 文件指定 RMPFlow 控制器的各种参数，包括关节限制缓冲、cspace 目标 RMP、碰撞 RMP 等。</p>
+
+<h3>使用 RMPFlow 的跟随目标示例</h3>
+<p>创建 RMPFlow 控制器将机器人末端执行器移动到目标位置。</p>
+<p>运行脚本：<code>./python.sh standalone_examples/api/isaacsim.robot.manipulators/ur10e/follow_target_example_rmpflow.py</code></p>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_ur10e_follow_target_rmp.webp" alt="RMPFlow跟随目标">
+<div class="img-caption">使用 RMPFlow 的跟随目标示例</div>
+
+<h3>总结</h3>
+<p>在本教程中，您学习了如何使用夹爪控制、Lula 运动学求解器和 RMPFlow 来控制 UR10e 机器人执行跟随目标和抓取放置任务。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 10 ==================== -->
+<div class="tutorial-section" id="tut10">
+<div class="tutorial-header">
+    <h2>第10课：装配闭环结构 <span class="level-badge level-advanced">高级</span></h2>
+    <p>学习使用 USD 层编辑资产、打破闭环关节链、添加 Mimic 关节等技术</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>在本教程中，您将：</p>
+<ul>
+    <li>使用 USD 层编辑和测试资产</li>
+    <li>在 CAD 导入后添加材质和调整关节</li>
+    <li>打破闭环关节链</li>
+    <li>添加关节驱动，包括 Mimic 关节</li>
+    <li>调整碰撞形状</li>
+    <li>使用 Gripper Controller Omnigraph 测试夹爪</li>
+</ul>
+<p><em>30 分钟教程</em></p>
+
+<h3>入门</h3>
+<p>从 Robotiq 2F-85 并联夹爪的 STP 文件开始，该文件已导入到 Onshape 文档中并建模了关节。</p>
+<p>参考 USD 位于 <code>Samples/Rigging/Gripper/Robotiq 2F-85</code>。</p>
+
+<h3>使用层编辑和测试资产</h3>
+<p>所有刚体、质量和关节定义都在 Onshape 中完成。导入到 Isaac Sim 后，资产包含基本关节信息和刚体设置。</p>
+<p>使用<strong>层（Layers）</strong>编辑资产。层允许在根资产之上构建场景并保存它，而不更改底层根层资产。</p>
+<ol>
+    <li>创建一个没有引用的新场景。</li>
+    <li>将此场景保存为 <code>Robotiq_2F_85_config.usd</code>，与导入资产在同一文件夹。</li>
+    <li>打开层标签，将 <code>Robotiq_2F_85_edit.usd</code> 拖到 <strong>Root Layer</strong> 中。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isaac_robotiq_layer.png" alt="层管理">
+<div class="img-caption">USD 层管理</div>
+
+<h3>导入后调整关节</h3>
+<p>有时 Onshape Client API 的限制会导致关节从图纸翻转 180 度。要修复此问题，选择翻转的关节，在 Rotation 0 和 Rotation 1 X 轴上应用相等的 180 度偏移。</p>
+<p>关节 <code>[left, right]_outer_finger_joint</code> 需要限制 [0,180]，<code>[finger_joint, right_outer_knuckle_joint]</code> 需要限制 [0, 75]。</p>
+<p>添加指尖物理材质以增加摩擦接触：</p>
+<ol>
+    <li>打开菜单 <strong>Create > Physics > Physics Material</strong>。</li>
+    <li>选择 <strong>Rigid Body Material</strong>，重命名为 <code>fingertip_material</code>。</li>
+    <li>将两个摩擦系数设置为 0.8，摩擦 <strong>Combine Mode</strong> 设为 <code>Max</code>。</li>
+    <li>选择 <code>right_inner_finger</code> 和 <code>left_inner_finger</code>，应用创建的材质。</li>
+</ol>
+
+<h3>打破关节链循环</h3>
+<p>如果现在尝试仿真此资产，您会在屏幕上看到两个大警告，因为关节链必须是运动学树，但不需要删除任何关节。</p>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isaac_robotiq_loop_error.png" alt="循环错误">
+<div class="img-caption">关节链循环错误警告</div>
+
+<p>要消除这些警告，必须选择一个关节从关节链中排除，使其被视为最大坐标关节。对于此夹爪，最好的选择是移除连接内部连杆到夹爪主体的关节——<code>inner_knuckle_joint</code>。</p>
+<ol>
+    <li>选择 <code>left_inner_knuckle_joint</code> prim。</li>
+    <li>在 Physics 下的 Joint 部分，选择 <strong>Exclude From Articulation</strong>。</li>
+    <li>对 <code>right_inner_knuckle_joint</code> 重复此操作。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isaac_robotiq_loop.png" alt="打破循环">
+<div class="img-caption">排除关节以打破循环</div>
+
+<h3>添加关节驱动</h3>
+<p>为所有关节添加关节驱动 API：</p>
+<ol>
+    <li>选择所有关节，在 Properties 面板中 <strong>Add > Physics > Angular Drive</strong>（或移动关节用 <strong>Linear Drive</strong>）。</li>
+    <li>将此夹爪建模为力驱动抓取。选择 <code>finger_joint</code> 和 <code>right_outer_knuckle_joint</code>，将 <strong>Stiffness</strong> 设为零，<strong>Damping</strong> 设为 5000.0。</li>
+    <li>设置 <code>Max Force</code> 为 180.0 以控制夹爪关闭时施加的压力。</li>
+    <li>在关节部分的 <strong>Advanced</strong> 标签下，设置 <strong>Maximum Joint Velocity</strong> 为 130.0。</li>
+</ol>
+
+<p>总结更改：</p>
+<ul>
+    <li>Maximum Joint Velocity: 130</li>
+    <li>Max Force: 180.0</li>
+    <li>Damping: 5000.0</li>
+    <li>Stiffness: 0.0</li>
+</ul>
+
+<h3>添加 Mimic 关节</h3>
+<p>此夹爪使用单个输入命令同时移动两个手指。这是通过 Mimic Joint 规范将驱动关节组合在一起实现的。</p>
+<ol>
+    <li>选择 <code>right_outer_knuckle_joint</code>。</li>
+    <li>移除或在我们刚添加的关节驱动中将所有值设为零。</li>
+    <li>在 Properties 面板上，点击 <strong>Add > Physics > Mimic Joint</strong>。</li>
+    <li>在 Mimic 设置中，设置 gearing 为 -1.0。</li>
+    <li>设置 Reference Joint 为 <code>finger_joint</code>。</li>
+    <li>再次运行仿真。</li>
+</ol>
+
+<h3>碰撞网格</h3>
+<p>导入时碰撞网格的默认设置是 Convex Hull。对于夹爪，通常希望指尖具有紧密跟随指尖几何轮廓的碰撞网格。将碰撞近似类型更改为 <strong>Convex Decomposition</strong>。</p>
+
+<h3>使用 Gripper Controller Omnigraph 测试</h3>
+<p>创建一个 Omnigraph 来控制夹爪，以便在仿真中测试其功能。使用 <strong>Joint Position</strong> 控制器图来驱动夹爪关节。</p>
+
+<h3>总结</h3>
+<p>在本教程中，您学习了处理闭环结构的技术，包括使用 USD 层、打破关节链循环、添加 Mimic 关节和调整碰撞网格。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 11 ==================== -->
+<div class="tutorial-section" id="tut11">
+<div class="tutorial-header">
+    <h2>第11课：调节关节驱动增益 <span class="level-badge level-advanced">高级</span></h2>
+    <p>学习使用 Gain Tuner 调节机器人关节，使其按预期行为</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>在本教程中，您学习如何使用 Gain Tuner 调节机器人的关节，使其按预期行为。</p>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_ref_gui_gains_tuner_ui.png" alt="Gain Tuner">
+<div class="img-caption">Gain Tuner 概览</div>
+
+<h3>前提条件</h3>
+<ul>
+    <li>如果机器人是 URDF 格式，按照 <a href="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/importer_exporter/import_urdf.html" target="_blank">URDF 导入教程</a>导入。</li>
+    <li>Gain Tuner 扩展设计用于应用了 Robot Schema 的 USD 资产。</li>
+    <li>建议按照推荐的 <a href="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/robot_setup/asset_structure.html" target="_blank">Asset Structure</a> 设置机器人。</li>
+    <li>转到 <strong>Tools > Robotics > Asset Editors > Gain Tuner</strong> 访问此扩展。</li>
+</ul>
+
+<h3>增益调节</h3>
+<p>调节关节驱动增益是找到平衡稳定性和响应性的最佳值的过程。例如，低阻尼和刚度可能无法克服机器人的惯性，测量值将与目标值偏移；过高的刚度可能导致机器人超调并在目标周围振荡。</p>
+
+<h4>位置驱动</h4>
+<p>对于机器人的每个关节：</p>
+<ol>
+    <li>首先将阻尼设为零，仅调节刚度。这将帮助您在没有微分项影响的情况下建立稳定响应。</li>
+    <li>增加刚度直到关节能够收敛到接近目标位置。</li>
+    <li>将刚度降低一个数量级。</li>
+    <li>设置刚度后，添加比刚度低一个数量级的阻尼。这将是您的参数基线，通常不应超调。如果需要更快的响应，可以进一步降低阻尼。</li>
+    <li>围绕此建立的基线微调两个增益，以实现所需的性能。</li>
+</ol>
+
+<div class="tip">
+    <strong>提示：</strong>要模拟包含重力补偿的控制，选择机器人的所有刚体，在属性面板中勾选 Disable Gravity。
+</div>
+
+<h5>速度限制和工业机器人</h5>
+<p>许多机器人，包括大多数工业机器人，都预调了关节驱动的 PD 控制，可以设置为具有完美的位置控制响应，始终以给定的关节速度限制驱动。要重现此行为，可以将关节刚度从先前的调节启发式增加两倍，并在 <strong>Properties</strong> 面板中的 <strong>Joint > Advanced > Maximum Joint velocity</strong> 定义最大关节速度。</p>
+
+<h4>速度驱动</h4>
+<p>对于机器人的每个关节：</p>
+<ol>
+    <li>将 <strong>Stiffness</strong> 设为零，仅调节阻尼。</li>
+    <li>增加阻尼直到关节能够收敛到接近目标速度。</li>
+    <li>如果机器人可能承载额外负载，稍微增加阻尼（例如增加 10%）以考虑额外负载。</li>
+    <li>可以通过设置最大关节速度或限制最大关节力来限制关节的输出。</li>
+</ol>
+
+<h3>将增益保存到资产</h3>
+<p>根据 NVIDIA Isaac Sim Asset Structure，关节增益属于物理配置，理想情况下应保存在物理配置层上。<strong>Save Gains to Physics Layer</strong> 按钮会在资产的物理层中搜索并应用更新的增益。</p>
+
+<h3>可视化结果</h3>
+<p>测试结果以图表形式可视化，其中跟踪的关节位置和速度与命令轨迹进行比较。在左侧面板中选择要可视化的关节，其各自的测试结果将显示在图表中。</p>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_ref_gui_gains_tuner_plots.png" alt="增益调节结果">
+<div class="img-caption">Gain Tuner 结果图</div>
+
+<h3>提示</h3>
+<ul>
+    <li>合理的目标是找到一组增益，能够斜坡到位置但将超调保持在目标的 1% 以内。</li>
+    <li>如果您的机器人具有内置重力补偿或单独的重力补偿控制器，请禁用重力。</li>
+    <li>将预期一起移动的关节分组，首先单独调节每个组的增益，然后组合它们进行最终测试。</li>
+    <li>降低您正在调节的关节的最大速度（如果在实践中不期望以那么快的速度被命令）。</li>
+</ul>
+
+<h3>总结</h3>
+<p>本教程介绍了如何使用 Gain Tuner 调节位置驱动和速度驱动的关节增益，以及如何将增益保存到资产并可视化结果。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 12 ==================== -->
+<div class="tutorial-section" id="tut12">
+<div class="tutorial-header">
+    <h2>第12课：资产优化 <span class="level-badge level-advanced">高级</span></h2>
+    <p>学习如何使机器人资产更具性能，找到实现更快仿真或渲染时间的权衡</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>本教程详细介绍如何使机器人资产更具性能，以及在哪里可以找到实现更快仿真或渲染时间的权衡。<em>30 分钟教程</em></p>
+
+<h3>入门</h3>
+<p>本教程探索 NVIDIA Jetbot 机器人资产以改进性能。如果从不同来源（例如自定义 CAD）导入资产，每个刚体可能有大量网格，这会严重影响性能。</p>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_asset_optimization_1.webp" alt="Jetbot优化对比">
+<div class="img-caption">Jetbot 优化前后对比：未优化 40 FPS，优化后 64 FPS</div>
+
+<h3>资产结构优化</h3>
+
+<h4>设置重新父子化和层</h4>
+<ol>
+    <li>在 Isaac Sim 中，转到 <strong>Edit > Preferences</strong>。</li>
+    <li>在 <strong>Stage > Authoring</strong> 下，确保勾选 <strong>Inherit Parent Transform</strong>。</li>
+    <li>打开位于 <code>Isaac Sim/Samples/Rigging/Jetbot/Jetbot_Optimized/Jetbot_optimized.usd</code> 的 Jetbot。</li>
+    <li>选择 <strong>Layers</strong> 面板，点击底部的 <strong>Insert Sublayer</strong> 按钮，选择 <code>Isaac Sim/Samples/Rigging/Jetbot/Jetbot_Base/Jetbot_base.usd</code>。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_asset_optimization_3.png" alt="插入子层">
+<div class="img-caption">插入子层</div>
+
+<h4>创建资产结构</h4>
+<ol>
+    <li>在 Stage 面板的右侧菜单中，选择 <strong>Show Root</strong>。</li>
+    <li>创建一个新的 Xform 叫做 <code>Jetbot_Sim</code>，将其拖到 Root 上。</li>
+    <li>右键点击 <code>Jetbot_Sim</code>，选择 <strong>Set as Default Prim</strong>。</li>
+    <li>右键点击选择 <strong>Create > Scope</strong>，命名为 <code>Visuals</code>。</li>
+    <li>将此 scope 拖到 Root 上，使其从 <code>Jetbot_Sim</code> 中取消父子化。</li>
+    <li>选择 <code>Jetbot</code> 下的 prims，将它们拖到 <code>Jetbot_Sim</code> 上。</li>
+    <li>验证它们被停用而不是从 Jetbot 中删除。</li>
+    <li>全部选择，然后右键点击选择 <strong>Activate</strong>。</li>
+    <li>删除 <code>Jetbot_Sim</code> 内 prims 中的内容。</li>
+</ol>
+
+<h4>合并网格</h4>
+<ol>
+    <li>打开 Mesh Merge Tool：<strong>Tools > Robotics > Asset Editors > Mesh Merge Tool</strong>。</li>
+    <li>选择 <code>Jetbot/left_wheel</code> prim。</li>
+    <li>勾选 <strong>Combine Materials</strong> 框，插入 <code>Jetbot_Sim/Looks</code> 以在 Jetbot Sim xform 中保存材质。</li>
+    <li>点击 <strong>Merge</strong>。</li>
+    <li>选择 <code>/Merged/left_wheel</code> 上的结果网格，在属性面板中清除变换。</li>
+    <li>右键点击 <strong>Visuals</strong> scope，创建名为 <code>left_wheel</code> 的 xform，将结果网格拖入其中。从场景中移除 <code>/Merged</code> xform。</li>
+    <li>创建对车轮的内部引用：在 <code>left_wheel</code> 内创建 <strong>Visuals</strong> Xform，右键点击选择 <strong>Add > Reference</strong>，选择 <code>Jetbot_base.usd</code>，设置 prim_path 为 <code>/Visuals/left_wheel</code>。</li>
+    <li>在 <strong>References</strong> 部分清除 <strong>Asset Path</strong> 条目。</li>
+    <li>保存文件（CTRL+S）。</li>
+    <li>对其他主体重复上述步骤以完成网格优化。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_asset_optimization_7.png" alt="Mesh Merge Tool">
+<div class="img-caption">Mesh Merge Tool 合并网格</div>
+
+<h3>场景图实例化（Scenegraph Instancing）</h3>
+<p>场景图实例化支持子图 prims 的可共享、组合表示。这是一个指令，告诉场景合成器场景的某个组件是可重复模式。</p>
+<ol>
+    <li>打开 USD 文件 <code>Isaac Sim/Samples/Rigging/Jetbot/Jetbot_Optimized/Jetbot_optimized_post_merge.usd</code>。</li>
+    <li>左右车轮网格相同。让左右车轮引用同一网格以进一步简化资产。选择 <code>Visuals/left_wheel</code> 重命名为 <code>Visuals/wheel</code>。</li>
+    <li>删除 <code>Visuals/right_wheel</code>。</li>
+    <li>选择 <code>Jetbot_Sim/right_wheel/Visuals</code>，将引用 Prim Path 从 <code>/Visuals/right_wheel</code> 替换为 <code>/Visuals/wheel</code>。</li>
+    <li>Shift 选择 <code>/Jetbot_Sim</code> 下的所有 Visuals prims，在 Property 面板中勾选 <strong>Instanceable</strong>。</li>
+    <li>保存文件（CTRL+S）。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_asset_optimization_16.png" alt="实例化">
+<div class="img-caption">设置 Instanceable 后的场景</div>
+
+<h3>其他考虑事项</h3>
+<ul>
+    <li><strong>最小化灯光数量</strong>：每个灯光都会负面影响渲染性能。默认情况下，如果场景有超过 10 个灯光，渲染会恢复为基于采样的照明。</li>
+    <li><strong>减少半透明材质</strong>：每个半透明材质比默认 OmniPBR 材质产生更大的性能瓶颈。</li>
+    <li><strong>优化物理性能</strong>：搜索可以修改的仿真方面以降低计算成本。碰撞体通常具有高计算成本。碰撞形状越基本，仿真性能越好。减少接触点数量也能带来巨大的性能优势。</li>
+    <li><strong>近似车轮碰撞体</strong>：如果有车轮碰撞体，考虑使用简单的圆柱体或球体碰撞体代替网格碰撞体。这可以显著提高性能，并允许机器人在地形上平稳行驶。</li>
+</ul>
+
+<h3>总结</h3>
+<p>本教程介绍了通过合并网格、场景图实例化和其他优化技术来提高机器人资产性能的方法。</p>
+</div>
+</div>
+
+<!-- ==================== TUTORIAL 13 ==================== -->
+<div class="tutorial-section" id="tut13">
+<div class="tutorial-header">
+    <h2>第13课：为运动策略装配腿式机器人 <span class="level-badge level-advanced">高级</span></h2>
+    <p>学习装配 H1 人形机器人以匹配运动策略指定的配置</p>
+</div>
+<div class="tutorial-body">
+
+<h3>学习目标</h3>
+<p>本教程的目的是解释装配腿式机器人以匹配运动策略指定的配置的过程。Isaac Sim 的 Policy Controller Class 已在运行时处理机器人的装配过程，因此本教程仅在您希望使用 ROS 等外部进程运行机器人策略时才相关。</p>
+<p>在本教程中，您将逐步装配 H1 人形机器人以匹配 H1 平坦地形运动策略的配置：</p>
+<ol>
+    <li>设置初始机器人位置</li>
+    <li>设置关节配置</li>
+    <li>验证关节配置</li>
+</ol>
+
+<div class="note">
+    <strong>注意：</strong>H1 平坦地形策略环境定义文件可在 <a href="https://omniverse-content-staging.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Samples/Policies/H1_Policies/h1_env.yaml" target="_blank">此处</a>获取。
+</div>
+
+<h3>设置初始机器人位置</h3>
+<p>机器人的初始关节位置在环境定义文件的 <code>robot:init_state:joint_pos</code> 部分指定。</p>
+
+<pre><code>robot:
+  init_state:
+    joint_pos:
+      .*_hip_yaw: 0.0
+      .*_hip_roll: 0.0
+      .*_hip_pitch: -0.28
+      .*_knee: 0.79
+      .*_ankle: -0.52
+      torso: 0.0
+      .*_shoulder_pitch: 0.28
+      .*_shoulder_roll: 0.0
+      .*_shoulder_yaw: 0.0
+      .*_elbow: 0.52
+    joint_vel:
+      .*: 0.0</code></pre>
+
+<div class="note">
+    <strong>注意：</strong>关节位置以弧度指定，而在 USD 中，关节位置以度指定。
+</div>
+
+<p>存储机器人的初始状态：</p>
+<ol>
+    <li>从 Content Browser 打开 <code>h1.usd</code> 文件（位于 <code>Isaac Sim/Robots/Unitree/H1</code>）。</li>
+    <li>创建关节状态 API 以报告机器人关节位置和速度。</li>
+    <li>在场景右上角，选择 <code>funnel</code> 图标，点击 <code>Physics Joints</code> 过滤关节列表。</li>
+    <li>左键点击第一个关节（<code>left_hip_yaw</code>），按住 Shift 左键点击最后一个关节（<code>right_elbow</code>）选择所有关节。</li>
+    <li>右键点击任何选中的关节，点击 <strong>Add > Physics > Joint State Angular</strong> 创建关节状态 API 属性。</li>
+    <li>右键点击任何选中的关节，点击 <strong>Add > Physics > Angular drive</strong> 创建关节驱动 API 属性。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_rigging_humanoid_1.png" alt="过滤关节">
+<div class="img-caption">过滤 Physics Joints</div>
+
+<ol start="7">
+    <li>转到每个关节，在关节驱动 API 的 <code>Target Position</code> 属性中设置上面环境定义文件中指定的值。记得将关节位置和速度从弧度转换为度。</li>
+    <li>按 Play，验证机器人移动到环境定义文件中指定的初始位置。</li>
+    <li>为防止机器人无限下落，在 <code>/h1/torso_link</code> 上右键点击 <strong>Create > Physics > Joint > Fixed Joint</strong> 添加固定关节。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_rigging_humanoid_2.webp" alt="H1初始位置">
+<div class="img-caption">H1 机器人初始位置</div>
+
+<p>为防止关节状态 API 值重置，需要更改仿真设置：</p>
+<ol>
+    <li>点击 <strong>Edit > Preferences</strong>。</li>
+    <li>在左下方选择 <strong>Physics</strong> 标签。</li>
+    <li>取消勾选 <strong>Reset Simulation on Stop</strong>。</li>
+</ol>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_rigging_humanoid_3.png" alt="仿真设置">
+<div class="img-caption">取消勾选 Reset Simulation on Stop</div>
+
+<ol start="4">
+    <li>删除机器人与世界之间的固定关节。</li>
+    <li>按 <strong>Ctrl+S</strong> 保存 USD 文件。</li>
+    <li>再次勾选 <strong>Reset Simulation on Stop</strong>。</li>
+</ol>
+
+<h3>设置关节配置</h3>
+<p>将关节配置设置为与策略的机器人配置匹配。关节驱动配置在环境定义文件的 <code>scene:robot:actuators</code> 部分指定。</p>
+
+<pre><code>actuators:
+  legs:
+    class_type: omni.isaac.lab.actuators.actuator_pd:ImplicitActuator
+    joint_names_expr:
+    - .*_hip_yaw
+    - .*_hip_roll
+    - .*_hip_pitch
+    - .*_knee
+    - torso
+    effort_limit: 300
+    velocity_limit: 100.0
+    stiffness:
+      .*_hip_yaw: 150.0
+      .*_hip_roll: 150.0
+      .*_hip_pitch: 200.0
+      .*_knee: 200.0
+      torso: 200.0
+    damping:
+      .*_hip_yaw: 5.0
+      .*_hip_roll: 5.0
+      .*_hip_pitch: 5.0
+      .*_knee: 5.0
+      torso: 5.0</code></pre>
+
+<p>设置关节配置：</p>
+<ol>
+    <li>左键点击关节（如 <code>left_hip_yaw</code>）。</li>
+    <li>在属性面板中，向下滚动到 <code>joint drive</code> 属性，将 <code>stiffness</code>、<code>damping</code> 设置为环境定义文件中指定的值。记得将刚度和阻尼转换为度。</li>
+</ol>
+
+<div class="note">
+    <strong>注意：</strong>USD 文件刚度单位为 Kg·m²/(Deg·s²)，阻尼单位为 Kg·m²/(Deg·s)。转换公式：
+    <ul>
+        <li>S_deg = S_rad × π/180</li>
+        <li>D_deg = D_rad × π/180</li>
+    </ul>
+</div>
+
+<p><code>effort_limit</code> 是可施加到关节的最大力，将其设置为关节驱动 API 的 <code>Max Force</code> 属性。</p>
+<p>向下滚动到 <strong>Advanced</strong> 标签下的 <strong>Raw USD Properties</strong>，将 <strong>Armature</strong>、<strong>Joint Friction</strong> 属性设置为环境定义文件中指定的值。</p>
+<p>对于 <strong>Maximum Joint Velocity</strong> 属性，将其设置为 <code>velocity_limit</code> 值，记得转换为度：ω_deg = ω_rad × 180/π</p>
+
+<img src="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/_images/isim_5.0_full_tut_gui_rigging_humanoid_4.png" alt="关节配置">
+<div class="img-caption">关节驱动配置</div>
+
+<div class="note">
+    <strong>注意：</strong>记得为机器人中所有活动关节设置关节配置。例如，手臂和腿部。
+</div>
+
+<h3>验证关节配置</h3>
+<p>要验证关节配置，可以播放仿真并在脚本编辑器中运行以下代码片段来打印关节配置：</p>
+<ol>
+    <li>播放仿真。</li>
+    <li>打开脚本编辑器：<strong>Window > Script Editor</strong>。</li>
+    <li>复制并粘贴以下代码：
+        <pre><code>from isaacsim.core.prims import SingleArticulation
+
+prim_path = "/h1"
+prim = SingleArticulation(prim_path=prim_path, name="h1")
+print(prim.dof_names)
+print(prim.dof_properties)</code></pre>
+    </li>
+    <li>点击 <strong>Run</strong> 运行。</li>
+    <li>验证控制台输出中每个关节的 <code>maxVelocity</code>、<code>maxEffort</code>、<code>stiffness</code>、<code>damping</code> 值与环境定义文件中指定的值匹配。</li>
+</ol>
+
+<div class="note">
+    <strong>注意：</strong>装配好的 H1 机器人可在 Content Browser 的 <code>Isaac/Samples/Rigging/H1/h1_rigged.usd</code> 找到。
+</div>
+
+<h3>总结</h3>
+<p>本教程涵盖以下主题：</p>
+<ul>
+    <li>设置初始机器人位置</li>
+    <li>设置关节配置（弧度与度的转换）</li>
+    <li>验证关节配置</li>
+</ul>
+</div>
+</div>
+
+<div class="page-footer">
+    <p>NVIDIA Isaac Sim 机器人设置教程系列 | 翻译自 <a href="https://docs.isaacsim.omniverse.nvidia.com/5.1.0/robot_setup_tutorials/index.html" target="_blank">NVIDIA 官方文档</a></p>
+    <p>Isaac Sim 版本：5.1.0</p>
+</div>
+
+</div><!-- end main-content -->
+
+<a href="#top" class="top-link" title="返回顶部">&#9650;</a>
+
+<script>
+(function() {
+    var sections = document.querySelectorAll('.tutorial-section[id]');
+    var sidebarLinks = document.querySelectorAll('.sidebar a[href^="#tut"]');
+
+    function onScroll() {
+        var scrollY = window.scrollY || window.pageYOffset;
+        var navbarHeight = 50;
+        var currentId = '';
+
+        sections.forEach(function(section) {
+            var top = section.getBoundingClientRect().top + scrollY - navbarHeight - 16;
+            if (scrollY >= top) {
+                currentId = section.getAttribute('id');
+            }
+        });
+
+        sidebarLinks.forEach(function(link) {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + currentId) {
+                link.classList.add('active');
+            }
+        });
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+})();
+</script>
+
+</body>
+</html>
