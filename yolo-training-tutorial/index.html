@@ -928,7 +928,6 @@ model.train(
     </div>
   </div>
 
-</div>
 
   <!-- FAQ -->
   <div class="step" id="faq">
@@ -942,32 +941,34 @@ model.train(
       <p>预训练权重的价值在于<strong>迁移学习能力</strong>，而不是"保留原有类别的记忆"。</p>
       <p>用 COCO 数据集训练过的模型，其骨干网络（Backbone）已经学会了提取边缘、纹理、形状等通用视觉特征。Fine-tune 时，这部分能力被保留并迁移，使模型只需<strong>几十张图片</strong>就能学会识别充电口这类新类别。</p>
       <div class="tip">
-        <strong>💡 类比：</strong>就像一个见过上万种物品的人，学认"充电口型号"时只需看几十个样品——因为他的眼睛已经很"会看"了。但他专门学充电口之后，<strong>如果没有继续复习，之前认识的物体知识会逐渐模糊</strong>。
+        <strong>💡 类比：</strong>就像一个见过上万种物品的人，学认"充电口型号"时只需看几十个样品——因为他的眼睛已经很"会看"了。但专门学了充电口之后，<strong>如果没有继续复习，之前认识的物体知识会逐渐模糊</strong>。
       </div>
       <p>Fine-tune 时，<code>data.yaml</code> 中 <code>nc: 3</code> 与原模型的 <code>nc: 80</code> 不一致，Ultralytics 会自动丢弃原有检测头并重新初始化。因此：</p>
       <table>
         <tr><th>Fine-tune 后</th><th>状态</th></tr>
-        <tr><td>骨干网络的视觉特征提取能力</td><td>✅ 保留（这是迁移学习的价值）</td></tr>
+        <tr><td>骨干网络的视觉特征提取能力</td><td>✅ 保留（这是迁移学习的价值所在）</td></tr>
         <tr><td>COCO 原有 80 类的识别能力</td><td>❌ 丢失（检测头被重建）</td></tr>
       </table>
-      <p>这是深度学习中<strong>灾难性遗忘（Catastrophic Forgetting）</strong>的固有问题，不是 bug。</p>
+      <div class="warning">
+        <strong>⚠️ 注意：</strong>这是深度学习中<strong>灾难性遗忘（Catastrophic Forgetting）</strong>的固有问题，不是 bug，无法通过调参规避。
+      </div>
 
       <h3>Q2：标注 DC_hole 和 PE 对提升充电口识别精度有帮助吗？</h3>
       <p>对 <code>charging_port</code> 的检测精度<strong>几乎没有直接帮助</strong>，但有其独立用途。</p>
       <table>
-        <tr><th>类别</th><th>实际用途</th><th>是否必须标注</th></tr>
+        <tr><th>类别</th><th>实际用途</th><th>是否必须</th></tr>
         <tr><td><code>charging_port</code></td><td>YOLO 检测定位充电口位置</td><td>✅ 必须</td></tr>
         <tr><td><code>DC_hole</code></td><td>PnP 位姿估计，计算充电口三维朝向，供机器人精准插枪</td><td>按需选择</td></tr>
         <tr><td><code>PE</code></td><td>PnP 位姿估计关键点</td><td>按需选择</td></tr>
       </table>
       <div class="tip">
-        <strong>💡 结论：</strong>如果目标仅是<strong>检测充电口在哪里</strong>（2D 定位），只标注 <code>charging_port</code> 即可。如果后续需要<strong>精准对准插枪</strong>（计算三维位姿），则需要 <code>DC_hole</code> 和 <code>PE</code> 作为关键点。
+        <strong>💡 结论：</strong>如果目标仅是<strong>检测充电口在哪里</strong>（2D 定位），只标注 <code>charging_port</code> 即可。如果后续需要<strong>精准对准插枪</strong>（计算三维位姿），则 <code>DC_hole</code> 和 <code>PE</code> 是必要的关键点。
       </div>
 
       <h3>Q3：训练完后原本 YOLO 能识别的 80 类物体都不能识别了，怎么办？</h3>
       <p>这是正常现象（原因见 Q1）。工程上有三种应对方案：</p>
 
-      <h3 style="font-size:13px; margin-top:14px">方案一：保留两个独立模型（推荐）</h3>
+      <h3>Q3.1 保留两个独立模型（推荐）</h3>
       <div class="code-block"><span class="comment"># 原始模型，识别通用 80 类</span>
 model_general = YOLO(<span class="string">"yolo11n.pt"</span>)
 
@@ -978,25 +979,28 @@ model_custom  = YOLO(<span class="string">"runs/detect/dc_charging_v1/weights/be
 results = model_custom(frame)</div>
       <p>这是<strong>工业界最常见的做法</strong>——专用模型比通用模型精度更高，按场景切换使用即可。</p>
 
-      <h3 style="font-size:13px; margin-top:14px">方案二：使用 YOLO-World（开放词汇检测）</h3>
-      <p>YOLO-World 无需重新训练，直接用文字描述类别：</p>
+      <h3>Q3.2 使用 YOLO-World（开放词汇检测）</h3>
+      <p>YOLO-World 无需重新训练，直接用文字描述类别，80 类识别能力始终保留：</p>
       <div class="code-block"><span class="keyword">from</span> ultralytics <span class="keyword">import</span> YOLOWorld
 
 model = YOLOWorld(<span class="string">"yolov8s-world.pt"</span>)
 model.set_classes([<span class="string">"person"</span>, <span class="string">"car"</span>, <span class="string">"charging port"</span>])
 results = model.predict(<span class="string">"image.jpg"</span>)</div>
-      <p>缺点：对专业类别（如充电口）的识别精度低于专门训练的模型。</p>
+      <div class="warning">
+        <strong>⚠️ 缺点：</strong>对"充电口"这类专业类别，识别精度低于专门训练的模型。
+      </div>
 
-      <h3 style="font-size:13px; margin-top:14px">方案三：双模型并行推理</h3>
+      <h3>Q3.3 双模型并行推理</h3>
+      <p>同时运行两个模型，合并输出结果：</p>
       <div class="code-block">results_general = model_general(frame)   <span class="comment"># 通用 80 类</span>
 results_custom  = model_custom(frame)    <span class="comment"># 充电口专用</span>
 <span class="comment"># 合并两组结果后显示</span></div>
 
       <h3>Q4：收集到更多图片后，需要把所有图片重新训练一遍吗？</h3>
-      <p>是的，<strong>每次都把所有标注好的图片放在一起训练</strong>，这是标准做法。如果只用新图片训练，模型会遗忘旧图片学到的知识，效果反而变差。</p>
+      <p>是的，<strong>每次都把所有标注好的图片放在一起全量训练</strong>，这是标准做法。如果只用新图片训练，模型会遗忘旧图片学到的知识，效果反而变差。</p>
       <p>正确的迭代方式：以上一版 <code>best.pt</code> 为起点，用全量数据继续训练：</p>
       <div class="code-block"><span class="comment"># 第二版：42张旧图 + 新增图片，全部放入 data.yaml</span>
-model = YOLO(<span class="string">"runs/detect/dc_charging_v1/weights/best.pt"</span>)  <span class="comment"># 上一版起点</span>
+model = YOLO(<span class="string">"runs/detect/dc_charging_v1/weights/best.pt"</span>)  <span class="comment"># 上一版起点，收敛更快</span>
 
 model.train(
     data=<span class="string">"/路径/新版data.yaml"</span>,  <span class="comment"># 包含所有图片</span>
@@ -1004,15 +1008,12 @@ model.train(
     name=<span class="string">"dc_charging_v2"</span>,
     project=<span class="string">"runs/detect"</span>,
 )</div>
-      <div class="tip">
-        <strong>💡 数据量参考：</strong>
-        <table style="margin-top:8px">
-          <tr><th>图片数量</th><th>预期效果</th></tr>
-          <tr><td>20~50 张</td><td>流程跑通，场景泛化差（换角度/光线可能失败）</td></tr>
-          <tr><td>100~200 张</td><td>较稳定，覆盖主要场景变化</td></tr>
-          <tr><td>500 张以上</td><td>生产级别可靠性</td></tr>
-        </table>
-      </div>
+      <table>
+        <tr><th>图片数量</th><th>预期效果</th></tr>
+        <tr><td>20~50 张</td><td>流程跑通，场景泛化差（换角度/光线可能失败）</td></tr>
+        <tr><td>100~200 张</td><td>较稳定，覆盖主要场景变化</td></tr>
+        <tr><td>500 张以上</td><td>生产级别可靠性</td></tr>
+      </table>
 
     </div>
   </div>
