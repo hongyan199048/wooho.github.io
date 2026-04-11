@@ -90,6 +90,20 @@
             color: #b0a89e;
         }
 
+        /* ── Learn row ── */
+        .learn-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #e0ddd8;
+            text-decoration: none;
+            transition: border-color 0.2s;
+        }
+        .learn-row:hover { border-color: #c5c0b8; }
+        .learn-row:last-child { border-bottom: none; }
+
         /* ── Nav ── */
         .nav-link {
             font-size: 13px;
@@ -133,6 +147,7 @@
     <a href="/" class="font-mono text-sm tracking-[0.06em] text-[#1a1a1a]">100 Tools. 100x You.</a>
     <div class="flex items-center gap-5">
         <a href="#tools" class="nav-link" data-en="Tools" data-zh="工具">Tools</a>
+        <a href="#learning" class="nav-link" data-en="Learning" data-zh="学习">Learning</a>
         <a href="#about" class="nav-link" data-en="About" data-zh="关于">About</a>
         <button id="lang-btn" class="nav-link border border-[#e0ddd8] rounded px-2.5 py-1 hover:border-[#c5c0b8] cursor-pointer bg-transparent">
             <span data-en="中文" data-zh="EN">中文</span>
@@ -153,11 +168,11 @@
             100 tools that make you 100x more productive — each one built to remove friction from exactly one workflow.
         </p>
         <div class="flex items-center justify-center gap-3 opacity-0 animate-fade-in delay-300">
-            <span class="font-mono text-sm text-[#2d6a4f]">002 / 100</span>
+            <span class="font-mono text-sm text-[#2d6a4f]">001 / 100</span>
             <div class="w-32 h-px bg-[#e0ddd8] relative">
-                <div class="absolute left-0 top-0 h-full bg-[#2d6a4f]" style="width:2%"></div>
+                <div class="absolute left-0 top-0 h-full bg-[#2d6a4f]" style="width:1%"></div>
             </div>
-            <span class="font-mono text-xs text-[#b0a89e]">2% complete</span>
+            <span class="font-mono text-xs text-[#b0a89e]">1% complete</span>
         </div>
     </div>
 </section>
@@ -190,26 +205,14 @@
                 </div>
             </a>
 
-            <!-- #002 Live -->
-            <a href="/isaac-sim-tutorials/" class="tool-card opacity-0 animate-slide-up delay-400">
+            <!-- #002 coming soon -->
+            <div class="tool-card coming-soon">
                 <div class="flex items-center justify-between">
-                    <span class="font-mono text-xs text-[#b0a89e]">#002</span>
-                    <span class="tag live" data-en="LIVE" data-zh="已上线">LIVE</span>
+                    <span class="font-mono text-xs text-[#c5c0b8]">#002</span>
+                    <span class="tag" data-en="SOON" data-zh="即将上线">SOON</span>
                 </div>
-                <div>
-                    <p class="font-medium text-[#1a1a1a] text-sm leading-snug mb-1.5"
-                       data-en="Isaac Sim Robot Setup Guide" data-zh="Isaac Sim 机器人设置教程">Isaac Sim Robot Setup Guide</p>
-                    <p class="text-[#6b6b6b] text-xs font-light leading-relaxed"
-                       data-en="13 hands-on tutorials for building robot digital twins in NVIDIA Isaac Sim — from scene setup to legged robot assembly."
-                       data-zh="13 节实操教程，覆盖 NVIDIA Isaac Sim 机器人数字孪生构建全流程——从场景搭建到腿式机器人装配。">
-                        13 hands-on tutorials for building robot digital twins in NVIDIA Isaac Sim — from scene setup to legged robot assembly.
-                    </p>
-                </div>
-                <div class="flex items-center gap-1 mt-auto pt-2">
-                    <span class="tag" data-en="Robotics" data-zh="机器人">Robotics</span>
-                    <span class="tag" data-en="Simulation" data-zh="仿真">Simulation</span>
-                </div>
-            </a>
+                <p class="text-[#b0a89e] text-xs font-mono" data-en="Coming soon..." data-zh="即将上线...">Coming soon...</p>
+            </div>
 
             <div class="tool-card coming-soon">
                 <div class="flex items-center justify-between">
@@ -247,6 +250,27 @@
     </div>
 </section>
 
+<!-- ── Learning ── -->
+<section id="learning" class="relative z-10 px-6 sm:px-10 lg:px-16 pb-24 border-t border-[#e0ddd8]">
+    <div class="max-w-5xl mx-auto pt-16">
+        <p class="section-label mb-8" data-en="SELF-UPGRADE" data-zh="自我学习升级">SELF-UPGRADE</p>
+        <div class="max-w-xl">
+            <a href="/isaac-sim-tutorials/" class="learn-row">
+                <div>
+                    <p class="font-medium text-sm text-[#1a1a1a] mb-1"
+                       data-en="Isaac Sim Robot Setup Guide" data-zh="Isaac Sim 机器人设置教程">Isaac Sim Robot Setup Guide</p>
+                    <p class="text-xs text-[#6b6b6b] font-light"
+                       data-en="13 tutorials — building robot digital twins in NVIDIA Isaac Sim"
+                       data-zh="13 节教程——使用 NVIDIA Isaac Sim 构建机器人数字孪生">13 tutorials — building robot digital twins in NVIDIA Isaac Sim</p>
+                </div>
+                <svg class="h-3.5 w-3.5 text-[#c5c0b8] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+
 <!-- ── About ── -->
 <section id="about" class="relative z-10 px-6 sm:px-10 lg:px-16 pb-32 border-t border-[#e0ddd8]">
     <div class="max-w-lg mx-auto pt-20">
@@ -278,7 +302,7 @@
 <footer class="relative z-10 border-t border-[#e0ddd8] px-6 sm:px-10 lg:px-16 py-8">
     <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
         <p class="font-mono text-xs text-[#b0a89e]">© 2025 Tim — wooho.cc</p>
-        <p class="font-mono text-xs text-[#c5c0b8]" data-en="002 / 100 tools launched" data-zh="已上线 002 / 100 个工具">002 / 100 tools launched</p>
+        <p class="font-mono text-xs text-[#c5c0b8]" data-en="001 / 100 tools launched" data-zh="已上线 001 / 100 个工具">001 / 100 tools launched</p>
     </div>
 </footer>
 
