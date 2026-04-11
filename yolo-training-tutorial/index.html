@@ -18,6 +18,7 @@
       --border-hover: #c5c0b8;
       --muted: #faf8f5;
       --font-mono: 'Share Tech Mono', monospace;
+      --sidebar-width: 268px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,7 +29,6 @@
       color: var(--text);
       line-height: 1.8;
       font-size: 14px;
-      padding-top: 50px;
     }
 
     /* ── Navbar ── */
@@ -72,11 +72,56 @@
       color: #b0a89e;
     }
 
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100vh - 50px);
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 100;
+      padding: 0 0 20px;
+    }
+    .sidebar-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #b0a89e;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .sidebar ul { list-style: none; margin: 0; padding: 0; }
+    .sidebar li { margin: 0; }
+    .sidebar a {
+      display: block;
+      color: var(--text-sec);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 300;
+      border-left: 2px solid transparent;
+      padding: 7px 20px;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+    .sidebar a:hover { color: var(--text); border-left-color: var(--text); background: var(--bg); }
+    .sidebar a.active { color: var(--text); border-left-color: var(--text); }
+
+    /* ── Page body (offset for sidebar + navbar) ── */
+    .page-body {
+      margin-left: var(--sidebar-width);
+      margin-top: 50px;
+    }
+
     /* ── Hero ── */
     .hero {
       background: #ffffff;
       border-bottom: 1px solid #e0ddd8;
-      padding: 48px 40px 40px;
+      padding: 40px 48px 32px;
       text-align: center;
     }
     .hero h1 {
@@ -114,37 +159,8 @@
     .container {
       max-width: 860px;
       margin: 0 auto;
-      padding: 0 24px 80px;
+      padding: 32px 48px 80px;
     }
-
-    /* ── TOC ── */
-    .toc {
-      background: #ffffff;
-      border: 1px solid #e0ddd8;
-      border-left: 3px solid #1a1a1a;
-      border-radius: 3px;
-      padding: 20px 28px;
-      max-width: 860px;
-      margin: 28px auto;
-      box-shadow: 0 1px 3px rgba(26,26,26,0.05);
-    }
-    .toc h2 {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #b0a89e;
-      margin-bottom: 14px;
-    }
-    .toc ol { padding-left: 20px; }
-    .toc li { margin: 5px 0; }
-    .toc a {
-      color: #6b6b6b;
-      font-size: 13px;
-      font-weight: 300;
-      text-decoration: none;
-    }
-    .toc a:hover { color: #1a1a1a; }
 
     /* ── Steps ── */
     .step {
@@ -380,6 +396,26 @@
   <div class="navbar-right">#003</div>
 </nav>
 
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-title">目录</div>
+  <ul>
+    <li><a href="#overview">整体流程概览</a></li>
+    <li><a href="#step1">1. 环境准备</a></li>
+    <li><a href="#step2">2. Roboflow 项目创建</a></li>
+    <li><a href="#step3">3. 数据标注规范</a></li>
+    <li><a href="#step4">4. 生成数据集 Version</a></li>
+    <li><a href="#step5">5. 导出数据集到本地</a></li>
+    <li><a href="#step6">6. 修正 data.yaml 路径</a></li>
+    <li><a href="#step7">7. 本地训练模型</a></li>
+    <li><a href="#step8">8. 解读训练结果</a></li>
+    <li><a href="#step9">9. 替换模型并运行检测</a></li>
+    <li><a href="#step10">10. 后续迭代</a></li>
+  </ul>
+</div>
+
+<div class="page-body">
+
 <!-- Hero -->
 <div class="hero">
   <h1>YOLO11 自定义目标检测模型训练全流程</h1>
@@ -393,27 +429,10 @@
   </div>
 </div>
 
-<!-- TOC -->
-<div class="toc">
-  <h2>目录</h2>
-  <ol>
-    <li><a href="#step1">环境准备</a></li>
-    <li><a href="#step2">Roboflow 项目创建与图片上传</a></li>
-    <li><a href="#step3">数据标注规范</a></li>
-    <li><a href="#step4">生成数据集 Version</a></li>
-    <li><a href="#step5">导出数据集到本地</a></li>
-    <li><a href="#step6">修正 data.yaml 路径</a></li>
-    <li><a href="#step7">本地训练模型</a></li>
-    <li><a href="#step8">解读训练结果</a></li>
-    <li><a href="#step9">替换模型并运行检测</a></li>
-    <li><a href="#step10">后续迭代：增加数据重新训练</a></li>
-  </ol>
-</div>
-
 <div class="container">
 
   <!-- 整体流程 -->
-  <div class="step">
+  <div class="step" id="overview">
     <div class="step-header">
       <div class="step-num">→</div>
       <h2>整体流程概览</h2>
@@ -916,6 +935,24 @@ model.train(
 </footer>
 
 <a href="#" class="scroll-top" title="回到顶部">↑</a>
+
+</div><!-- /page-body -->
+
+<script>
+// Sidebar active link on scroll
+const sections = document.querySelectorAll('.step[id], [id="overview"]');
+const sidebarLinks = document.querySelectorAll('.sidebar a');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      sidebarLinks.forEach(a => a.classList.remove('active'));
+      const active = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
 
 </body>
 </html>
