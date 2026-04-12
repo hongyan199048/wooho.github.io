@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YOLO11 + 深度相机 6DoF 位姿估计教程 — 100x Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f2ed;
+      --bg-card: #ffffff;
+      --text: #1a1a1a;
+      --text-sec: #6b6b6b;
+      --text-dim: #a0a0a0;
+      --border: #e0ddd8;
+      --border-hover: #c5c0b8;
+      --muted: #faf8f5;
+      --font-mono: 'Share Tech Mono', monospace;
+      --sidebar-width: 268px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Inter, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 50px;
+      background: rgba(245,242,237,0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e0ddd8;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+    .navbar-left a {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #6b6b6b;
+      text-decoration: none;
+    }
+    .navbar-left a:hover { color: #1a1a1a; }
+    .navbar-divider {
+      width: 1px;
+      height: 16px;
+      background: #e0ddd8;
+      margin: 0 14px;
+    }
+    .navbar-center {
+      flex: 1;
+      text-align: center;
+      font-family: Inter, sans-serif;
+      font-weight: 400;
+      font-size: 13px;
+      color: #1a1a1a;
+    }
+    .navbar-right {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #b0a89e;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100vh - 50px);
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 100;
+      padding: 0 0 20px;
+    }
+    .sidebar-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #b0a89e;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .sidebar ul { list-style: none; margin: 0; padding: 0; }
+    .sidebar li { margin: 0; }
+    .sidebar a {
+      display: block;
+      color: var(--text-sec);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 300;
+      border-left: 2px solid transparent;
+      padding: 7px 20px;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+    .sidebar a:hover { color: var(--text); border-left-color: var(--text); background: var(--bg); }
+    .sidebar a.active { color: var(--text); border-left-color: var(--text); }
+
+    /* ── Page body (offset for sidebar + navbar) ── */
+    .page-body {
+      margin-left: var(--sidebar-width);
+      margin-top: 50px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: #ffffff;
+      border-bottom: 1px solid #e0ddd8;
+      padding: 40px 48px 32px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      color: #1a1a1a;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      font-size: 14px;
+      color: #6b6b6b;
+      font-weight: 300;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .hero .subtitle {
+      margin-top: 14px;
+      font-size: 14px;
+      color: #6b6b6b;
+      font-weight: 300;
+    }
+    .hero .badge {
+      display: inline-block;
+      background: #f0ede8;
+      color: #888;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 2px;
+      margin: 0 2px;
+    }
+
+    /* ── Container ── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 48px 80px;
+    }
+
+    /* ── Steps ── */
+    .step {
+      background: #ffffff;
+      border: 1px solid #e0ddd8;
+      border-radius: 4px;
+      margin: 24px 0;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(26,26,26,0.05);
+    }
+    .step-header {
+      background: #1a1a1a;
+      color: #f5f2ed;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: rgba(245,242,237,0.15);
+      border: 1px solid rgba(245,242,237,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #f5f2ed;
+      flex-shrink: 0;
+    }
+    .step-header h2 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #f5f2ed;
+    }
+    .step-body {
+      padding: 24px;
+      background: #ffffff;
+    }
+
+    /* ── Typography ── */
+    h2 {
+      font-size: 18px;
+      font-weight: 500;
+      color: #1a1a1a;
+      border-bottom: 1px solid #e0ddd8;
+      padding-bottom: 8px;
+      margin: 28px 0 14px;
+    }
+    h3 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin: 22px 0 10px;
+    }
+    p { margin: 10px 0; color: #1a1a1a; }
+    ul, ol { margin: 10px 0 10px 28px; }
+    li { margin: 5px 0; }
+
+    /* ── Code ── */
+    .code-block {
+      background: var(--bg);
+      border: 1px solid #e0ddd8;
+      border-radius: 3px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 14px 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #1a1a1a;
+      line-height: 1.6;
+      white-space: pre;
+    }
+    .code-block .comment { color: #a0a0a0; }
+    .code-block .keyword { color: #1a1a1a; font-weight: 500; }
+    .code-block .string { color: #2d6a4f; }
+    .code-block .number { color: #b07030; }
+
+    code {
+      background: #f0ede8;
+      color: #1a1a1a;
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+
+    /* ── Callouts ── */
+    .tip {
+      background: #f0f7f2;
+      border-left: 3px solid #2d6a4f;
+      padding: 12px 16px;
+      border-radius: 0 3px 3px 0;
+      margin: 14px 0;
+    }
+    .tip strong { color: #2d6a4f; }
+
+    .warning {
+      background: #fdf5ec;
+      border-left: 3px solid #b07030;
+      padding: 12px 16px;
+      border-radius: 0 3px 3px 0;
+      margin: 14px 0;
+    }
+    .warning strong { color: #b07030; }
+
+    .danger {
+      background: #fdf5ec;
+      border-left: 3px solid #b07030;
+      padding: 12px 16px;
+      border-radius: 0 3px 3px 0;
+      margin: 14px 0;
+    }
+    .danger strong { color: #b07030; }
+
+    /* ── Tables ── */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 14px 0;
+    }
+    th {
+      background: var(--bg);
+      border: 1px solid #e0ddd8;
+      padding: 10px 12px;
+      font-weight: 500;
+      font-size: 13px;
+      text-align: left;
+      color: #1a1a1a;
+    }
+    td {
+      border: 1px solid #e0ddd8;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+    .badge-green { background: #f0f7f2; color: #2d6a4f; }
+    .badge-blue  { background: #f0ede8; color: #555; }
+    .badge-orange { background: #fdf5ec; color: #b07030; }
+
+    /* ── Result box ── */
+    .result-box {
+      background: var(--bg);
+      border: 1px solid #e0ddd8;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 16px;
+      margin: 14px 0;
+      overflow-x: auto;
+      white-space: pre;
+      color: #1a1a1a;
+    }
+
+    /* ── Checklist ── */
+    .checklist { list-style: none; padding-left: 0; margin-left: 0; }
+    .checklist li { padding-left: 4px; }
+    .checklist li::before { content: "☐  "; color: #b0a89e; font-family: var(--font-mono); }
+
+    /* ── Flow diagram ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .flow-item {
+      background: #1a1a1a;
+      color: #f5f2ed;
+      padding: 6px 14px;
+      border-radius: 2px;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+    .flow-arrow {
+      color: #b0a89e;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: #a0a0a0;
+      font-size: 13px;
+      border-top: 1px solid #e0ddd8;
+      margin-top: 40px;
+    }
+
+    /* ── Scroll to top ── */
+    .scroll-top {
+      background: #1a1a1a;
+      color: #f5f2ed;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(26,26,26,0.15);
+    }
+    .scroll-top:hover { background: #333; }
+
+    /* ── Language toggle button ── */
+    .lang-toggle {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #6b6b6b;
+      cursor: pointer;
+      border: 1px solid #e0ddd8;
+      background: transparent;
+      padding: 3px 10px;
+      border-radius: 2px;
+      margin-left: 16px;
+      transition: all 0.15s;
+    }
+    .lang-toggle:hover { color: #1a1a1a; border-color: #1a1a1a; }
+
+    /* ── Bilingual: hide/show by language class on body ── */
+    body.lang-zh [data-en]       { display: none; }
+    body.lang-zh [data-en-block] { display: none; }
+    body.lang-en [data-zh]       { display: none; }
+    body.lang-en [data-zh-block] { display: none; }
+  </style>
+</head>
+<body class="lang-zh">
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <a href="/">&#8592; wooho.cc</a>
+  </div>
+  <div class="navbar-divider"></div>
+  <div class="navbar-center">
+    <span data-zh>YOLO11 + 深度相机 6DoF 位姿估计</span>
+    <span data-en>YOLO11 + Depth Camera 6DoF Pose Estimation</span>
+  </div>
+  <div class="navbar-right">LEARN &mdash; 003</div>
+  <button class="lang-toggle" id="langBtn" onclick="toggleLang()">EN</button>
+</nav>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-title">
+    <span data-zh>目录</span><span data-en>Contents</span>
+  </div>
+  <ul>
+    <li><a href="#step-0">
+      <span data-zh>0. 概述</span><span data-en>0. Overview</span>
+    </a></li>
+    <li><a href="#step-1">
+      <span data-zh>1. 为什么需要 6DoF</span><span data-en>1. Why 6DoF</span>
+    </a></li>
+    <li><a href="#step-2">
+      <span data-zh>2. 整体方案</span><span data-en>2. Pipeline Overview</span>
+    </a></li>
+    <li><a href="#step-3">
+      <span data-zh>3. 前置条件</span><span data-en>3. Prerequisites</span>
+    </a></li>
+    <li><a href="#step-4">
+      <span data-zh>4. 获取相机内参</span><span data-en>4. Camera Intrinsics</span>
+    </a></li>
+    <li><a href="#step-5">
+      <span data-zh>5. 关键点物理坐标</span><span data-en>5. Keypoint Coordinates</span>
+    </a></li>
+    <li><a href="#step-6">
+      <span data-zh>6. 深度反投影</span><span data-en>6. Depth Backprojection</span>
+    </a></li>
+    <li><a href="#step-7">
+      <span data-zh>7. RANSAC 平面拟合</span><span data-en>7. RANSAC Plane Fitting</span>
+    </a></li>
+    <li><a href="#step-8">
+      <span data-zh>8. 构建完整坐标系</span><span data-en>8. Build Coordinate Frame</span>
+    </a></li>
+    <li><a href="#step-9">
+      <span data-zh>9. DC+ / DC- 区分</span><span data-en>9. DC+ vs DC- Sorting</span>
+    </a></li>
+    <li><a href="#step-10">
+      <span data-zh>10. 主循环完整流程</span><span data-en>10. Main Loop</span>
+    </a></li>
+    <li><a href="#step-11">
+      <span data-zh>11. 可视化坐标轴</span><span data-en>11. Axis Visualization</span>
+    </a></li>
+    <li><a href="#step-12">
+      <span data-zh>12. 输出结果说明</span><span data-en>12. Output Explained</span>
+    </a></li>
+    <li><a href="#step-13">
+      <span data-zh>13. 后续：手眼标定</span><span data-en>13. Next: Eye-Hand Calib</span>
+    </a></li>
+  </ul>
+</div>
+
+<div class="page-body">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>
+    <span data-zh>YOLO11 + 深度相机 6DoF 位姿估计</span>
+    <span data-en>YOLO11 + Depth Camera 6DoF Pose Estimation</span>
+  </h1>
+  <p>
+    <span data-zh>YOLO11 目标检测 + Orbbec DaBai DCW2 深度相机，获取物体完整 6DoF 位姿——以 GB/T 20234.3 直流充电口为例</span>
+    <span data-en>Combine YOLO11 detection with an Orbbec DaBai DCW2 depth camera to recover full 6DoF pose &mdash; demonstrated on a GB/T 20234.3 DC charging port</span>
+  </p>
+  <div class="subtitle">
+    <span class="badge">Python 3.10</span>
+    <span class="badge">Ultralytics YOLO11</span>
+    <span class="badge">pyorbbecsdk</span>
+    <span class="badge">OpenCV</span>
+    <span class="badge">NumPy</span>
+    <span class="badge">RANSAC</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══ STEP 0 ═══ -->
+  <div class="step" id="step-0">
+    <div class="step-header">
+      <div class="step-num">0</div>
+      <h2>
+        <span data-zh>概述</span>
+        <span data-en>Overview</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh><strong>目标：</strong>从 YOLO11 检测结果 + 深度相机，获取物体完整 6DoF 位姿（位置 + 姿态）。</span>
+        <span data-en><strong>Goal:</strong> Recover the complete 6DoF pose (position + orientation) of an object from YOLO11 detections combined with a depth camera.</span>
+      </p>
+      <p>
+        <span data-zh>本教程以 <strong>GB/T 20234.3 直流充电口</strong>为例，使用三个检测类别：<code>charging_port</code> / <code>DC_hole</code> / <code>PE</code>。</span>
+        <span data-en>This tutorial uses a <strong>GB/T 20234.3 DC charging port</strong> as the example object with three detection classes: <code>charging_port</code> / <code>DC_hole</code> / <code>PE</code>.</span>
+      </p>
+      <p>
+        <span data-zh><strong>最终输出：</strong><code>T_cam2port</code>（4&times;4 变换矩阵），包含相机坐标系下充电口的完整位置和朝向。</span>
+        <span data-en><strong>Final output:</strong> <code>T_cam2port</code> (4&times;4 transformation matrix) encoding the full position and orientation of the charging port in the camera coordinate frame.</span>
+      </p>
+      <div class="flow">
+        <div class="flow-item">YOLO11 检测</div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-item">深度采样</div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-item">反投影 3D 点</div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-item">RANSAC 法向量</div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-item">T_cam2port</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 1 ═══ -->
+  <div class="step" id="step-1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <h2>
+        <span data-zh>为什么需要 6DoF 而不只是距离</span>
+        <span data-en>Why 6DoF Instead of Just Distance</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh>YOLO + 深度读数只能给出「物体在多远」——Z 方向的标量距离。插接任务需要完整的 6 个自由度：X/Y/Z 三维位置 + Roll/Pitch/Yaw 三个朝向角（共 6 个自由度）。</span>
+        <span data-en>YOLO plus a depth reading only tells you <em>how far away</em> the object is &mdash; a scalar Z distance. A plug-insertion task requires all 6 degrees of freedom: X/Y/Z translation plus Roll/Pitch/Yaw orientation (6 DOF total).</span>
+      </p>
+      <table>
+        <tr>
+          <th><span data-zh>自由度</span><span data-en>DOF</span></th>
+          <th><span data-zh>方向</span><span data-en>Direction</span></th>
+          <th><span data-zh>YOLO + 单深度可得？</span><span data-en>YOLO + single depth?</span></th>
+        </tr>
+        <tr>
+          <td>X</td>
+          <td><span data-zh>左右平移</span><span data-en>Left / Right</span></td>
+          <td><span class="badge badge-green">YES</span></td>
+        </tr>
+        <tr>
+          <td>Y</td>
+          <td><span data-zh>上下平移</span><span data-en>Up / Down</span></td>
+          <td><span class="badge badge-green">YES</span></td>
+        </tr>
+        <tr>
+          <td>Z</td>
+          <td><span data-zh>前后距离</span><span data-en>Depth</span></td>
+          <td><span class="badge badge-green">YES</span></td>
+        </tr>
+        <tr>
+          <td>Roll</td>
+          <td><span data-zh>绕 Z 轴旋转</span><span data-en>Rotation about Z</span></td>
+          <td><span class="badge badge-orange">NO</span></td>
+        </tr>
+        <tr>
+          <td>Pitch</td>
+          <td><span data-zh>绕 X 轴旋转</span><span data-en>Rotation about X</span></td>
+          <td><span class="badge badge-orange">NO</span></td>
+        </tr>
+        <tr>
+          <td>Yaw</td>
+          <td><span data-zh>绕 Y 轴旋转</span><span data-en>Rotation about Y</span></td>
+          <td><span class="badge badge-orange">NO</span></td>
+        </tr>
+      </table>
+      <div class="tip">
+        <strong><span data-zh>类比：</span><span data-en>Analogy:</span></strong>
+        <span data-zh>知道前方 1.2 米有个插座，但不知道插座面朝哪个方向，机器人无法精准插进去。需要完整的旋转信息才能对齐插头与插座。</span>
+        <span data-en>You know there is a socket 1.2 m ahead, but without knowing which direction it faces, the robot arm cannot insert the plug. Full rotation information is required to align the connector.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 2 ═══ -->
+  <div class="step" id="step-2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <h2>
+        <span data-zh>整体方案</span>
+        <span data-en>Pipeline Overview</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh>三步原理：</span>
+        <span data-en>Three-step principle:</span>
+      </p>
+      <ol>
+        <li>
+          <span data-zh>YOLO 检测 <code>charging_port</code> bbox &rarr; 区域深度点云 &rarr; <strong>RANSAC 平面拟合</strong> &rarr; 法向量（Z 轴方向）</span>
+          <span data-en>YOLO detects <code>charging_port</code> bbox &rarr; extract region depth point cloud &rarr; <strong>RANSAC plane fitting</strong> &rarr; surface normal (Z-axis direction)</span>
+        </li>
+        <li>
+          <span data-zh><code>DC_hole</code>（两个孔）+ <code>PE</code> 的 bbox 中心像素 + 深度 &rarr; 相机内参反投影 &rarr; <strong>三个 3D 关键点</strong></span>
+          <span data-en><code>DC_hole</code> (two holes) + <code>PE</code> bbox center pixels + depth &rarr; back-project via camera intrinsics &rarr; <strong>three 3D keypoints</strong></span>
+        </li>
+        <li>
+          <span data-zh>DC+/DC- 连线 &rarr; X 轴；DC 中点 &rarr; PE 方向 &rarr; Y 轴；法向量校验 Z 轴 &rarr; <strong>完整旋转矩阵 R</strong></span>
+          <span data-en>DC+ &rarr; DC- vector defines X-axis; DC midpoint &rarr; PE direction defines Y-axis; normal validates Z-axis &rarr; <strong>full rotation matrix R</strong></span>
+        </li>
+      </ol>
+      <h3><span data-zh>数据流示意</span><span data-en>Data-flow diagram</span></h3>
+      <div class="flow">
+        <div class="flow-item">charging_port bbox</div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-item">RANSAC</div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-item">Z 轴（法向量）</div>
+      </div>
+      <div class="flow">
+        <div class="flow-item">DC_hole + PE bbox</div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-item">反投影 3D 点</div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-item">X 轴 + Y 轴</div>
+      </div>
+      <div class="flow">
+        <div class="flow-item">X + Y + Z 轴</div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-item">旋转矩阵 R</div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-item">T_cam2port</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 3 ═══ -->
+  <div class="step" id="step-3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <h2>
+        <span data-zh>前置条件</span>
+        <span data-en>Prerequisites</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <ul>
+        <li>
+          <span data-zh>已完成 YOLO11 自定义模型训练（参见训练教程 LEARN &mdash; 002）</span>
+          <span data-en>YOLO11 custom model training completed (see training tutorial LEARN &mdash; 002)</span>
+        </li>
+        <li>
+          <span data-zh>已安装 <code>pyorbbecsdk</code> 并可正常驱动 Orbbec DaBai DCW2</span>
+          <span data-en><code>pyorbbecsdk</code> installed and Orbbec DaBai DCW2 working</span>
+        </li>
+        <li>
+          <span data-zh>检测类别包含 <code>charging_port</code>、<code>DC_hole</code>、<code>PE</code></span>
+          <span data-en>Detection classes include <code>charging_port</code>, <code>DC_hole</code>, <code>PE</code></span>
+        </li>
+        <li>
+          <span data-zh>Python 环境已安装：<code>ultralytics</code>、<code>opencv-python</code>、<code>numpy</code></span>
+          <span data-en>Python environment with: <code>ultralytics</code>, <code>opencv-python</code>, <code>numpy</code></span>
+        </li>
+      </ul>
+      <div class="tip">
+        <strong><span data-zh>D2C 对齐说明：</span><span data-en>D2C Alignment:</span></strong>
+        <span data-zh>Orbbec DaBai DCW2 支持硬件深度到彩色对齐（HW D2C）。启用后，深度图与 RGB 图像素一一对应，可统一使用 <code>rgb_intrinsic</code> 内参进行反投影。</span>
+        <span data-en>Orbbec DaBai DCW2 supports hardware depth-to-color alignment (HW D2C). Once enabled, depth and RGB pixels correspond one-to-one and share the same <code>rgb_intrinsic</code> parameters for backprojection.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 4 ═══ -->
+  <div class="step" id="step-4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <h2>
+        <span data-zh>获取相机内参</span>
+        <span data-en>Getting Camera Intrinsics</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh>相机内参（fx, fy, cx, cy）是将像素坐标反投影为 3D 点的必要参数。在 <code>pipeline.start(config)</code> 之后调用：</span>
+        <span data-en>Camera intrinsics (fx, fy, cx, cy) are required to back-project pixel coordinates into 3D space. Call after <code>pipeline.start(config)</code>:</span>
+      </p>
+      <div class="code-block"><span class="comment"># pipeline.start(config) 之后调用</span>
+cam_param = pipeline.get_camera_param()
+fx = cam_param.rgb_intrinsic.fx
+fy = cam_param.rgb_intrinsic.fy
+cx = cam_param.rgb_intrinsic.cx
+cy = cam_param.rgb_intrinsic.cy
+<span class="comment"># HW D2C 对齐后深度与彩色同坐标系，统一用 rgb_intrinsic</span></div>
+      <table>
+        <tr>
+          <th><span data-zh>参数</span><span data-en>Parameter</span></th>
+          <th><span data-zh>含义</span><span data-en>Meaning</span></th>
+        </tr>
+        <tr><td><code>fx</code></td><td><span data-zh>X 方向焦距（像素）</span><span data-en>Focal length in X (pixels)</span></td></tr>
+        <tr><td><code>fy</code></td><td><span data-zh>Y 方向焦距（像素）</span><span data-en>Focal length in Y (pixels)</span></td></tr>
+        <tr><td><code>cx</code></td><td><span data-zh>主点 X 坐标</span><span data-en>Principal point X</span></td></tr>
+        <tr><td><code>cy</code></td><td><span data-zh>主点 Y 坐标</span><span data-en>Principal point Y</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 5 ═══ -->
+  <div class="step" id="step-5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <h2>
+        <span data-zh>关键点物理坐标</span>
+        <span data-en>Keypoint Physical Coordinates</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh>预先量好的充电口物理尺寸，<strong>不是实时测量</strong>。以充电口圆心为原点，单位米。数据来源 GB/T 20234.3-2023：</span>
+        <span data-en>Pre-measured physical dimensions of the charging port — <strong>not measured at runtime</strong>. Origin at the charging port center, unit: meters. Source: GB/T 20234.3-2023:</span>
+      </p>
+      <div class="code-block"><span class="comment"># GB/T 20234.3-2023 车辆插座孔位坐标（单位：米）</span>
+<span class="comment"># DC+/DC- 水平间距 34mm，各距圆心 ±17mm；垂直方向距圆心 1.2mm 偏下</span>
+<span class="comment"># PE 在圆心正下方 21mm，左右居中</span>
+OBJECT_POINTS = np.array([
+    [-<span class="number">0.017</span>, -<span class="number">0.0012</span>, <span class="number">0</span>],  <span class="comment"># DC+ 左，距圆心 -17mm</span>
+    [ <span class="number">0.017</span>, -<span class="number">0.0012</span>, <span class="number">0</span>],  <span class="comment"># DC- 右，距圆心 +17mm</span>
+    [ <span class="number">0.000</span>, -<span class="number">0.021</span>,  <span class="number">0</span>],  <span class="comment"># PE  圆心正下方 21mm</span>
+], dtype=np.float64)</div>
+      <div class="warning">
+        <strong><span data-zh>说明：</span><span data-en>Note:</span></strong>
+        <span data-zh><code>OBJECT_POINTS</code> 是物理模型常量，用于 PnP 求解（若使用 solvePnP 方案）或几何关系校验。本教程采用几何构建法，不依赖 solvePnP，但物理坐标仍是理解坐标系定义的重要参考。</span>
+        <span data-en><code>OBJECT_POINTS</code> is a physical model constant used for PnP solving (if using solvePnP) or geometric validation. This tutorial uses geometric construction rather than solvePnP, but these coordinates are important for understanding the coordinate frame definition.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 6 ═══ -->
+  <div class="step" id="step-6">
+    <div class="step-header">
+      <div class="step-num">6</div>
+      <h2>
+        <span data-zh>深度反投影</span>
+        <span data-en>Depth Backprojection</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh>将像素坐标 (u, v) 加上深度值，利用相机内参反投影为相机坐标系下的 3D 点：</span>
+        <span data-en>Convert a pixel coordinate (u, v) plus a depth value into a 3D point in camera space using the intrinsic parameters:</span>
+      </p>
+      <div class="code-block"><span class="keyword">def</span> backproject(u, v, z_mm, fx, fy, cx, cy):
+    <span class="string">"""像素坐标 + 深度 → 相机坐标系 3D 点（单位：米）"""</span>
+    z = z_mm / <span class="number">1000.0</span>
+    x = (u - cx) * z / fx
+    y = (v - cy) * z / fy
+    <span class="keyword">return</span> np.array([x, y, z])</div>
+      <div class="tip">
+        <strong><span data-zh>深度单位：</span><span data-en>Depth units:</span></strong>
+        <span data-zh>Orbbec DaBai DCW2 原始深度值单位为毫米（mm），除以 1000 转换为米。返回的 3D 点单位为米，与旋转矩阵单位一致。</span>
+        <span data-en>Orbbec DaBai DCW2 outputs depth in millimeters. Dividing by 1000 converts to meters, keeping units consistent with the rotation matrix output.</span>
+      </div>
+      <p>
+        <span data-zh>对每个关键点（DC+、DC-、PE），取 bbox 中心像素作为 (u, v)，在深度图中采样对应深度值，再调用 <code>backproject()</code> 得到 3D 坐标。</span>
+        <span data-en>For each keypoint (DC+, DC-, PE), use the bbox center pixel as (u, v), sample the corresponding depth from the depth map, then call <code>backproject()</code> to get the 3D coordinate.</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 7 ═══ -->
+  <div class="step" id="step-7">
+    <div class="step-header">
+      <div class="step-num">7</div>
+      <h2>
+        <span data-zh>RANSAC 平面拟合</span>
+        <span data-en>RANSAC Plane Fitting</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh>从 <code>charging_port</code> bbox 区域的深度点云中，用 RANSAC 鲁棒地拟合充电口平面，得到法向量（即 Z 轴方向）：</span>
+        <span data-en>From the depth point cloud within the <code>charging_port</code> bbox region, robustly fit the charging port plane using RANSAC to obtain the surface normal (Z-axis direction):</span>
+      </p>
+      <div class="code-block"><span class="keyword">def</span> fit_plane_ransac(points, n_iter=<span class="number">100</span>, thresh_m=<span class="number">0.005</span>):
+    <span class="string">"""对 Nx3 点云做 RANSAC 平面拟合，返回单位法向量"""</span>
+    best_normal, best_inliers = <span class="keyword">None</span>, <span class="number">0</span>
+    <span class="keyword">for</span> _ <span class="keyword">in</span> range(n_iter):
+        idx = np.random.choice(len(points), <span class="number">3</span>, replace=<span class="keyword">False</span>)
+        p0, p1, p2 = points[idx]
+        n = np.cross(p1 - p0, p2 - p0)
+        norm = np.linalg.norm(n)
+        <span class="keyword">if</span> norm &lt; <span class="number">1e-9</span>:
+            <span class="keyword">continue</span>
+        n = n / norm
+        dists = np.abs((points - p0) @ n)
+        inliers = np.sum(dists &lt; thresh_m)
+        <span class="keyword">if</span> inliers &gt; best_inliers:
+            best_inliers = inliers
+            best_normal = n
+    <span class="keyword">return</span> best_normal</div>
+      <table>
+        <tr>
+          <th><span data-zh>参数</span><span data-en>Parameter</span></th>
+          <th><span data-zh>默认值</span><span data-en>Default</span></th>
+          <th><span data-zh>说明</span><span data-en>Description</span></th>
+        </tr>
+        <tr>
+          <td><code>n_iter</code></td>
+          <td>100</td>
+          <td><span data-zh>随机采样迭代次数</span><span data-en>Number of random sampling iterations</span></td>
+        </tr>
+        <tr>
+          <td><code>thresh_m</code></td>
+          <td>0.005</td>
+          <td><span data-zh>内点距离阈值（5 mm）</span><span data-en>Inlier distance threshold (5 mm)</span></td>
+        </tr>
+      </table>
+      <div class="tip">
+        <strong><span data-zh>为什么用 RANSAC：</span><span data-en>Why RANSAC:</span></strong>
+        <span data-zh>深度图存在噪点和孔洞，直接用最小二乘拟合容易被离群点破坏。RANSAC 通过随机采样三点并统计内点数的方式，对噪声有更好的鲁棒性。</span>
+        <span data-en>Depth maps contain noise and holes. Least-squares fitting is easily distorted by outliers. RANSAC randomly samples three points, counts inliers, and is therefore far more robust to noise.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 8 ═══ -->
+  <div class="step" id="step-8">
+    <div class="step-header">
+      <div class="step-num">8</div>
+      <h2>
+        <span data-zh>构建完整坐标系</span>
+        <span data-en>Building the Full Coordinate Frame</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <div class="code-block"><span class="keyword">def</span> build_pose(p_dc_plus, p_dc_minus, p_pe, normal_ransac):
+    <span class="comment"># X轴：DC+ → DC-</span>
+    x_axis = normalize(p_dc_minus - p_dc_plus)
+    <span class="comment"># Y轴参考：PE → DC中点（向上）</span>
+    dc_mid = (p_dc_plus + p_dc_minus) / <span class="number">2.0</span>
+    y_raw  = normalize(dc_mid - p_pe)
+    <span class="comment"># Z轴初算：X × Y_raw</span>
+    z_axis = normalize(np.cross(x_axis, y_raw))
+    <span class="comment"># 法向量校验：夹角 > 30° 则丢弃本帧</span>
+    <span class="keyword">if</span> np.dot(z_axis, -normal_ransac) &lt; np.cos(np.radians(<span class="number">30</span>)):
+        <span class="keyword">return None</span>
+    <span class="comment"># 用点云法向量替换 Z，精度更高</span>
+    z_axis = -normal_ransac
+    <span class="comment"># 重新正交化 Y</span>
+    y_axis = normalize(np.cross(z_axis, x_axis))
+    <span class="comment"># 组装 4×4</span>
+    T = np.eye(<span class="number">4</span>)
+    T[:<span class="number">3</span>,<span class="number">0</span>]=x_axis; T[:<span class="number">3</span>,<span class="number">1</span>]=y_axis; T[:<span class="number">3</span>,<span class="number">2</span>]=z_axis; T[:<span class="number">3</span>,<span class="number">3</span>]=dc_mid
+    <span class="keyword">return</span> T</div>
+      <p>
+        <span data-zh><strong>为什么用三点而不是两点：</strong>PE 提供 Y 轴约束，三点互相冗余校验比两点更鲁棒。若只用 DC+/DC-，则 Y 轴方向完全依赖法向量，无额外校验；加入 PE 后，两路信息可以交叉验证，减少单帧噪声影响。</span>
+        <span data-en><strong>Why three points instead of two:</strong> PE provides the Y-axis constraint, giving three-point redundancy that is more robust than two points alone. With only DC+/DC-, the Y-axis depends entirely on the surface normal with no cross-check. Adding PE creates two independent estimates that validate each other, reducing the effect of single-frame noise.</span>
+      </p>
+      <div class="tip">
+        <strong><span data-zh>重新正交化 Y：</span><span data-en>Re-orthogonalizing Y:</span></strong>
+        <span data-zh>用法向量替换 Z 轴后，原来的 Y 轴与新 Z 轴可能不完全正交。通过 <code>Z &times; X</code> 重新计算 Y，保证旋转矩阵是严格正交矩阵（行列式为 +1）。</span>
+        <span data-en>After replacing Z with the RANSAC normal, the original Y may not be perfectly orthogonal to the new Z. Recomputing Y as <code>Z &times; X</code> ensures the rotation matrix is strictly orthogonal (determinant = +1).</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 9 ═══ -->
+  <div class="step" id="step-9">
+    <div class="step-header">
+      <div class="step-num">9</div>
+      <h2>
+        <span data-zh>DC+ 和 DC- 的区分</span>
+        <span data-en>Distinguishing DC+ from DC-</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh>YOLO 无法区分 DC+ 和 DC-（两者属于同一类别 <code>DC_hole</code>，外观完全相同）。代码中按图像 X 坐标排序：<strong>X 较小（左边）= DC+，X 较大（右边）= DC-</strong>。</span>
+        <span data-en>YOLO cannot distinguish DC+ from DC- — both belong to class <code>DC_hole</code> and look identical. The code sorts by image X coordinate: <strong>smaller X (left) = DC+, larger X (right) = DC-</strong>.</span>
+      </p>
+      <div class="code-block"><span class="comment"># YOLO 无法区分 DC+ 和 DC-（同类别 DC_hole），按 X 坐标排序</span>
+top2_dc = sorted(dc_boxes, key=<span class="keyword">lambda</span> x: x[<span class="number">1</span>], reverse=<span class="keyword">True</span>)[:<span class="number">2</span>]  <span class="comment"># 取置信度最高的2个</span>
+top2_dc = sorted(top2_dc, key=<span class="keyword">lambda</span> x: (x[<span class="number">0</span>][<span class="number">0</span>]+x[<span class="number">0</span>][<span class="number">2</span>])//<span class="number">2</span>)     <span class="comment"># 按中心 X 坐标排序</span>
+dc_plus_box  = top2_dc[<span class="number">0</span>][<span class="number">0</span>]  <span class="comment"># 左边 = DC+</span>
+dc_minus_box = top2_dc[<span class="number">1</span>][<span class="number">0</span>]  <span class="comment"># 右边 = DC-</span></div>
+      <div class="warning">
+        <strong><span data-zh>前提假设：</span><span data-en>Assumption:</span></strong>
+        <span data-zh>相机正对充电口（偏转角较小）时，图像 X 轴与充电口物理 X 轴方向一致，左侧即为 DC+。若相机从右侧大角度拍摄（偏转 &gt; 90°），则左右关系翻转，需额外逻辑处理。工程上建议限制相机相对充电口的进入角度范围。</span>
+        <span data-en>This assumes the camera faces the charging port roughly head-on. When the camera is angled more than ~90° to one side, the left/right relationship flips and additional logic is needed. It is recommended to constrain the camera approach angle in practice.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 10 ═══ -->
+  <div class="step" id="step-10">
+    <div class="step-header">
+      <div class="step-num">10</div>
+      <h2>
+        <span data-zh>主循环完整流程</span>
+        <span data-en>Complete Main Loop</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh>每帧执行以下步骤：</span>
+        <span data-en>Execute the following steps every frame:</span>
+      </p>
+      <ol>
+        <li>
+          <span data-zh>YOLO 推理，按类别收集 <code>charging_port</code> / <code>DC_hole</code> / <code>PE</code> 检测框</span>
+          <span data-en>Run YOLO inference, collect detected bounding boxes by class: <code>charging_port</code>, <code>DC_hole</code>, <code>PE</code></span>
+        </li>
+        <li>
+          <span data-zh>检查三类是否都存在（<code>charging_port</code> &ge;1，<code>DC_hole</code> &ge;2，<code>PE</code> &ge;1），否则显示缺失提示并跳过本帧</span>
+          <span data-en>Verify all three classes are present (<code>charging_port</code> &ge;1, <code>DC_hole</code> &ge;2, <code>PE</code> &ge;1); if not, display a missing-detection warning and skip this frame</span>
+        </li>
+        <li>
+          <span data-zh>取 <code>charging_port</code> bbox 区域深度点云，调用 <code>fit_plane_ransac()</code> 拟合平面法向量</span>
+          <span data-en>Extract the depth point cloud within the <code>charging_port</code> bbox region, call <code>fit_plane_ransac()</code> to fit the surface normal</span>
+        </li>
+        <li>
+          <span data-zh>取两个 <code>DC_hole</code> bbox 中心 + 深度 &rarr; 调用 <code>backproject()</code> &rarr; 得到 3D 坐标 <code>p_dc_plus</code>、<code>p_dc_minus</code></span>
+          <span data-en>Get center + depth of two <code>DC_hole</code> bboxes &rarr; call <code>backproject()</code> &rarr; obtain 3D coordinates <code>p_dc_plus</code>, <code>p_dc_minus</code></span>
+        </li>
+        <li>
+          <span data-zh>取 <code>PE</code> bbox 中心 + 深度 &rarr; 调用 <code>backproject()</code> &rarr; 得到 3D 坐标 <code>p_pe</code></span>
+          <span data-en>Get center + depth of <code>PE</code> bbox &rarr; call <code>backproject()</code> &rarr; obtain 3D coordinate <code>p_pe</code></span>
+        </li>
+        <li>
+          <span data-zh>调用 <code>build_pose(p_dc_plus, p_dc_minus, p_pe, normal_ransac)</code> 构建 <code>T_cam2port</code></span>
+          <span data-en>Call <code>build_pose(p_dc_plus, p_dc_minus, p_pe, normal_ransac)</code> to construct <code>T_cam2port</code></span>
+        </li>
+        <li>
+          <span data-zh>调用 <code>draw_axis()</code> 在图像上画坐标轴，打印变换矩阵到终端</span>
+          <span data-en>Call <code>draw_axis()</code> to overlay coordinate axes on the image, print the transformation matrix to the terminal</span>
+        </li>
+      </ol>
+      <div class="tip">
+        <strong><span data-zh>帧过滤：</span><span data-en>Frame filtering:</span></strong>
+        <span data-zh>若 <code>build_pose()</code> 返回 <code>None</code>（法向量校验失败），跳过当前帧，继续处理下一帧。建议对多帧结果做滑动平均，进一步减少单帧噪声。</span>
+        <span data-en>If <code>build_pose()</code> returns <code>None</code> (normal validation failed), skip this frame and continue. A sliding-window average over multiple frames further reduces per-frame noise.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 11 ═══ -->
+  <div class="step" id="step-11">
+    <div class="step-header">
+      <div class="step-num">11</div>
+      <h2>
+        <span data-zh>可视化坐标轴</span>
+        <span data-en>Visualizing the Coordinate Axes</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh>在图像上画出充电口坐标系三轴，便于调试和验证位姿结果：</span>
+        <span data-en>Draw the three axes of the charging port coordinate frame onto the image for debugging and visual validation:</span>
+      </p>
+      <div class="code-block"><span class="keyword">def</span> draw_axis(img, T, fx, fy, cx, cy, length=<span class="number">0.03</span>):
+    <span class="string">"""在图像上画充电口坐标系三轴（红X，绿Y，蓝Z）"""</span>
+    origin = T[:<span class="number">3</span>, <span class="number">3</span>]
+    axes = {<span class="string">'X'</span>: (T[:<span class="number">3</span>,<span class="number">0</span>], (<span class="number">0</span>,<span class="number">0</span>,<span class="number">255</span>)),
+            <span class="string">'Y'</span>: (T[:<span class="number">3</span>,<span class="number">1</span>], (<span class="number">0</span>,<span class="number">255</span>,<span class="number">0</span>)),
+            <span class="string">'Z'</span>: (T[:<span class="number">3</span>,<span class="number">2</span>], (<span class="number">255</span>,<span class="number">0</span>,<span class="number">0</span>))}
+    <span class="keyword">def</span> proj(p):
+        <span class="keyword">return</span> (int(p[<span class="number">0</span>]/p[<span class="number">2</span>]*fx+cx), int(p[<span class="number">1</span>]/p[<span class="number">2</span>]*fy+cy))
+    o2d = proj(origin)
+    <span class="keyword">for</span> name, (axis, color) <span class="keyword">in</span> axes.items():
+        end = origin + axis * length
+        cv2.arrowedLine(img, o2d, proj(end), color, <span class="number">2</span>, tipLength=<span class="number">0.2</span>)
+        cv2.putText(img, name, proj(end), cv2.FONT_HERSHEY_SIMPLEX, <span class="number">0.5</span>, color, <span class="number">1</span>)</div>
+      <table>
+        <tr>
+          <th><span data-zh>轴</span><span data-en>Axis</span></th>
+          <th><span data-zh>颜色（OpenCV BGR）</span><span data-en>Color (OpenCV BGR)</span></th>
+          <th><span data-zh>方向含义</span><span data-en>Direction</span></th>
+        </tr>
+        <tr>
+          <td>X</td>
+          <td><span data-zh>红色 (0,0,255)</span><span data-en>Red (0,0,255)</span></td>
+          <td><span data-zh>DC+ &rarr; DC- 方向</span><span data-en>DC+ &rarr; DC- direction</span></td>
+        </tr>
+        <tr>
+          <td>Y</td>
+          <td><span data-zh>绿色 (0,255,0)</span><span data-en>Green (0,255,0)</span></td>
+          <td><span data-zh>充电口向上方向</span><span data-en>Upward direction of the port</span></td>
+        </tr>
+        <tr>
+          <td>Z</td>
+          <td><span data-zh>蓝色 (255,0,0)</span><span data-en>Blue (255,0,0)</span></td>
+          <td><span data-zh>充电口法向量（指向相机）</span><span data-en>Port normal (pointing toward camera)</span></td>
+        </tr>
+      </table>
+      <p>
+        <span data-zh><code>length=0.03</code> 表示轴长 30 mm，适合充电口尺寸，可根据相机距离调整。</span>
+        <span data-en><code>length=0.03</code> draws 30 mm arrows, appropriate for the charging port size. Adjust based on the camera-to-port distance.</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 12 ═══ -->
+  <div class="step" id="step-12">
+    <div class="step-header">
+      <div class="step-num">12</div>
+      <h2>
+        <span data-zh>输出结果说明</span>
+        <span data-en>Understanding the Output</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh><code>T_cam2port</code> 的结构含义：</span>
+        <span data-en>Structure of <code>T_cam2port</code>:</span>
+      </p>
+      <div class="code-block">T_cam2port = [R | t]
+             [0 | 1]
+
+t = T[:<span class="number">3</span>,<span class="number">3</span>]   <span class="comment">→ 充电口中心在相机坐标系的 XYZ 坐标（米）</span>
+R = T[:<span class="number">3</span>,:<span class="number">3</span>]  <span class="comment">→ 充电口旋转矩阵</span>
+  <span class="comment">列0 = X轴方向（DC+ → DC- 方向）</span>
+  <span class="comment">列1 = Y轴方向（向上）</span>
+  <span class="comment">列2 = Z轴方向（充电口法向量，指向相机）</span>
+
+<span class="comment">终端输出示例：</span>
+T_cam2port:
+[[ <span class="number">0.9998</span> -<span class="number">0.0123</span>  <span class="number">0.0156</span>  <span class="number">0.0023</span>]
+ [ <span class="number">0.0119</span>  <span class="number">0.9994</span>  <span class="number">0.0312</span> -<span class="number">0.0187</span>]
+ [-<span class="number">0.0160</span> -<span class="number">0.0310</span>  <span class="number">0.9994</span>  <span class="number">0.4821</span>]
+ [ <span class="number">0</span>.      <span class="number">0</span>.      <span class="number">0</span>.      <span class="number">1</span>.    ]]
+距离: <span class="number">482</span>mm  X: <span class="number">2.3</span>mm  Y: -<span class="number">18.7</span>mm  Z: <span class="number">482.1</span>mm</div>
+      <table>
+        <tr>
+          <th><span data-zh>读数</span><span data-en>Reading</span></th>
+          <th><span data-zh>来源</span><span data-en>Source</span></th>
+          <th><span data-zh>含义</span><span data-en>Meaning</span></th>
+        </tr>
+        <tr>
+          <td><code>Z: 482.1mm</code></td>
+          <td><code>T[:3,3][2] * 1000</code></td>
+          <td><span data-zh>充电口距相机的深度</span><span data-en>Depth from camera to port</span></td>
+        </tr>
+        <tr>
+          <td><code>X: 2.3mm</code></td>
+          <td><code>T[:3,3][0] * 1000</code></td>
+          <td><span data-zh>充电口水平偏移（相机坐标系）</span><span data-en>Lateral offset in camera frame</span></td>
+        </tr>
+        <tr>
+          <td><code>Y: -18.7mm</code></td>
+          <td><code>T[:3,3][1] * 1000</code></td>
+          <td><span data-zh>充电口垂直偏移（相机坐标系）</span><span data-en>Vertical offset in camera frame</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 13 ═══ -->
+  <div class="step" id="step-13">
+    <div class="step-header">
+      <div class="step-num">13</div>
+      <h2>
+        <span data-zh>后续：手眼标定（TODO）</span>
+        <span data-en>Next Steps: Eye-Hand Calibration (TODO)</span>
+      </h2>
+    </div>
+    <div class="step-body">
+      <p>
+        <span data-zh><code>T_cam2port</code> 是相机坐标系下的位姿。要让机械臂知道末端去哪，还需手眼标定得到 <code>T_cam2gripper</code>：</span>
+        <span data-en><code>T_cam2port</code> is expressed in the camera frame. For the robot arm to know where to move its end effector, eye-hand calibration is needed to obtain <code>T_cam2gripper</code>:</span>
+      </p>
+      <div class="code-block">T_base2port = T_base2gripper &times; T_gripper2cam &times; T_cam2port
+<span class="comment">其中：</span>
+<span class="comment">  T_cam2gripper  — 手眼标定结果（相机相对末端的固定变换）</span>
+<span class="comment">  T_base2gripper — 机械臂正运动学（实时读取）</span>
+<span class="comment">  T_cam2port     — 本教程输出</span></div>
+      <table>
+        <tr>
+          <th><span data-zh>变换</span><span data-en>Transform</span></th>
+          <th><span data-zh>来源</span><span data-en>Source</span></th>
+          <th><span data-zh>更新频率</span><span data-en>Update Rate</span></th>
+        </tr>
+        <tr>
+          <td><code>T_cam2gripper</code></td>
+          <td><span data-zh>手眼标定（一次性）</span><span data-en>Eye-hand calibration (one-time)</span></td>
+          <td><span data-zh>固定不变</span><span data-en>Static</span></td>
+        </tr>
+        <tr>
+          <td><code>T_base2gripper</code></td>
+          <td><span data-zh>机械臂正运动学</span><span data-en>Robot forward kinematics</span></td>
+          <td><span data-zh>实时</span><span data-en>Real-time</span></td>
+        </tr>
+        <tr>
+          <td><code>T_cam2port</code></td>
+          <td><span data-zh>本教程（视觉检测）</span><span data-en>This tutorial (vision)</span></td>
+          <td><span data-zh>每帧</span><span data-en>Per frame</span></td>
+        </tr>
+      </table>
+      <div class="tip">
+        <strong><span data-zh>下一步参考：</span><span data-en>Next step:</span></strong>
+        <span data-zh>操作教程 Part 2 手眼标定。标定完成后，本教程输出的 <code>T_cam2port</code> 即可直接用于机械臂路径规划，实现自动充电插枪。</span>
+        <span data-en>See Tutorial Part 2: Eye-Hand Calibration. Once calibrated, the <code>T_cam2port</code> output from this tutorial can be directly fed into the robot motion planner to achieve autonomous charging plug insertion.</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <p>
+    <span data-zh>YOLO11 + 深度相机 6DoF 位姿估计教程 &middot; Orbbec DaBai DCW2 &middot; GB/T 20234.3 直流充电口</span>
+    <span data-en>YOLO11 + Depth Camera 6DoF Pose Estimation &middot; Orbbec DaBai DCW2 &middot; GB/T 20234.3 DC Charging Port</span>
+  </p>
+  <p style="margin-top:6px">
+    <span data-zh>适用场景：电动汽车自动充电 &middot; 工业机器人末端操作 &middot; 视觉引导抓取</span>
+    <span data-en>Use cases: EV autonomous charging &middot; Industrial robot end-effector control &middot; Vision-guided grasping</span>
+  </p>
+</footer>
+
+<a href="#" class="scroll-top" title="回到顶部">&#8593;</a>
+
+</div><!-- /page-body -->
+
+<script>
+// ── Language toggle ──
+function toggleLang() {
+  var body = document.body;
+  var btn  = document.getElementById('langBtn');
+  if (body.classList.contains('lang-zh')) {
+    body.classList.remove('lang-zh');
+    body.classList.add('lang-en');
+    btn.textContent = '中';
+  } else {
+    body.classList.remove('lang-en');
+    body.classList.add('lang-zh');
+    btn.textContent = 'EN';
+  }
+}
+
+// ── Sidebar active link on scroll ──
+var sections     = document.querySelectorAll('.step[id]');
+var sidebarLinks = document.querySelectorAll('.sidebar a');
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      sidebarLinks.forEach(function(a) { a.classList.remove('active'); });
+      var active = document.querySelector('.sidebar a[href="#' + entry.target.id + '"]');
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(function(s) { observer.observe(s); });
+</script>
+
+</body>
+</html>
