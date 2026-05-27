@@ -228,6 +228,7 @@
       border: 1px solid #e0ddd8;
       border-radius: 3px;
       padding: 16px;
+      padding-right: 60px;
       overflow-x: auto;
       margin: 14px 0;
       font-family: var(--font-mono);
@@ -235,6 +236,35 @@
       color: #1a1a1a;
       line-height: 1.6;
       white-space: pre;
+      position: relative;
+    }
+
+    /* Copy button */
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #ffffff;
+      border: 1px solid #e0ddd8;
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #6b6b6b;
+      padding: 3px 10px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s, background 0.15s, color 0.15s;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .code-block:hover .copy-btn,
+    .result-box:hover .copy-btn {
+      opacity: 1;
+    }
+    .copy-btn:hover {
+      background: #1a1a1a;
+      color: #f5f2ed;
+      border-color: #1a1a1a;
     }
     .code-block .comment { color: #a0a0a0; }
     .code-block .keyword { color: #1a1a1a; font-weight: 500; }
@@ -319,10 +349,12 @@
       font-family: var(--font-mono);
       font-size: 13px;
       padding: 16px;
+      padding-right: 60px;
       margin: 14px 0;
       overflow-x: auto;
       white-space: pre;
       color: #1a1a1a;
+      position: relative;
     }
 
     /* ── Checklist ── */
@@ -477,6 +509,12 @@ conda activate yolo_env</div>
       <p>首次运行时 ultralytics 会自动下载，也可手动下载放到项目目录：</p>
       <div class="code-block"><span class="comment"># 在项目目录下运行，自动下载 yolo11n.pt</span>
 python -c <span class="string">"from ultralytics import YOLO; YOLO('yolo11n.pt')"</span></div>
+
+      <p>手动下载地址：<a href="https://github.com/ultralytics/assets/releases" target="_blank">https://github.com/ultralytics/assets/releases</a>，也可用 wget 直接下载：</p>
+      <div class="code-block"><span class="comment"># 下载对应版本的预训练权重</span>
+wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.pt
+wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11s.pt
+wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt</div>
 
       <div class="tip">
         <strong>💡 说明：</strong>yolo11n.pt 是 YOLO11 nano 版本，参数量最小、速度最快，适合实时检测场景。后续训练以此为基础进行迁移学习（fine-tune）。
@@ -1043,6 +1081,26 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, { rootMargin: '-20% 0px -70% 0px' });
 sections.forEach(s => observer.observe(s));
+
+// Copy button for code blocks
+document.querySelectorAll('.code-block, .result-box').forEach(block => {
+  const codeText = block.textContent.trim();
+  block.setAttribute('data-code', codeText);
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  block.appendChild(btn);
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(block.getAttribute('data-code')).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    }).catch(() => {
+      btn.textContent = 'Error';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    });
+  });
+});
 </script>
 
 </body>
