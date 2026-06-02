@@ -115,6 +115,11 @@
     .page-body {
       margin-left: var(--sidebar-width);
       margin-top: 50px;
+      margin-right: 0;
+      transition: margin-right 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    body.anno-open .page-body {
+      margin-right: 290px;
     }
 
     /* ── Hero ── */
@@ -341,6 +346,25 @@
     .badge-blue  { background: #f0ede8; color: #555; }
     .badge-orange { background: #fdf5ec; color: #b07030; }
 
+    /* ── Tutorial images ── */
+    .tutorial-img {
+      display: block;
+      max-width: 100%;
+      margin: 20px 0;
+      border: 1px solid #e0ddd8;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(26,26,26,0.05);
+    }
+    .img-caption {
+      text-align: center;
+      font-size: 11px;
+      color: #a0a0a0;
+      margin-top: -14px;
+      margin-bottom: 20px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+    }
+
     /* ── Result box ── */
     .result-box {
       background: var(--bg);
@@ -414,6 +438,251 @@
       box-shadow: 0 2px 8px rgba(26,26,26,0.15);
     }
     .scroll-top:hover { background: #333; }
+
+    /* ── Annotation panel (right side) ── */
+    .anno-toggle {
+      position: fixed;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      background: #1a1a1a;
+      color: #c5c0b8;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 3px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      padding: 14px 8px;
+      border: 1px solid #333;
+      border-right: none;
+      border-radius: 3px 0 0 3px;
+      cursor: pointer;
+      z-index: 201;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .anno-toggle:hover {
+      background: #333;
+      color: #f5f2ed;
+    }
+    .anno-toggle.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .anno-panel {
+      position: fixed;
+      top: 50px;
+      right: -290px;
+      width: 290px;
+      height: calc(100vh - 50px);
+      background: #ffffff;
+      border-left: 1px solid #e0ddd8;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
+      box-shadow: -2px 0 16px rgba(26,26,26,0.06);
+    }
+    .anno-panel.open {
+      right: 0;
+    }
+
+    .anno-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid #e0ddd8;
+      flex-shrink: 0;
+    }
+    .anno-header span {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #b0a89e;
+    }
+    .anno-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #a0a0a0;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .anno-close:hover { color: #1a1a1a; }
+
+    .anno-quote-btn {
+      background: none;
+      border: 1px solid #e0ddd8;
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #6b6b6b;
+      padding: 3px 8px;
+      cursor: pointer;
+      margin-left: auto;
+      margin-right: 8px;
+      transition: all 0.15s;
+      letter-spacing: 1px;
+    }
+    .anno-quote-btn:hover {
+      background: #f0ede8;
+      color: #1a1a1a;
+      border-color: #c5c0b8;
+    }
+    .anno-quote-btn.has-selection {
+      background: #f0f7f2;
+      color: #2d6a4f;
+      border-color: #2d6a4f;
+    }
+
+    .anno-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      border-top: 1px solid #e0ddd8;
+      flex-shrink: 0;
+    }
+    .anno-status {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #a0a0a0;
+      letter-spacing: 1px;
+    }
+    .anno-status.saved { color: #2d6a4f; }
+
+    .anno-export-btn {
+      background: #1a1a1a;
+      color: #f5f2ed;
+      border: none;
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .anno-export-btn:hover { background: #333; }
+
+    /* ── Highlights in main content ── */
+    .anno-hl {
+      background: #fef3c7;
+      border-bottom: 2px solid #f59e0b;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-radius: 1px;
+      padding: 0 1px;
+    }
+    .anno-hl:hover { background: #fde68a; }
+    .anno-hl.flash {
+      background: #fbbf24;
+      transition: background 0s;
+    }
+
+    /* ── Reference list in annotation panel ── */
+    .anno-refs {
+      flex: 1;
+      overflow-y: auto;
+    }
+    #anno-ref-count {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #b0a89e;
+    }
+    .anno-refs-header {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #b0a89e;
+      padding: 10px 18px 6px;
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+    }
+    .anno-ref-item { cursor: pointer; }
+    .anno-ref-item:hover { background: #faf8f5; }
+    .anno-ref-item.active { background: #fef3c7; }
+    .anno-ref-item.expanded { background: #faf8f5; }
+    .anno-ref-item:last-child { border-bottom: none; }
+
+    .anno-ref-expand {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: #c5c0b8;
+      margin-left: 8px;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .anno-ref-item.expanded .anno-ref-expand {
+      transform: rotate(90deg);
+      color: #6b6b6b;
+    }
+
+    .anno-ref-note {
+      width: 100%;
+      border: none;
+      border-top: 1px solid #f0ede8;
+      outline: none;
+      resize: vertical;
+      padding: 12px 18px;
+      font-family: Inter, -apple-system, sans-serif;
+      font-size: 12px;
+      line-height: 1.7;
+      color: #1a1a1a;
+      background: #ffffff;
+      min-height: 60px;
+      display: none;
+    }
+    .anno-ref-item.expanded + .anno-ref-note {
+      display: block;
+    }
+    .anno-ref-note:focus {
+      background: #faf8f5;
+    }
+    .anno-ref-num {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: #b0a89e;
+      letter-spacing: 1px;
+    }
+    .anno-ref-text {
+      font-size: 11px;
+      color: #6b6b6b;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
+    }
+    .anno-ref-del {
+      background: none;
+      border: none;
+      color: #c5c0b8;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 0 0 0 8px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: color 0.15s;
+    }
+    .anno-ref-del:hover { color: #d93025; }
+    .anno-ref-item {
+      padding: 7px 18px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid #f5f2ed;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
   </style>
 </head>
 <body>
@@ -441,8 +710,6 @@
     <li><a href="#step6">6. 修正 data.yaml 路径</a></li>
     <li><a href="#step7">7. 本地训练模型</a></li>
     <li><a href="#step8">8. 解读训练结果</a></li>
-    <li><a href="#step9">9. 替换模型并运行检测</a></li>
-    <li><a href="#step10">10. 后续迭代</a></li>
     <li><a href="#faq">常见问题 FAQ</a></li>
   </ul>
 </div>
@@ -505,6 +772,9 @@ conda activate yolo_env</div>
       <h3>1.3 验证安装</h3>
       <div class="code-block">python -c <span class="string">"from ultralytics import YOLO; print('OK')"</span></div>
 
+      <img class="tutorial-img" src="images/step1-env-verify.png" alt="终端截图：环境安装验证成功" loading="lazy">
+      <p class="img-caption">▲ 图 1：Conda 环境创建 + Ultralytics 安装验证成功的终端输出</p>
+
       <h3>1.4 下载初始预训练权重</h3>
       <p>首次运行时 ultralytics 会自动下载，也可手动下载放到项目目录：</p>
       <div class="code-block"><span class="comment"># 在项目目录下运行，自动下载 yolo11n.pt</span>
@@ -544,12 +814,18 @@ wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt</
         <li>填写项目名称，点击 <strong>Create Project</strong></li>
       </ol>
 
+      <img class="tutorial-img" src="images/step2-roboflow-new-project.png" alt="Roboflow 新建项目弹窗" loading="lazy">
+      <p class="img-caption">▲ 图 2：Roboflow New Project 弹窗 — Project Type 选择 Object Detection</p>
+
       <h3>2.2 上传图片</h3>
       <ol>
         <li>进入项目后，点击左侧 <strong>Upload Data</strong></li>
         <li>拖拽图片文件夹或点击选择文件（支持 JPG/PNG）</li>
         <li>等待上传完成，点击 <strong>Finish Uploading</strong></li>
       </ol>
+
+      <img class="tutorial-img" src="images/step2-roboflow-upload.png" alt="Roboflow 上传图片页面" loading="lazy">
+      <p class="img-caption">▲ 图 3：Roboflow Upload Data 页面 — 图片上传完成，点击 Finish Uploading</p>
 
       <h3>2.3 采集建议</h3>
       <table>
@@ -594,6 +870,9 @@ wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt</
         <li>每张图标注 4 个框：1 个 <code>charging_port</code> + 2 个 <code>DC_hole</code> + 1 个 <code>PE</code></li>
         <li>按 <strong>→</strong> 进入下一张</li>
       </ol>
+
+      <img class="tutorial-img" src="images/step3-annotation-example.png" alt="已标注的充电口照片示例" loading="lazy">
+      <p class="img-caption">▲ 图 4：一张已完成标注的充电口照片 — 4 个框分别标记 charging_port / DC_hole×2 / PE</p>
 
       <h3>3.3 快捷键</h3>
       <table>
@@ -664,6 +943,9 @@ wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt</
         <li><strong>Maximum Version Size</strong>：选 <code>3x</code>（训练集图片数 × 3 倍增强）</li>
         <li>点击 <strong>Create</strong>，等待几秒生成完成</li>
       </ul>
+
+      <img class="tutorial-img" src="images/step4-version-config.png" alt="Roboflow Version 配置页面" loading="lazy">
+      <p class="img-caption">▲ 图 5：Roboflow Version 创建配置 — Train/Test Split + 预处理 + 数据增强 + 3x 上限</p>
     </div>
   </div>
 
@@ -683,6 +965,9 @@ wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt</
         <li>Download Options 选择 <strong>Download zip to computer</strong></li>
         <li>点击 <strong>Continue</strong>，浏览器自动下载 zip 文件</li>
       </ul>
+
+      <img class="tutorial-img" src="images/step5-export-dataset.png" alt="Roboflow 导出数据集弹窗" loading="lazy">
+      <p class="img-caption">▲ 图 6：Download Dataset 弹窗 — Format 选 YOLOv11，download zip to computer</p>
 
       <h3>5.3 解压到指定目录</h3>
       <div class="code-block"><span class="comment"># 将 zip 文件移动到项目的 datasets 目录</span>
@@ -863,109 +1148,9 @@ results[<span class="number">0</span>].show()
 <span class="comment"># 查看检测到的类别和置信度</span>
 <span class="keyword">for</span> box <span class="keyword">in</span> results[<span class="number">0</span>].boxes:
     print(results[<span class="number">0</span>].names[int(box.cls)], float(box.conf))</div>
+
     </div>
   </div>
-
-  <!-- STEP 9 -->
-  <div class="step" id="step9">
-    <div class="step-header">
-      <div class="step-num">9</div>
-      <h2>替换模型并运行实时检测</h2>
-    </div>
-    <div class="step-body">
-      <h3>9.1 修改 live_detect.py 中的模型路径</h3>
-      <p>将脚本中的模型路径从通用预训练模型改为你训练好的权重：</p>
-      <div class="code-block"><span class="comment"># 修改前（通用 YOLO11 模型）</span>
-model = YOLO(<span class="string">"yolo11n.pt"</span>)
-
-<span class="comment"># 修改后（你自己训练的充电口模型）</span>
-model = YOLO(<span class="string">"runs/detect/dc_charging_v1/weights/best.pt"</span>)</div>
-
-      <h3>9.2 运行实时检测</h3>
-      <div class="code-block">conda activate yolo_env
-cd /你的项目目录
-
-<span class="comment"># 设置库路径</span>
-export PYTHONPATH=$PYTHONPATH:$(pwd)/pyorbbecsdk/install/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/pyorbbecsdk/install/lib
-
-<span class="comment"># 启动检测</span>
-python live_detect.py</div>
-
-      <div class="tip">
-        <strong>💡 简化启动：</strong>将上述 export 命令写入 <code>run.sh</code> 脚本，以后只需运行 <code>bash run.sh</code> 即可：
-        <div class="code-block" style="margin-top:8px">#!/bin/bash
-cd "$(dirname "$0")"
-export LD_LIBRARY_PATH="$(pwd)/pyorbbecsdk/install/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="$(pwd)/pyorbbecsdk/install/lib:$PYTHONPATH"
-/home/用户名/miniconda3/envs/yolo_env/bin/python live_detect.py</div>
-      </div>
-
-      <h3>9.3 检测窗口说明</h3>
-      <ul>
-        <li>绿色框：检测到的目标（charging_port / DC_hole / PE）</li>
-        <li>框上方文字：类别名 + 置信度 + 距离（米）</li>
-        <li>红色圆点：bbox 中心点（用于采样深度值）</li>
-        <li>按 <strong>Q</strong> 或 <strong>ESC</strong> 退出</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- STEP 10 -->
-  <div class="step" id="step10">
-    <div class="step-header">
-      <div class="step-num">10</div>
-      <h2>后续迭代：增加数据重新训练</h2>
-    </div>
-    <div class="step-body">
-      <h3>10.1 迭代策略</h3>
-      <table>
-        <tr><th>新增数据量</th><th>推荐策略</th><th>起始权重</th><th>epochs</th></tr>
-        <tr><td>10~30 张</td><td>Fine-tune（继续训练）</td><td>上一次的 best.pt</td><td>50</td></tr>
-        <tr><td>50 张以上</td><td>重头训练</td><td>yolo11n.pt</td><td>100</td></tr>
-      </table>
-
-      <h3>10.2 Fine-tune 脚本</h3>
-      <div class="code-block"><span class="keyword">from</span> ultralytics <span class="keyword">import</span> YOLO
-
-<span class="comment"># 从上一次训练的 best.pt 继续</span>
-model = YOLO(<span class="string">"runs/detect/dc_charging_v1/weights/best.pt"</span>)
-
-model.train(
-    data=<span class="string">"/绝对路径/datasets/新版数据集/data.yaml"</span>,
-    epochs=<span class="number">50</span>,          <span class="comment"># 轮数可以少一些</span>
-    imgsz=<span class="number">512</span>,
-    batch=<span class="number">16</span>,
-    name=<span class="string">"dc_charging_v2"</span>,   <span class="comment"># 版本号递增</span>
-    project=<span class="string">"runs/detect"</span>,
-)</div>
-
-      <h3>10.3 完整迭代流程</h3>
-      <ol>
-        <li>在 Roboflow 上传新照片并完成标注</li>
-        <li>重新生成一个新的 Version（版本号自动递增）</li>
-        <li>导出新 Version 的数据集 zip 文件</li>
-        <li>解压，修改 <code>data.yaml</code> 为绝对路径</li>
-        <li>运行 fine-tune 脚本，等待训练完成</li>
-        <li>将 <code>live_detect.py</code> 中的模型路径改为新的 <code>best.pt</code></li>
-        <li>测试效果</li>
-      </ol>
-
-      <h3>10.4 操作检查清单</h3>
-      <ul class="checklist">
-        <li>新照片已上传到 Roboflow</li>
-        <li>所有新图片已完成标注（每张 4 个框）</li>
-        <li>已生成新版本 Version（包含增强配置）</li>
-        <li>已下载并解压新数据集 zip</li>
-        <li>data.yaml 路径已修改为绝对路径</li>
-        <li>已运行训练脚本</li>
-        <li>训练完成后 mAP50 &gt; 0.95</li>
-        <li>live_detect.py 已替换为新的 best.pt</li>
-        <li>实测摄像头检测效果正常</li>
-      </ul>
-    </div>
-  </div>
-
 
   <!-- FAQ -->
   <div class="step" id="faq">
@@ -1067,6 +1252,26 @@ model.train(
 
 </div><!-- /page-body -->
 
+<!-- Annotation panel toggle -->
+<div id="anno-toggle" class="anno-toggle">批注</div>
+
+<!-- Annotation panel -->
+<div id="anno-panel" class="anno-panel">
+  <div class="anno-header">
+    <span>批注</span>
+    <button id="anno-quote" class="anno-quote-btn" title="引用页面中选中的文字">引用选中</button>
+    <button id="anno-close" class="anno-close" title="关闭">&times;</button>
+  </div>
+  <div id="anno-refs" class="anno-refs">
+    <div class="anno-refs-header">引用列表 <span id="anno-ref-count"></span></div>
+    <div id="anno-refs-list"></div>
+  </div>
+  <div class="anno-footer">
+    <span id="anno-status" class="anno-status saved">已保存</span>
+    <button id="anno-export" class="anno-export-btn">导出 HTML</button>
+  </div>
+</div>
+
 <script>
 // Sidebar active link on scroll
 const sections = document.querySelectorAll('.step[id], [id="overview"]');
@@ -1100,6 +1305,290 @@ document.querySelectorAll('.code-block, .result-box').forEach(block => {
       setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
     });
   });
+});
+
+// ── Annotation panel ──
+const annoToggle   = document.getElementById('anno-toggle');
+const annoPanel    = document.getElementById('anno-panel');
+const annoClose    = document.getElementById('anno-close');
+const annoQuote    = document.getElementById('anno-quote');
+const annoStatus   = document.getElementById('anno-status');
+const annoExport   = document.getElementById('anno-export');
+const annoRefsList = document.getElementById('anno-refs-list');
+const annoRefCount = document.getElementById('anno-ref-count');
+const pageBody     = document.querySelector('.page-body');
+
+// References store: { id, quote, markEl, parentId, note }
+let annoRefsArr = [];
+
+function openPanel() {
+  annoPanel.classList.add('open');
+  annoToggle.classList.add('hidden');
+  document.body.classList.add('anno-open');
+}
+
+function closePanel() {
+  annoPanel.classList.remove('open');
+  annoToggle.classList.remove('hidden');
+  document.body.classList.remove('anno-open');
+}
+
+function escapeHTML(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function saveRefs() {
+  const data = annoRefsArr.map(r => ({ id: r.id, quote: r.quote, parentId: r.parentId, note: r.note || '' }));
+  localStorage.setItem('yolo-tutorial-refs', JSON.stringify(data));
+}
+
+function deleteRef(idx) {
+  const ref = annoRefsArr[idx];
+  if (!ref) return;
+  if (ref.markEl && document.body.contains(ref.markEl)) {
+    const parent = ref.markEl.parentNode;
+    while (ref.markEl.firstChild) parent.insertBefore(ref.markEl.firstChild, ref.markEl);
+    parent.removeChild(ref.markEl);
+    parent.normalize();
+  }
+  annoRefsArr.splice(idx, 1);
+  annoRefsArr.forEach((r, i) => { r.id = i; if (r.markEl) r.markEl.dataset.annoRef = i; });
+  saveRefs();
+  renderRefs();
+}
+
+function renderRefs() {
+  // Sort by DOM position (top → bottom)
+  annoRefsArr.sort((a, b) => {
+    if (!a.markEl || !document.body.contains(a.markEl)) return 0;
+    if (!b.markEl || !document.body.contains(b.markEl)) return 0;
+    const pos = a.markEl.compareDocumentPosition(b.markEl);
+    return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+  });
+  annoRefsArr.forEach((r, i) => { r.id = i; if (r.markEl) r.markEl.dataset.annoRef = i; });
+
+  annoRefsList.innerHTML = annoRefsArr.map((ref, i) =>
+    '<div class="anno-ref-item" data-anno-ref="' + i + '">' +
+    '<div class="anno-ref-num">引用 #' + (i + 1) + '</div>' +
+    '<div class="anno-ref-text">' + escapeHTML(ref.quote.substring(0, 120)) + '</div>' +
+    '<span class="anno-ref-expand">▶</span>' +
+    '<button class="anno-ref-del" data-action="delete" data-idx="' + i + '" title="删除此引用">&times;</button>' +
+    '</div>' +
+    '<textarea class="anno-ref-note" data-anno-ref="' + i + '" placeholder="点击左侧引用条目展开，在此写批注...">' + escapeHTML(ref.note || '') + '</textarea>'
+  ).join('');
+  annoRefCount.textContent = annoRefsArr.length > 0 ? '(' + annoRefsArr.length + ')' : '';
+}
+
+function restoreRefs() {
+  const raw = localStorage.getItem('yolo-tutorial-refs');
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch (e) { return; }
+  if (!Array.isArray(data)) return;
+
+  data.forEach((item, idx) => {
+    const container = item.parentId ? document.getElementById(item.parentId) : pageBody;
+    if (!container) return;
+    const mark = findAndWrapText(container, item.quote, idx);
+    if (mark) {
+      annoRefsArr.push({ id: idx, quote: item.quote, markEl: mark, parentId: item.parentId, note: item.note || '' });
+    }
+  });
+
+  if (annoRefsArr.length > 0) renderRefs();
+}
+
+function findAndWrapText(container, searchText, refIdx) {
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+  let node;
+  while ((node = walker.nextNode())) {
+    const idx = node.textContent.indexOf(searchText);
+    if (idx === -1) continue;
+    if (node.parentNode.closest('textarea, script, style, .anno-panel, .sidebar, nav')) continue;
+    try {
+      const range = document.createRange();
+      range.setStart(node, idx);
+      range.setEnd(node, idx + searchText.length);
+      const mark = document.createElement('mark');
+      mark.className = 'anno-hl';
+      mark.dataset.annoRef = refIdx;
+      range.surroundContents(mark);
+      return mark;
+    } catch (e) { continue; }
+  }
+  return null;
+}
+
+// Toggle open / close
+annoToggle.addEventListener('click', openPanel);
+annoClose.addEventListener('click', closePanel);
+
+// Highlight quote button when text is selected in main content
+document.addEventListener('selectionchange', () => {
+  const sel = window.getSelection();
+  const inContent = sel.rangeCount > 0 && pageBody.contains(sel.anchorNode);
+  if (sel.toString().trim().length > 0 && inContent) {
+    annoQuote.classList.add('has-selection');
+  } else {
+    annoQuote.classList.remove('has-selection');
+  }
+});
+
+// Quote selected text → create highlight + add reference
+annoQuote.addEventListener('click', () => {
+  const sel = window.getSelection();
+  const text = sel.toString().trim();
+  if (!text) return;
+  if (sel.rangeCount === 0) return;
+
+  const range = sel.getRangeAt(0);
+  if (!pageBody.contains(range.commonAncestorContainer)) return;
+
+  let mark;
+  try {
+    mark = document.createElement('mark');
+    mark.className = 'anno-hl';
+    mark.dataset.annoRef = annoRefsArr.length;
+    range.surroundContents(mark);
+  } catch (e) {
+    try {
+      const frag = range.extractContents();
+      mark = document.createElement('mark');
+      mark.className = 'anno-hl';
+      mark.dataset.annoRef = annoRefsArr.length;
+      mark.appendChild(frag);
+      range.insertNode(mark);
+    } catch (e2) {
+      alert('无法高亮跨层级选区，请选择单个段落内的文字。');
+      return;
+    }
+  }
+
+  const parentStep = mark.closest('.step');
+  const parentId = parentStep ? parentStep.id : null;
+  annoRefsArr.push({ id: annoRefsArr.length, quote: text, markEl: mark, parentId: parentId, note: '' });
+  saveRefs();
+  renderRefs();
+
+  if (!annoPanel.classList.contains('open')) openPanel();
+  sel.removeAllRanges();
+});
+
+// Click on highlight in content → navigate to reference in panel
+pageBody.addEventListener('click', (e) => {
+  const mark = e.target.closest('.anno-hl');
+  if (!mark) return;
+  const refIdx = parseInt(mark.dataset.annoRef);
+  if (isNaN(refIdx) || refIdx >= annoRefsArr.length) return;
+
+  if (!annoPanel.classList.contains('open')) openPanel();
+
+  const refItem = annoRefsList.querySelector('[data-anno-ref="' + refIdx + '"]');
+  if (refItem) {
+    annoRefsList.querySelectorAll('.anno-ref-item').forEach(el => el.classList.remove('active'));
+    refItem.classList.add('active');
+    refItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Auto-expand the note
+    if (!refItem.classList.contains('expanded')) {
+      refItem.classList.add('expanded');
+    }
+  }
+
+  mark.classList.add('flash');
+  setTimeout(() => mark.classList.remove('flash'), 800);
+});
+
+// Click on reference list → navigate, expand, delete
+annoRefsList.addEventListener('click', (e) => {
+  // Handle delete button
+  if (e.target.dataset.action === 'delete') {
+    e.stopPropagation();
+    const idx = parseInt(e.target.dataset.idx);
+    if (!isNaN(idx)) deleteRef(idx);
+    return;
+  }
+
+  // Handle expand arrow or item click
+  const item = e.target.closest('.anno-ref-item');
+  if (!item) return;
+
+  // Ignore clicks on the note textarea inside the expanded area
+  if (e.target.closest('.anno-ref-note')) return;
+
+  const refIdx = parseInt(item.dataset.annoRef);
+  if (isNaN(refIdx) || refIdx >= annoRefsArr.length) return;
+
+  // Toggle expand
+  if (item.classList.contains('expanded')) {
+    item.classList.remove('expanded');
+  } else {
+    item.classList.add('expanded');
+    // Focus the note textarea
+    const noteTA = annoRefsList.querySelector('.anno-ref-note[data-anno-ref="' + refIdx + '"]');
+    if (noteTA) noteTA.focus();
+  }
+
+  // Navigate to highlight in content
+  const mark = annoRefsArr[refIdx].markEl;
+  if (mark && document.body.contains(mark)) {
+    mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    mark.classList.add('flash');
+    setTimeout(() => mark.classList.remove('flash'), 800);
+  }
+});
+
+// Save notes on input (delegated on refs list)
+annoRefsList.addEventListener('input', (e) => {
+  const noteTA = e.target.closest('.anno-ref-note');
+  if (!noteTA) return;
+  const refIdx = parseInt(noteTA.dataset.annoRef);
+  if (isNaN(refIdx) || refIdx >= annoRefsArr.length) return;
+  annoRefsArr[refIdx].note = noteTA.value;
+
+  annoStatus.textContent = '保存中...';
+  annoStatus.classList.remove('saved');
+  clearTimeout(noteTA._saveTimer);
+  noteTA._saveTimer = setTimeout(() => {
+    saveRefs();
+    annoStatus.textContent = '已保存';
+    annoStatus.classList.add('saved');
+  }, 500);
+});
+
+// Restore saved references
+restoreRefs();
+
+// Export HTML with all notes
+annoExport.addEventListener('click', () => {
+  let html = document.documentElement.outerHTML;
+
+  // Build a notes report block
+  let report = '';
+  annoRefsArr.forEach((ref, i) => {
+    report += '────────────────────────\n';
+    report += '[引用 #' + (i + 1) + ']\n';
+    report += '> ' + ref.quote.replace(/\n/g, '\n> ') + '\n';
+    if (ref.note && ref.note.trim()) {
+      report += '\n批注：\n' + ref.note.trim() + '\n';
+    }
+    report += '\n';
+  });
+
+  // Inject report before </body>
+  if (report) {
+    const reportHTML = '\n<!-- 批注导出 -->\n<pre id="anno-export-block" style="display:none">' + escapeHTML(report) + '</pre>\n';
+    html = html.replace('</body>', reportHTML + '</body>');
+  }
+
+  const blob = new Blob(['<!DOCTYPE html>\n' + html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'YOLO11-教程-笔记.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });
 </script>
 
