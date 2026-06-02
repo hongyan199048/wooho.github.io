@@ -112,6 +112,35 @@
     .api-key-input { font-size: 10px; }
     .api-key-input::placeholder { color: #d0ccc4; }
 
+.file-list-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 8px; background: #faf8f5; border: 1px solid #e0ddd8;
+  border-radius: 3px; margin-bottom: 4px; font-size: 11px; gap: 8px;
+}
+.file-list-name {
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: #1a1a1a;
+}
+.file-list-size { font-family: var(--font-mono); font-size: 9px; color: #b0a89e; flex-shrink: 0; }
+.file-list-del {
+  background: none; border: none; color: #c5c0b8; font-size: 14px; cursor: pointer;
+  padding: 0; line-height: 1; flex-shrink: 0; transition: color 0.15s;
+}
+.file-list-del:hover { color: #d93025; }
+
+.api-key-row { margin-top: 4px; position: relative; }
+.api-key-eye {
+  position: absolute; right: 4px; bottom: 5px; background: none; border: none;
+  cursor: pointer; padding: 4px; color: #b0a89e; line-height: 1;
+  transition: color 0.15s; display: flex; align-items: center;
+}
+.api-key-eye:hover { color: #1a1a1a; }
+.api-key-eye svg { width: 14px; height: 14px; }
+.api-key-label {
+  font-size: 10px; color: #6b6b6b; margin-bottom: 2px;
+  display: flex; align-items: center; gap: 6px;
+}
+
     .btn-generate {
       width: 100%; padding: 10px 0; background: #1a1a1a; color: #f5f2ed; border: none;
       border-radius: 4px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 2px;
@@ -367,10 +396,10 @@
   <div id="tab-file">
     <div class="upload-zone" id="upload-zone">
       <div class="upload-zone-icon">📂</div>
-      <div class="upload-zone-text">拖拽文件到此 或 点击选择<br>支持 PDF · Word · 图片</div>
-      <div class="upload-zone-file" id="upload-name" style="display:none"></div>
+      <div class="upload-zone-text">拖拽文件到此 或 点击选择<br>支持 PDF · Word · TXT · MD · 图片</div>
     </div>
-    <input type="file" class="file-input-hidden" id="file-input" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp">
+    <input type="file" class="file-input-hidden" id="file-input" accept=".pdf,.doc,.docx,.txt,.md,.png,.jpg,.jpeg,.webp" multiple>
+    <div id="file-list" style="margin-top:8px"></div>
   </div>
 
   <div id="tab-video" style="display:none">
@@ -382,21 +411,29 @@
     <textarea class="context-textarea" id="context" placeholder="可选：补充说明内容主题、目标受众、期望的详细程度..."></textarea>
   </div>
 
+  <div class="api-key-row">
+    <div class="api-key-label">DeepSeek API Key <span class="model-badge" style="background:#f0f7f2;color:#2d6a4f">已接入</span></div>
+    <div class="api-key-row">
+      <input type="password" class="api-key-input" id="text-api-key" placeholder="sk-... 不填则使用 Demo 模式" style="padding-right:32px">
+      <button class="api-key-eye" id="api-key-eye" title="显示/隐藏">
+        <svg id="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg id="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      </button>
+    </div>
+  </div>
+
   <div>
-    <div class="config-toggle" id="config-toggle">
-      <span>模型配置</span>
+    <div class="config-toggle open" id="config-toggle">
+      <span>更多模型</span>
       <span class="config-arrow">▶</span>
     </div>
-    <div class="config-body" id="config-body">
+    <div class="config-body open" id="config-body">
       <div class="model-row">
-        <div class="model-label">文字模型 <span class="model-badge">待接入</span></div>
+        <div class="model-label">文字模型 <span class="model-badge" style="background:#f0f7f2;color:#2d6a4f">已接入</span></div>
         <select class="model-select" id="text-model">
-          <option value="deepseek-v3">DeepSeek-V3</option>
-          <option value="deepseek-r1">DeepSeek-R1</option>
-          <option value="claude">Claude 4</option>
-          <option value="gpt-4o">GPT-4o</option>
+          <option value="deepseek-v4-pro">DeepSeek V4 Pro</option>
+          <option value="deepseek-v4-flash">DeepSeek V4 Flash</option>
         </select>
-        <input type="password" class="api-key-input" id="text-api-key" placeholder="API Key（可选）">
       </div>
       <div class="model-row">
         <div class="model-label">视觉模型 <span class="model-badge">待接入</span></div>
@@ -448,7 +485,7 @@
   <!-- Loading -->
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <div class="loading-text">AI 正在分析内容，生成教程...</div>
+    <div class="loading-text" id="loading-text">AI 正在分析内容，生成教程...</div>
   </div>
 
   <!-- Generated content will be inserted here -->
@@ -481,6 +518,9 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
 <script>
 // ── Tab switching ──
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -492,10 +532,49 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// ── File upload ──
+// ── File upload (multi-file) ──
 const uploadZone = document.getElementById('upload-zone');
 const fileInput = document.getElementById('file-input');
-const uploadName = document.getElementById('upload-name');
+const fileList = document.getElementById('file-list');
+let selectedFiles = []; // { file, id }
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function renderFileList() {
+  if (selectedFiles.length === 0) {
+    fileList.innerHTML = '';
+    return;
+  }
+  fileList.innerHTML = selectedFiles.map((f, i) =>
+    '<div class="file-list-item">' +
+    '<span class="file-list-name">' + escapeHTML(f.file.name) + '</span>' +
+    '<span class="file-list-size">' + formatSize(f.file.size) + '</span>' +
+    '<button class="file-list-del" data-idx="' + i + '" title="删除">&times;</button>' +
+    '</div>'
+  ).join('');
+  // Bind delete buttons
+  fileList.querySelectorAll('.file-list-del').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx);
+      selectedFiles.splice(idx, 1);
+      renderFileList();
+    });
+  });
+}
+
+function addFiles(newFiles) {
+  for (const f of newFiles) {
+    // Avoid exact duplicates
+    if (selectedFiles.some(sf => sf.file.name === f.name && sf.file.size === f.size)) continue;
+    selectedFiles.push({ file: f, id: Date.now() + Math.random() });
+  }
+  renderFileList();
+}
 
 uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
@@ -503,24 +582,28 @@ uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag
 uploadZone.addEventListener('drop', (e) => {
   e.preventDefault();
   uploadZone.classList.remove('dragover');
-  if (e.dataTransfer.files.length > 0) {
-    fileInput.files = e.dataTransfer.files;
-    showFileName(e.dataTransfer.files[0]);
-  }
+  if (e.dataTransfer.files.length > 0) addFiles(e.dataTransfer.files);
 });
 fileInput.addEventListener('change', () => {
-  if (fileInput.files.length > 0) showFileName(fileInput.files[0]);
+  if (fileInput.files.length > 0) addFiles(fileInput.files);
+  fileInput.value = ''; // reset so re-select same file works
 });
 
-function showFileName(file) {
-  uploadName.textContent = '✓ ' + file.name + ' (' + formatSize(file.size) + ')';
-  uploadName.style.display = 'block';
-}
-function formatSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / 1048576).toFixed(1) + ' MB';
-}
+// ── API key eye toggle ──
+document.getElementById('api-key-eye').addEventListener('click', () => {
+  const inp = document.getElementById('text-api-key');
+  const on = document.getElementById('eye-on');
+  const off = document.getElementById('eye-off');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    on.style.display = 'none';
+    off.style.display = 'block';
+  } else {
+    inp.type = 'password';
+    on.style.display = 'block';
+    off.style.display = 'none';
+  }
+});
 
 // ── Config toggle ──
 document.getElementById('config-toggle').addEventListener('click', function() {
@@ -643,6 +726,217 @@ const DEMO_TUTORIAL = `
 </div>
 `;
 
+// ── Text extraction ──
+async function extractFileContent(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'pdf') {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(it => it.str).join(' ') + '\n';
+    }
+    return fullText.trim();
+  }
+
+  if (ext === 'docx') {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return result.value.trim();
+  }
+
+  if (ext === 'doc') {
+    return '⚠️ .doc 格式暂不支持，请转换为 .docx 后重试。';
+  }
+
+  // Plain text files (txt, md, code files, etc.)
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+
+// ── Template system ──
+const TEMPLATES = [
+  {
+    id: 'tech',
+    name: '技术教程',
+    icon: '💻',
+    keywords: ['代码', 'API', '编程', '开发', '部署', '配置', '安装', '命令行', '函数', '类', '模块',
+               'code', 'api', 'function', 'config', 'install', 'deploy', 'python', 'javascript', 'docker',
+               'git', 'linux', 'server', 'database', 'framework', 'library', 'npm', 'pip', 'sdk'],
+    prompt: `你是一个技术教程编写专家。根据用户提供的技术文档/代码，生成一份面向开发者的技术教程。
+
+### 输出格式
+只输出 HTML，不要用 \`\`\`html 包裹。
+
+### 章节结构
+1. 概览卡片(overview)：用 <div class="flow"> 展示技术流程/架构
+2. 环境准备/前置条件（如适用）
+3. 核心步骤 3-6 个，每个步骤包含：
+   - 概念说明
+   - 代码示例（必须使用 <div class="code-block">）
+   - 参数/配置表格（使用 <table>）
+   - 常见坑点（使用 <div class="warning">）
+4. 完整示例/运行结果（使用 <div class="result-box">）
+5. FAQ：3-4 个技术相关问题
+
+### 组件格式
+- 步骤卡片: <div class="step" id="stepN"> → <div class="step-header"><div class="step-num">N</div><h2>标题</h2></div> → <div class="step-body">内容</div>
+- 代码块: <div class="code-block">代码内容</div>
+- 提示: <div class="tip"><strong>💡 提示：</strong>...</div>
+- 警告: <div class="warning"><strong>⚠️ 注意：</strong>...</div>
+- 表格: <table><tr><th>列1</th></tr><tr><td>值</td></tr></table>
+- 用 <h3> 做子标题
+
+### 要求：代码示例准确可运行，参数说明完整，用中文输出。`
+  },
+  {
+    id: 'manual',
+    name: '操作手册',
+    icon: '📋',
+    keywords: ['操作', '步骤', '安装', '设置', '配置', '按钮', '点击', '选择', '界面', '窗口', '菜单',
+               '教程', '指南', '手册', '使用', '如何', '怎么', '入门', '启动', '登录', '注册',
+               'how', 'guide', 'step', 'click', 'setup', 'install', 'tutorial', 'walkthrough'],
+    prompt: `你是一个操作手册编写专家。根据用户提供的内容，生成一份面向普通用户的操作指南。
+
+### 输出格式
+只输出 HTML，不要用 \`\`\`html 包裹。
+
+### 章节结构
+1. 概览卡片(overview)：用 <div class="flow"> 展示操作流程
+2. 准备工作（需要什么、前置条件）
+3. 操作步骤 4-7 个，每个步骤包含：
+   - 这一步要完成什么
+   - 具体操作说明（编号列表 <ol>）
+   - 操作要点（使用 <div class="tip">）
+   - 可能遇到的问题（使用 <div class="warning">）
+4. 完成后的验证/检查
+5. FAQ：3-4 个常见操作问题
+
+### 组件格式
+- 步骤卡片: <div class="step" id="stepN"> → <div class="step-header"><div class="step-num">N</div><h2>标题</h2></div> → <div class="step-body">内容</div>
+- 提示: <div class="tip"><strong>💡 提示：</strong>...</div>
+- 警告: <div class="warning"><strong>⚠️ 注意：</strong>...</div>
+- 表格: <table><tr><th>列1</th></tr><tr><td>值</td></tr></table>
+- 用 <h3> 做子标题
+
+### 要求：步骤清晰可跟随，避免术语堆砌，每个操作说明要具体（不要"点击按钮"要说"点击右上角蓝色的 xx 按钮"），用中文输出。`
+  },
+  {
+    id: 'course',
+    name: '课程讲义',
+    icon: '📖',
+    keywords: ['学习', '课程', '知识', '概念', '原理', '理论', '基础', '入门', '理解', '掌握',
+               '定义', '分类', '特点', '作用', '关系', '区别', '例子', '练习', '习题',
+               'learn', 'course', 'concept', 'theory', 'principle', 'introduction', 'overview'],
+    prompt: `你是一个课程讲义编写专家。根据用户提供的内容，生成一份结构化的学习讲义。
+
+### 输出格式
+只输出 HTML，不要用 \`\`\`html 包裹。
+
+### 章节结构
+1. 概览卡片(overview)：用 <div class="flow"> 展示知识体系/学习路径
+2. 学习目标（用表格列出：掌握、理解、了解三个层次）
+3. 核心知识点 4-8 个，每个知识点包含：
+   - 概念定义（使用 <p>)
+   - 关键特征/分类（使用 <table>）
+   - 实例说明
+   - 易混淆点辨析（使用 <div class="warning">）
+   - 小结要点（使用 <div class="tip">）
+4. 总结：用表格对比关键概念
+5. FAQ：3-4 个常见疑问
+
+### 组件格式
+- 步骤卡片: <div class="step" id="stepN"> → <div class="step-header"><div class="step-num">N</div><h2>标题</h2></div> → <div class="step-body">内容</div>
+- 提示: <div class="tip"><strong>💡 小结：</strong>...</div>
+- 警告: <div class="warning"><strong>⚠️ 易混淆：</strong>...</div>
+- 表格: <table><tr><th>列1</th></tr><tr><td>值</td></tr></table>
+- 用 <h3> 做子标题
+
+### 要求：由浅入深，善用比喻帮助理解，关键概念要精确定义，用中文输出。`
+  },
+  {
+    id: 'research',
+    name: '研究报告',
+    icon: '📊',
+    keywords: ['研究', '论文', '实验', '数据', '分析', '结果', '方法', '结论', '文献', '综述',
+               '统计', '调查', '样本', '假设', '验证', '对比', '评估',
+               'research', 'paper', 'study', 'analysis', 'method', 'result', 'conclusion', 'data'],
+    prompt: `你是一个研究报告解读专家。根据用户提供的论文/报告内容，生成一份易于理解的研究解读。
+
+### 输出格式
+只输出 HTML，不要用 \`\`\`html 包裹。
+
+### 章节结构
+1. 概览卡片(overview)：用 <div class="flow"> 展示研究流程
+2. 研究背景与问题（为什么做这个研究）
+3. 研究方法（怎么做的，用表格总结）
+4. 核心发现 3-6 个，每个发现包含：
+   - 数据/结果（使用 <table> 或 <div class="result-box">）
+   - 解读分析
+5. 结论与局限（使用 <div class="tip"> 和 <div class="warning">）
+6. FAQ：3-4 个相关问题
+
+### 组件格式
+- 步骤卡片: <div class="step" id="stepN"> → <div class="step-header"><div class="step-num">N</div><h2>标题</h2></div> → <div class="step-body">内容</div>
+- 提示: <div class="tip"><strong>💡 解读：</strong>...</div>
+- 警告: <div class="warning"><strong>⚠️ 局限：</strong>...</div>
+- 表格: <table><tr><th>列1</th></tr><tr><td>值</td></tr></table>
+- 结果框: <div class="result-box">数据内容</div>
+- 用 <h3> 做子标题
+
+### 要求：把学术语言转成通俗表达，保留关键数据，指出研究的实际意义和局限性，用中文输出。`
+  },
+  {
+    id: 'general',
+    name: '通用教程',
+    icon: '📄',
+    keywords: [], // fallback
+    prompt: `你是一个专业的教程生成器。根据用户提供的内容，生成一份结构化的教程。
+
+### 输出格式
+只输出 HTML，不要用 \`\`\`html 包裹。
+
+### 章节结构
+1. 概览卡片(overview)：用 <div class="flow"> 展示流程/结构
+2. 3-6 个步骤卡片，按逻辑顺序组织
+3. FAQ：3-4 个相关问题
+
+### 组件格式
+- 步骤卡片: <div class="step" id="stepN"> → <div class="step-header"><div class="step-num">N</div><h2>标题</h2></div> → <div class="step-body">内容</div>
+- 代码块: <div class="code-block">代码</div>
+- 提示: <div class="tip"><strong>💡 提示：</strong>...</div>
+- 警告: <div class="warning"><strong>⚠️ 注意：</strong>...</div>
+- 表格: <table><tr><th>列1</th></tr><tr><td>值</td></tr></table>
+- 用 <h3> 做子标题
+
+### 要求：内容详实、结构清晰、从原文提取关键信息并适当补充背景，用中文输出。`
+  }
+];
+
+function classifyContent(text) {
+  const lower = text.toLowerCase();
+  const scores = TEMPLATES.map((t, i) => {
+    if (t.id === 'general') return { idx: i, score: 0.5 }; // low fallback score
+    let score = 0;
+    for (const kw of t.keywords) {
+      const count = (lower.match(new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')) || []).length;
+      score += count;
+    }
+    return { idx: i, score };
+  });
+  scores.sort((a, b) => b.score - a.score);
+  // Only use matched template if score is above threshold, otherwise fallback to general
+  if (scores[0].score >= 2) return scores[0].idx;
+  return TEMPLATES.findIndex(t => t.id === 'general');
+}
+
 // ── Generate ──
 const btnGenerate = document.getElementById('btn-generate');
 const btnExportPage = document.getElementById('btn-export-page');
@@ -652,43 +946,119 @@ const generatedContent = document.getElementById('generated-content');
 const heroTitle = document.getElementById('hero-title');
 const heroDesc = document.getElementById('hero-desc');
 
-btnGenerate.addEventListener('click', () => {
-  // Collect config (for future API use)
-  const config = {
-    source: document.querySelector('.tab-btn.active').dataset.tab,
-    file: fileInput.files[0] || null,
-    videoUrl: document.getElementById('video-url').value,
-    context: document.getElementById('context').value,
-    textModel: document.getElementById('text-model').value,
-    textApiKey: document.getElementById('text-api-key').value,
-    visionModel: document.getElementById('vision-model').value,
-    visionApiKey: document.getElementById('vision-api-key').value,
-    videoModel: document.getElementById('video-model').value,
-    videoApiKey: document.getElementById('video-api-key').value
-  };
-  console.log('Tutorial generation config:', config);
+btnGenerate.addEventListener('click', async () => {
+  const apiKey = document.getElementById('text-api-key').value.trim();
+  const context = document.getElementById('context').value.trim();
+  const model = document.getElementById('text-model').value;
+  const hasFiles = selectedFiles.length > 0;
+
+  // Validate: need either files or context
+  if (!hasFiles && !context) {
+    alert('请先上传文件或输入主题/上下文内容。');
+    return;
+  }
 
   // Show loading
   placeholder.style.display = 'none';
   generatedContent.innerHTML = '';
   loading.classList.add('active');
+  document.getElementById('loading-text').textContent = hasFiles
+    ? '正在提取文件内容...'
+    : 'AI 正在生成教程...';
   btnGenerate.disabled = true;
   btnGenerate.textContent = '生成中...';
 
-  // Simulate API call
-  setTimeout(() => {
+  try {
+    // Extract text from all files
+    let sourceText = '';
+    if (hasFiles) {
+      const fileNames = [];
+      for (const sf of selectedFiles) {
+        document.getElementById('loading-text').textContent = '正在提取：' + sf.file.name + '...';
+        const text = await extractFileContent(sf.file);
+        if (text && text.length >= 10) {
+          sourceText += '\n\n--- 文件：' + sf.file.name + ' ---\n\n' + text;
+          fileNames.push(sf.file.name);
+        }
+      }
+      if (!sourceText.trim()) {
+        throw new Error('所有文件内容提取失败，请检查文件格式。');
+      }
+      sourceText = sourceText.trim();
+    }
+
+    // Classify content → select template
+    const contentSample = sourceText ? sourceText.substring(0, 3000) : context;
+    const templateIdx = classifyContent(contentSample);
+    const template = TEMPLATES[templateIdx];
+    document.getElementById('loading-text').textContent = '匹配到模板：' + template.name + '...';
+
+    // Build prompt
+    const userPrompt = sourceText
+      ? `以下是我提供的内容，请严格按照「${template.name}」的结构生成教程：\n\n---\n${sourceText.substring(0, 20000)}\n---\n\n${context ? '补充说明：' + context : ''}`
+      : `请根据以下主题，按照「${template.name}」的结构生成教程：\n\n${context}`;
+
+    // Call DeepSeek API (or fallback to demo)
+    let tutorialHTML;
+    if (apiKey && (model === 'deepseek-v4-pro' || model === 'deepseek-v4-flash')) {
+      document.getElementById('loading-text').textContent = '正在调用 DeepSeek ' + model + ' 生成教程...';
+
+      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: 'system', content: template.prompt },
+            { role: 'user', content: userPrompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 8192
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error?.message || 'API 请求失败 (HTTP ' + response.status + ')');
+      }
+
+      const data = await response.json();
+      tutorialHTML = data.choices[0].message.content;
+
+      // Clean up possible markdown wrapping
+      tutorialHTML = tutorialHTML.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+    } else {
+      // Fallback to demo mode
+      document.getElementById('loading-text').textContent = '未配置 API Key，使用 Demo 模式...';
+      await new Promise(r => setTimeout(r, 800));
+      tutorialHTML = DEMO_TUTORIAL;
+      heroDesc.textContent = '以下为 Demo 示例 · 配置 DeepSeek API Key 后将根据你的内容生成专属教程';
+    }
+
+    // Render
     loading.classList.remove('active');
-    generatedContent.innerHTML = DEMO_TUTORIAL;
-    heroTitle.textContent = 'AI 教程生成器';
-    heroDesc.textContent = '以下为 Demo 示例 · 接入 API 后将根据你的内容生成专属教程';
+    generatedContent.innerHTML = tutorialHTML;
+    if (apiKey) {
+      heroTitle.textContent = template.icon + ' ' + template.name;
+      heroDesc.textContent = hasFiles
+        ? '已根据 ' + selectedFiles.length + ' 个文件生成 · 由 DeepSeek 驱动'
+        : '已根据主题生成 · 由 DeepSeek 驱动';
+    }
     btnGenerate.disabled = false;
     btnGenerate.textContent = '重新生成';
     btnExportPage.disabled = false;
-    // Re-init copy buttons for new content
     initCopyButtons();
-    // Scroll to content
     generatedContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 1500);
+  } catch (err) {
+    loading.classList.remove('active');
+    generatedContent.innerHTML = '<div class="placeholder"><div class="placeholder-icon">⚠️</div><div class="placeholder-title">生成失败</div><div class="placeholder-desc">' + escapeHTML(err.message) + '</div></div>';
+    btnGenerate.disabled = false;
+    btnGenerate.textContent = '重试';
+    console.error('Generation error:', err);
+  }
 });
 
 // ── Export page ──
