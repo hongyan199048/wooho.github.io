@@ -761,6 +761,61 @@ async function extractFileContent(file) {
   });
 }
 
+// ── Shared design rules (appended to every template prompt) ──
+const DESIGN_RULES = `
+
+## 设计规范（必须严格遵守）
+
+### 页面容器
+- 所有卡片必须放在一个外层容器中，不需要额外的包装 div
+- 不要添加任何 <style>、class、id 到容器上
+
+### 组件格式（精确匹配，不允许修改）
+卡片:
+<div class="step" id="stepN">
+  <div class="step-header">
+    <div class="step-num">N</div>
+    <h2>标题</h2>
+  </div>
+  <div class="step-body">
+    ...内容...
+  </div>
+</div>
+
+代码块:
+<div class="code-block">代码内容</div>
+
+运行结果:
+<div class="result-box">输出内容</div>
+
+提示:
+<div class="tip"><strong>💡 xxx：</strong>内容</div>
+
+警告:
+<div class="warning"><strong>⚠️ xxx：</strong>内容</div>
+
+表格:
+<table><tr><th>列1</th><th>列2</th></tr><tr><td>值1</td><td>值2</td></tr></table>
+
+流程图:
+<div class="flow"><div class="flow-item">步骤1</div><div class="flow-arrow">→</div><div class="flow-item">步骤2</div></div>
+
+### 禁止事项
+- ❌ 不要添加任何 inline style 属性（如 style="color:red"）
+- ❌ 不要添加 <style> 标签或自定义 CSS
+- ❌ 不要添加自定义 class 名
+- ❌ 不要用 \`\`\`html 包裹输出
+- ❌ 不要输出任何解释性文字，只输出 HTML
+- ❌ 不要使用 h1 标签（页面已有标题）
+- ❌ 不要在卡片外面放文字
+
+### 子标题
+- 在 step-body 内用 <h3>N.N 标题</h3> 做子标题
+
+### 语言
+- 全部用中文输出
+- 代码注释用中文或英文均可`;
+
 // ── Template system ──
 const TEMPLATES = [
   {
@@ -770,31 +825,16 @@ const TEMPLATES = [
     keywords: ['代码', 'API', '编程', '开发', '部署', '配置', '安装', '命令行', '函数', '类', '模块',
                'code', 'api', 'function', 'config', 'install', 'deploy', 'python', 'javascript', 'docker',
                'git', 'linux', 'server', 'database', 'framework', 'library', 'npm', 'pip', 'sdk'],
-    prompt: `你是一个技术教程编写专家。根据用户提供的技术文档/代码，生成一份面向开发者的技术教程。
-
-### 输出格式
-只输出 HTML，不要用 \`\`\`html 包裹。
+    prompt: `你是一个技术教程编写专家。生成一份面向开发者的技术教程。
 
 ### 章节结构
-1. 概览卡片(overview)：用 <div class="flow"> 展示技术流程/架构
+1. 概览卡片(overview)：展示技术流程/架构
 2. 环境准备/前置条件（如适用）
-3. 核心步骤 3-6 个，每个步骤包含：
-   - 概念说明
-   - 代码示例（必须使用 <div class="code-block">）
-   - 参数/配置表格（使用 <table>）
-   - 常见坑点（使用 <div class="warning">）
-4. 完整示例/运行结果（使用 <div class="result-box">）
-5. FAQ：3-4 个技术相关问题
+3. 核心步骤 3-6 个，每个步骤包含：概念说明 → 代码示例 → 参数表格 → 常见坑点
+4. 完整示例/运行结果
+5. FAQ：3-4 个技术问题
 
-### 组件格式
-- 步骤卡片: <div class="step" id="stepN"> → <div class="step-header"><div class="step-num">N</div><h2>标题</h2></div> → <div class="step-body">内容</div>
-- 代码块: <div class="code-block">代码内容</div>
-- 提示: <div class="tip"><strong>💡 提示：</strong>...</div>
-- 警告: <div class="warning"><strong>⚠️ 注意：</strong>...</div>
-- 表格: <table><tr><th>列1</th></tr><tr><td>值</td></tr></table>
-- 用 <h3> 做子标题
-
-### 要求：代码示例准确可运行，参数说明完整，用中文输出。`
+### 要求：代码示例准确可运行，参数说明完整，多用代码块和表格。`
   },
   {
     id: 'manual',
@@ -803,30 +843,16 @@ const TEMPLATES = [
     keywords: ['操作', '步骤', '安装', '设置', '配置', '按钮', '点击', '选择', '界面', '窗口', '菜单',
                '教程', '指南', '手册', '使用', '如何', '怎么', '入门', '启动', '登录', '注册',
                'how', 'guide', 'step', 'click', 'setup', 'install', 'tutorial', 'walkthrough'],
-    prompt: `你是一个操作手册编写专家。根据用户提供的内容，生成一份面向普通用户的操作指南。
-
-### 输出格式
-只输出 HTML，不要用 \`\`\`html 包裹。
+    prompt: `你是一个操作手册编写专家。生成一份面向普通用户的操作指南。
 
 ### 章节结构
-1. 概览卡片(overview)：用 <div class="flow"> 展示操作流程
+1. 概览卡片(overview)：展示操作流程
 2. 准备工作（需要什么、前置条件）
-3. 操作步骤 4-7 个，每个步骤包含：
-   - 这一步要完成什么
-   - 具体操作说明（编号列表 <ol>）
-   - 操作要点（使用 <div class="tip">）
-   - 可能遇到的问题（使用 <div class="warning">）
+3. 操作步骤 4-7 个，每个步骤包含：要完成什么 → 具体操作说明（用 <ol> 编号） → 操作提示 → 可能遇到的问题
 4. 完成后的验证/检查
 5. FAQ：3-4 个常见操作问题
 
-### 组件格式
-- 步骤卡片: <div class="step" id="stepN"> → <div class="step-header"><div class="step-num">N</div><h2>标题</h2></div> → <div class="step-body">内容</div>
-- 提示: <div class="tip"><strong>💡 提示：</strong>...</div>
-- 警告: <div class="warning"><strong>⚠️ 注意：</strong>...</div>
-- 表格: <table><tr><th>列1</th></tr><tr><td>值</td></tr></table>
-- 用 <h3> 做子标题
-
-### 要求：步骤清晰可跟随，避免术语堆砌，每个操作说明要具体（不要"点击按钮"要说"点击右上角蓝色的 xx 按钮"），用中文输出。`
+### 要求：步骤清晰可跟随，避免术语堆砌，操作说明要具体（说"点击右上角蓝色的 xx 按钮"而不是"点击按钮"）。`
   },
   {
     id: 'course',
@@ -835,31 +861,16 @@ const TEMPLATES = [
     keywords: ['学习', '课程', '知识', '概念', '原理', '理论', '基础', '入门', '理解', '掌握',
                '定义', '分类', '特点', '作用', '关系', '区别', '例子', '练习', '习题',
                'learn', 'course', 'concept', 'theory', 'principle', 'introduction', 'overview'],
-    prompt: `你是一个课程讲义编写专家。根据用户提供的内容，生成一份结构化的学习讲义。
-
-### 输出格式
-只输出 HTML，不要用 \`\`\`html 包裹。
+    prompt: `你是一个课程讲义编写专家。生成一份结构化的学习讲义。
 
 ### 章节结构
-1. 概览卡片(overview)：用 <div class="flow"> 展示知识体系/学习路径
-2. 学习目标（用表格列出：掌握、理解、了解三个层次）
-3. 核心知识点 4-8 个，每个知识点包含：
-   - 概念定义（使用 <p>)
-   - 关键特征/分类（使用 <table>）
-   - 实例说明
-   - 易混淆点辨析（使用 <div class="warning">）
-   - 小结要点（使用 <div class="tip">）
-4. 总结：用表格对比关键概念
+1. 概览卡片(overview)：展示知识体系/学习路径
+2. 学习目标（用表格：掌握/理解/了解三个层次）
+3. 核心知识点 4-8 个，每个知识点包含：定义 → 特征表格 → 实例 → 易混淆辨析 → 小结
+4. 总结：表格对比关键概念
 5. FAQ：3-4 个常见疑问
 
-### 组件格式
-- 步骤卡片: <div class="step" id="stepN"> → <div class="step-header"><div class="step-num">N</div><h2>标题</h2></div> → <div class="step-body">内容</div>
-- 提示: <div class="tip"><strong>💡 小结：</strong>...</div>
-- 警告: <div class="warning"><strong>⚠️ 易混淆：</strong>...</div>
-- 表格: <table><tr><th>列1</th></tr><tr><td>值</td></tr></table>
-- 用 <h3> 做子标题
-
-### 要求：由浅入深，善用比喻帮助理解，关键概念要精确定义，用中文输出。`
+### 要求：由浅入深，善用比喻帮助理解，关键概念要精确定义。`
   },
   {
     id: 'research',
@@ -868,30 +879,17 @@ const TEMPLATES = [
     keywords: ['研究', '论文', '实验', '数据', '分析', '结果', '方法', '结论', '文献', '综述',
                '统计', '调查', '样本', '假设', '验证', '对比', '评估',
                'research', 'paper', 'study', 'analysis', 'method', 'result', 'conclusion', 'data'],
-    prompt: `你是一个研究报告解读专家。根据用户提供的论文/报告内容，生成一份易于理解的研究解读。
-
-### 输出格式
-只输出 HTML，不要用 \`\`\`html 包裹。
+    prompt: `你是一个研究报告解读专家。将论文/报告内容转化为易于理解的研究解读。
 
 ### 章节结构
-1. 概览卡片(overview)：用 <div class="flow"> 展示研究流程
-2. 研究背景与问题（为什么做这个研究）
-3. 研究方法（怎么做的，用表格总结）
-4. 核心发现 3-6 个，每个发现包含：
-   - 数据/结果（使用 <table> 或 <div class="result-box">）
-   - 解读分析
-5. 结论与局限（使用 <div class="tip"> 和 <div class="warning">）
+1. 概览卡片(overview)：展示研究流程
+2. 研究背景与问题
+3. 研究方法（用表格总结）
+4. 核心发现 3-6 个，每个包含：数据/结果 → 解读分析
+5. 结论与局限
 6. FAQ：3-4 个相关问题
 
-### 组件格式
-- 步骤卡片: <div class="step" id="stepN"> → <div class="step-header"><div class="step-num">N</div><h2>标题</h2></div> → <div class="step-body">内容</div>
-- 提示: <div class="tip"><strong>💡 解读：</strong>...</div>
-- 警告: <div class="warning"><strong>⚠️ 局限：</strong>...</div>
-- 表格: <table><tr><th>列1</th></tr><tr><td>值</td></tr></table>
-- 结果框: <div class="result-box">数据内容</div>
-- 用 <h3> 做子标题
-
-### 要求：把学术语言转成通俗表达，保留关键数据，指出研究的实际意义和局限性，用中文输出。`
+### 要求：把学术语言转成通俗表达，保留关键数据，指出研究的实际意义和局限性。`
   },
   {
     id: 'general',
@@ -900,23 +898,12 @@ const TEMPLATES = [
     keywords: [], // fallback
     prompt: `你是一个专业的教程生成器。根据用户提供的内容，生成一份结构化的教程。
 
-### 输出格式
-只输出 HTML，不要用 \`\`\`html 包裹。
-
 ### 章节结构
-1. 概览卡片(overview)：用 <div class="flow"> 展示流程/结构
+1. 概览卡片(overview)：展示流程/结构
 2. 3-6 个步骤卡片，按逻辑顺序组织
 3. FAQ：3-4 个相关问题
 
-### 组件格式
-- 步骤卡片: <div class="step" id="stepN"> → <div class="step-header"><div class="step-num">N</div><h2>标题</h2></div> → <div class="step-body">内容</div>
-- 代码块: <div class="code-block">代码</div>
-- 提示: <div class="tip"><strong>💡 提示：</strong>...</div>
-- 警告: <div class="warning"><strong>⚠️ 注意：</strong>...</div>
-- 表格: <table><tr><th>列1</th></tr><tr><td>值</td></tr></table>
-- 用 <h3> 做子标题
-
-### 要求：内容详实、结构清晰、从原文提取关键信息并适当补充背景，用中文输出。`
+### 要求：内容详实、从原文提取关键信息并适当补充背景知识。`
   }
 ];
 
@@ -1012,7 +999,7 @@ btnGenerate.addEventListener('click', async () => {
         body: JSON.stringify({
           model: model,
           messages: [
-            { role: 'system', content: template.prompt },
+            { role: 'system', content: template.prompt + DESIGN_RULES },
             { role: 'user', content: userPrompt }
           ],
           temperature: 0.7,
