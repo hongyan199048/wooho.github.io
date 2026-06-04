@@ -661,6 +661,24 @@
   </div>
 </div>
 
+<!-- AI Chat bubble -->
+<div id="chat-bubble" class="chat-bubble" title="AI 问答">💬</div>
+
+<!-- AI Chat window -->
+<div id="chat-window" class="chat-window">
+  <div class="chat-header">
+    <span>AI 问答</span>
+    <button id="chat-minimize" class="chat-minimize" title="最小化">&minus;</button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg ai">你好！我可以回答关于你上传材料或当前 HTML 笔记的问题。请直接提问。</div>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" class="chat-input" id="chat-input" placeholder="输入问题..." onkeydown="if(event.key==='Enter')document.getElementById('chat-send').click()">
+    <button class="chat-send" id="chat-send">发送</button>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
@@ -1761,19 +1779,28 @@ function genTOC() {
 
 // ── Contenteditable ──
 function initContentEditable() {
-  generatedContent.querySelectorAll('.step-body').forEach(body => {
-    body.addEventListener('dblclick', () => {
-      body.contentEditable = body.contentEditable === 'true' ? 'false' : 'true';
-      if (body.contentEditable === 'true') {
-        body.style.outline = '2px dashed #f59e0b';
-        body.style.outlineOffset = '-4px';
-        body.focus();
+  generatedContent.querySelectorAll('.step-body, .step-header, .step-header h2').forEach(el => {
+    el.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      el.contentEditable = el.contentEditable === 'true' ? 'false' : 'true';
+      if (el.contentEditable === 'true') {
+        el.style.outline = '2px dashed #f59e0b';
+        el.style.outlineOffset = '-4px';
+        el.focus();
       } else {
-        body.style.outline = '';
-        saveHistory(generatedContent.innerHTML, heroTitle.textContent, '手动编辑');
+        el.style.outline = '';
       }
     });
   });
+  // Also make hero title editable
+  const heroH1 = document.querySelector('.hero h1');
+  if (heroH1) {
+    heroH1.addEventListener('dblclick', () => {
+      heroH1.contentEditable = heroH1.contentEditable === 'true' ? 'false' : 'true';
+      if (heroH1.contentEditable === 'true') { heroH1.style.outline = '2px dashed #f59e0b'; heroH1.style.outlineOffset = '-4px'; heroH1.focus(); }
+      else { heroH1.style.outline = ''; }
+    });
+  }
 }
 
 // ── Blank notebook ──
@@ -1885,24 +1912,6 @@ chatSend.addEventListener('click', async () => {
 restoreRefs();
 renderHistory();
 </script>
-
-<!-- AI Chat bubble -->
-<div id="chat-bubble" class="chat-bubble" title="AI 问答">💬</div>
-
-<!-- AI Chat window -->
-<div id="chat-window" class="chat-window">
-  <div class="chat-header">
-    <span>AI 问答</span>
-    <button id="chat-minimize" class="chat-minimize" title="最小化">&minus;</button>
-  </div>
-  <div class="chat-messages" id="chat-messages">
-    <div class="chat-msg ai">你好！我可以回答关于你上传材料或当前 HTML 笔记的问题。请直接提问。</div>
-  </div>
-  <div class="chat-input-row">
-    <input type="text" class="chat-input" id="chat-input" placeholder="输入问题..." onkeydown="if(event.key==='Enter')document.getElementById('chat-send').click()">
-    <button class="chat-send" id="chat-send">发送</button>
-  </div>
-</div>
 
 </body>
 </html>
