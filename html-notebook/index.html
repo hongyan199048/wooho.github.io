@@ -47,8 +47,47 @@
       position: fixed; top: 50px; left: 0; width: var(--sidebar-width);
       height: calc(100vh - 50px); background: var(--bg-card);
       border-right: 1px solid var(--border); overflow-y: auto; z-index: 100;
-      padding: 20px 18px; display: flex; flex-direction: column; gap: 16px;
+      display: flex; flex-direction: column;
     }
+    .sidebar-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: #fff; z-index: 10; flex-shrink: 0;
+    }
+    .sidebar-tab {
+      flex: 1; padding: 8px 0; text-align: center; font-family: var(--font-mono);
+      font-size: 10px; cursor: pointer; background: #fff; color: #a0a0a0; border: none;
+      transition: all 0.15s; letter-spacing: 1px; border-bottom: 2px solid transparent;
+    }
+    .sidebar-tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+    .sidebar-tab:hover:not(.active) { color: #6b6b6b; background: #faf8f5; }
+    .sidebar-tab.has-content::after { content: ' •'; color: #2d6a4f; }
+    .sidebar-content { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; flex: 1; overflow-y: auto; }
+    .sidebar-panel { display: none; }
+    .sidebar-panel.active { display: flex; flex-direction: column; gap: 14px; }
+
+    /* ── TOC ── */
+    .toc-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 5px 0; cursor: pointer; transition: color 0.15s;
+      font-size: 12px; color: #6b6b6b; border-bottom: 1px solid #f5f2ed;
+    }
+    .toc-item:hover { color: #1a1a1a; }
+    .toc-item .toc-badge {
+      font-family: var(--font-mono); font-size: 9px; color: #2d6a4f;
+      background: #f0f7f2; padding: 1px 6px; border-radius: 8px; flex-shrink: 0;
+    }
+
+    /* ── History ── */
+    .hist-item {
+      padding: 8px 0; cursor: pointer; border-bottom: 1px solid #f5f2ed;
+      transition: background 0.15s;
+    }
+    .hist-item:hover { background: #faf8f5; }
+    .hist-time { font-family: var(--font-mono); font-size: 9px; color: #b0a89e; }
+    .hist-title { font-size: 12px; color: #1a1a1a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hist-meta { font-family: var(--font-mono); font-size: 9px; color: #c5c0b8; }
+    .hist-del { background: none; border: none; color: #c5c0b8; font-size: 12px; cursor: pointer; padding: 0 4px; float: right; }
+    .hist-del:hover { color: #d93025; }
     .input-section-title {
       font-family: var(--font-mono); font-size: 10px; letter-spacing: 3px;
       text-transform: uppercase; color: #b0a89e; margin-bottom: 4px;
@@ -403,103 +442,103 @@
 
 <!-- Input Sidebar -->
 <div class="input-sidebar">
-  <div>
-    <div class="input-section-title">数据来源</div>
-    <div class="tab-row">
-      <button class="tab-btn active" data-tab="file">文件</button>
-      <button class="tab-btn" data-tab="video">视频链接</button>
-    </div>
+  <div class="sidebar-tabs">
+    <button class="sidebar-tab active" data-panel="input">输入</button>
+    <button class="sidebar-tab" data-panel="toc" id="tab-toc">目录</button>
+    <button class="sidebar-tab" data-panel="history" id="tab-history">历史</button>
   </div>
 
-  <div id="tab-file">
-    <div class="upload-zone" id="upload-zone">
-      <div class="upload-zone-icon">📂</div>
-      <div class="upload-zone-text">拖拽文件到此 或 点击选择<br>支持 PDF · Word · TXT · MD · 图片</div>
-    </div>
-    <input type="file" class="file-input-hidden" id="file-input" accept=".pdf,.doc,.docx,.txt,.md,.png,.jpg,.jpeg,.webp" multiple>
-    <div id="file-list" style="margin-top:8px"></div>
-  </div>
-
-  <div id="tab-video" style="display:none">
-    <input type="text" class="url-input" id="video-url" placeholder="粘贴 YouTube / Bilibili 链接...">
-  </div>
-
-  <div>
-    <div class="input-section-title">主题 / 上下文</div>
-    <textarea class="context-textarea" id="context" placeholder="可选：补充说明内容主题、目标受众、期望的详细程度..."></textarea>
-  </div>
-
-  <div class="api-key-row">
-    <div class="api-key-label">DeepSeek API Key <span class="model-badge" style="background:#f0f7f2;color:#2d6a4f">已接入</span></div>
-    <div class="api-key-row">
-      <input type="password" class="api-key-input" id="text-api-key" placeholder="sk-... 不填则使用 Demo 模式" style="padding-right:32px">
-      <button class="api-key-eye" id="api-key-eye" title="显示/隐藏">
-        <svg id="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        <svg id="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <div>
-    <div class="config-toggle open" id="config-toggle">
-      <span>模型配置</span>
-      <span class="config-arrow">▶</span>
-    </div>
-    <div class="config-body open" id="config-body">
-      <!-- Multimodal toggle -->
-      <div class="model-row" style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <label style="font-size:10px;color:#6b6b6b;cursor:pointer;display:flex;align-items:center;gap:4px">
-          <input type="checkbox" id="multimodal-toggle" style="accent-color:#1a1a1a"> 多模态一体（MiniMax 全处理）
-        </label>
-      </div>
-      <!-- Separate models mode -->
-      <div id="separate-models">
-        <div class="model-row">
-          <div class="model-label">文字模型 <span class="model-badge" style="background:#f0f7f2;color:#2d6a4f">已接入</span></div>
-          <select class="model-select" id="text-model">
-            <option value="deepseek-v4-pro">DeepSeek V4 Pro</option>
-            <option value="deepseek-v4-flash">DeepSeek V4 Flash</option>
-            <option value="minimax-m1">MiniMax-M1</option>
-          </select>
-        </div>
-        <div class="model-row">
-          <div class="model-label">视觉模型 <span class="model-badge">待接入</span></div>
-          <select class="model-select" id="vision-model">
-            <option value="minimax-m1">MiniMax-M1</option>
-            <option value="gemini-flash">Gemini 2.5 Flash</option>
-            <option value="gpt-4o">GPT-4o</option>
-            <option value="claude">Claude 4</option>
-          </select>
-          <input type="password" class="api-key-input" id="vision-api-key" placeholder="API Key（可选）">
-        </div>
-        <div class="model-row">
-          <div class="model-label">视频模型 <span class="model-badge">待接入</span></div>
-          <select class="model-select" id="video-model">
-            <option value="minimax-m1">MiniMax-M1</option>
-            <option value="gemini-pro">Gemini 2.5 Pro</option>
-            <option value="gemini-flash">Gemini 2.5 Flash</option>
-          </select>
-          <input type="password" class="api-key-input" id="video-api-key" placeholder="API Key（可选）">
+  <!-- Panel: Input -->
+  <div class="sidebar-panel active" id="panel-input">
+    <div class="sidebar-content">
+      <div>
+        <div class="input-section-title">数据来源</div>
+        <div class="tab-row">
+          <button class="tab-btn active" data-tab="file">文件</button>
+          <button class="tab-btn" data-tab="video">视频链接</button>
         </div>
       </div>
-      <!-- Unified multimodal mode -->
-      <div id="unified-model" style="display:none">
-        <div class="model-row">
-          <div class="model-label">多模态模型 <span class="model-badge" style="background:#f0f7f2;color:#2d6a4f">已接入</span></div>
-          <select class="model-select" id="unified-model-select">
-            <option value="minimax-m1">MiniMax-M1</option>
-          </select>
+      <div id="tab-file">
+        <div class="upload-zone" id="upload-zone">
+          <div class="upload-zone-icon">📂</div>
+          <div class="upload-zone-text">拖拽文件到此 或 点击选择<br>支持 PDF · Word · TXT · MD · 图片</div>
         </div>
-        <div class="model-row">
-          <div class="model-label">MiniMax API Key</div>
-          <input type="password" class="api-key-input" id="unified-api-key" placeholder="sk-... 不填则使用 Demo 模式">
+        <input type="file" class="file-input-hidden" id="file-input" accept=".pdf,.doc,.docx,.txt,.md,.png,.jpg,.jpeg,.webp" multiple>
+        <div id="file-list" style="margin-top:8px"></div>
+      </div>
+      <div id="tab-video" style="display:none">
+        <input type="text" class="url-input" id="video-url" placeholder="YouTube / Bilibili 链接...">
+      </div>
+      <div>
+        <div class="input-section-title">主题 / 上下文</div>
+        <textarea class="context-textarea" id="context" placeholder="可选：补充说明内容主题、目标受众..."></textarea>
+      </div>
+      <div>
+        <div class="input-section-title">模板（可选）</div>
+        <select class="model-select" id="manual-template">
+          <option value="">自动匹配</option>
+          <option value="tech">💻 技术教程</option>
+          <option value="manual">📋 操作手册</option>
+          <option value="course">📖 课程讲义</option>
+          <option value="research">📊 研究报告</option>
+          <option value="general">📄 通用教程</option>
+        </select>
+      </div>
+      <div class="api-key-row">
+        <div class="api-key-label">DeepSeek API Key <span class="model-badge" style="background:#f0f7f2;color:#2d6a4f">已接入</span></div>
+        <div class="api-key-row">
+          <input type="password" class="api-key-input" id="text-api-key" placeholder="sk-... 不填则使用 Demo 模式" style="padding-right:32px">
+          <button class="api-key-eye" id="api-key-eye" title="显示/隐藏">
+            <svg id="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
         </div>
       </div>
+      <div>
+        <div class="config-toggle open" id="config-toggle"><span>模型配置</span><span class="config-arrow">▶</span></div>
+        <div class="config-body open" id="config-body">
+          <div class="model-row" style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <label style="font-size:10px;color:#6b6b6b;cursor:pointer;display:flex;align-items:center;gap:4px">
+              <input type="checkbox" id="multimodal-toggle" style="accent-color:#1a1a1a"> 多模态一体（MiniMax 全处理）
+            </label>
+          </div>
+          <div id="separate-models">
+            <div class="model-row">
+              <div class="model-label">文字模型 <span class="model-badge" style="background:#f0f7f2;color:#2d6a4f">已接入</span></div>
+              <select class="model-select" id="text-model">
+                <option value="deepseek-v4-pro">DeepSeek V4 Pro</option>
+                <option value="deepseek-v4-flash">DeepSeek V4 Flash</option>
+                <option value="minimax-m1">MiniMax-M1</option>
+              </select>
+            </div>
+            <div class="model-row"><div class="model-label">视觉模型 <span class="model-badge">待接入</span></div><select class="model-select" id="vision-model"><option value="minimax-m1">MiniMax-M1</option><option value="gemini-flash">Gemini 2.5 Flash</option><option value="gpt-4o">GPT-4o</option></select><input type="password" class="api-key-input" id="vision-api-key" placeholder="API Key（可选）"></div>
+            <div class="model-row"><div class="model-label">视频模型 <span class="model-badge">待接入</span></div><select class="model-select" id="video-model"><option value="minimax-m1">MiniMax-M1</option><option value="gemini-pro">Gemini 2.5 Pro</option><option value="gemini-flash">Gemini 2.5 Flash</option></select><input type="password" class="api-key-input" id="video-api-key" placeholder="API Key（可选）"></div>
+          </div>
+          <div id="unified-model" style="display:none">
+            <div class="model-row"><div class="model-label">多模态模型</div><select class="model-select" id="unified-model-select"><option value="minimax-m1">MiniMax-M1</option></select></div>
+            <div class="model-row"><div class="model-label">MiniMax API Key</div><input type="password" class="api-key-input" id="unified-api-key" placeholder="sk-..."></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-generate" id="btn-generate">生成教程</button>
+      <button class="btn-generate" id="btn-blank" style="background:#fff;color:#1a1a1a;border:1px solid #e0ddd8;margin-top:-8px">空白笔记</button>
+      <button class="btn-export-secondary" id="btn-export-page" disabled>导出 HTML</button>
     </div>
   </div>
 
-  <button class="btn-generate" id="btn-generate">生成教程</button>
-  <button class="btn-export-secondary" id="btn-export-page" disabled>导出 HTML</button>
+  <!-- Panel: TOC -->
+  <div class="sidebar-panel" id="panel-toc">
+    <div class="sidebar-content">
+      <div id="toc-list"><p style="font-size:11px;color:#c5c0b8">生成教程后将自动生成目录</p></div>
+    </div>
+  </div>
+
+  <!-- Panel: History -->
+  <div class="sidebar-panel" id="panel-history">
+    <div class="sidebar-content">
+      <div id="hist-list"><p style="font-size:11px;color:#c5c0b8">暂无历史记录</p></div>
+    </div>
+  </div>
 </div>
 
 <div class="page-body">
@@ -567,7 +606,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
 <script>
-// ── Tab switching ──
+// ── Sidebar tab switching ──
+document.querySelectorAll('.sidebar-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sidebar-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+  });
+});
+
+// ── Source tab switching ──
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1030,11 +1079,17 @@ btnGenerate.addEventListener('click', async () => {
       sourceText = sourceText.trim();
     }
 
-    // Classify content → select template
-    const contentSample = sourceText ? sourceText.substring(0, 3000) : context;
-    const templateIdx = classifyContent(contentSample);
+    // Classify content → select template (respect manual override)
+    const manualTemplateId = document.getElementById('manual-template').value;
+    let templateIdx;
+    if (manualTemplateId) {
+      templateIdx = TEMPLATES.findIndex(t => t.id === manualTemplateId);
+      if (templateIdx === -1) templateIdx = classifyContent(sourceText ? sourceText.substring(0, 3000) : context);
+    } else {
+      templateIdx = classifyContent(sourceText ? sourceText.substring(0, 3000) : context);
+    }
     const template = TEMPLATES[templateIdx];
-    document.getElementById('loading-text').textContent = '匹配到模板：' + template.name + '...';
+    document.getElementById('loading-text').textContent = '模板：' + template.name + '...';
 
     // Build prompt
     const userPrompt = sourceText
@@ -1044,45 +1099,28 @@ btnGenerate.addEventListener('click', async () => {
     // Call DeepSeek API (or fallback to demo)
     let tutorialHTML;
     if (apiKey && (model === 'deepseek-v4-pro' || model === 'deepseek-v4-flash' || model === 'minimax-m1')) {
-      document.getElementById('loading-text').textContent = '正在调用 DeepSeek ' + model + ' 生成教程...';
-
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + apiKey
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            { role: 'system', content: template.prompt + DESIGN_RULES },
-            { role: 'user', content: userPrompt }
-          ],
-          temperature: 0.7,
-          max_tokens: 8192
-        })
+      document.getElementById('loading-text').textContent = '正在连接 DeepSeek...';
+      const systemPrompt = template.prompt + DESIGN_RULES;
+      const response = await streamGenerate(apiKey, model, systemPrompt, userPrompt);
+      // Hide loading, show stream
+      loading.classList.remove('active');
+      generatedContent.innerHTML = '';
+      let fullText = '';
+      await readStream(response, (chunk) => {
+        fullText += chunk;
+        generatedContent.innerHTML = fullText.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+        generatedContent.scrollTop = generatedContent.scrollHeight;
       });
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error?.message || 'API 请求失败 (HTTP ' + response.status + ')');
-      }
-
-      const data = await response.json();
-      tutorialHTML = data.choices[0].message.content;
-
-      // Clean up possible markdown wrapping
-      tutorialHTML = tutorialHTML.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+      tutorialHTML = fullText.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
     } else {
-      // Fallback to demo mode
       document.getElementById('loading-text').textContent = '未配置 API Key，使用 Demo 模式...';
       await new Promise(r => setTimeout(r, 800));
+      loading.classList.remove('active');
       tutorialHTML = DEMO_TUTORIAL;
       heroDesc.textContent = '以下为 Demo 示例 · 配置 DeepSeek API Key 后将根据你的内容生成专属教程';
     }
 
-    // Render
-    loading.classList.remove('active');
+    if (!apiKey) loading.classList.remove('active');
     generatedContent.innerHTML = tutorialHTML;
     if (apiKey) {
       heroTitle.textContent = template.icon + ' ' + template.name;
@@ -1094,6 +1132,9 @@ btnGenerate.addEventListener('click', async () => {
     btnGenerate.textContent = '重新生成';
     btnExportPage.disabled = false;
     initCopyButtons();
+    initContentEditable();
+    genTOC();
+    addToHistory(tutorialHTML, template.icon + ' ' + template.name, hasFiles ? selectedFiles.length + ' 个文件' : '主题输入');
     generatedContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     loading.classList.remove('active');
@@ -1513,35 +1554,38 @@ annoRefine.addEventListener('click', async () => {
       notesText += '\n';
     });
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: 'system', content: '你是教程优化专家。根据用户笔记完善教程，只输出 HTML，保持原有格式和 class 名。' },
-          { role: 'user', content: `根据以下用户笔记优化这篇 HTML 教程。可以增删改内容，但保持 HTML 结构和 class 名不变。只输出 HTML。\n\n## 用户笔记\n${notesText}\n\n## 当前教程\n${currentHTML}` }
-        ],
-        temperature: 0.7,
-        max_tokens: 8192
-      })
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.error?.message || 'HTTP ' + response.status);
+    // Also collect quote refs to help AI preserve reference points
+    const quoteRefs = annoRefsArr.filter(r => !r.freeNote && r.quote);
+    let refMap = '';
+    if (quoteRefs.length > 0) {
+      refMap = '\n\n## 已有的引用标注（这些文字在正文中被高亮，优化后仍需保留这些文字，以便批注关联不丢失）\n';
+      quoteRefs.forEach(r => refMap += '- 「' + r.quote.substring(0, 100) + '」\n');
     }
 
-    const data = await response.json();
-    let html = data.choices[0].message.content;
-    html = html.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+    const refinePrompt = `根据以下用户笔记优化这篇 HTML 教程。可以增删改内容，但保持 HTML 结构和 class 名不变。只输出 HTML。\n\n## 用户笔记\n${notesText}${refMap}\n\n## 当前教程\n${currentHTML}`;
+
+    const response = await streamGenerate(apiKey, model, '你是教程优化专家。根据用户笔记完善教程，只输出 HTML，保持原有格式和 class 名。', refinePrompt);
+    let fullText = '';
+    await readStream(response, (chunk) => {
+      fullText += chunk;
+      generatedContent.innerHTML = fullText.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+      generatedContent.scrollTop = generatedContent.scrollHeight;
+    });
+    let html = fullText.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
 
     generatedContent.innerHTML = html;
     heroDesc.textContent = '已根据笔记优化 · 由 DeepSeek 驱动';
     initCopyButtons();
+    initContentEditable();
+    genTOC();
+    addToHistory(html, heroTitle.textContent + '（优化）', annoRefsArr.length + ' 条笔记');
+    // Rebuild marks for existing quote refs
+    annoRefsArr.forEach(ref => {
+      if (!ref.freeNote && ref.quote) {
+        const mark = findAndWrapText(generatedContent, ref.quote, ref.id);
+        if (mark) ref.markEl = mark;
+      }
+    });
     generatedContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     alert('优化失败：' + err.message);
@@ -1552,7 +1596,143 @@ annoRefine.addEventListener('click', async () => {
   }
 });
 
+// ── Streaming API call ──
+async function streamGenerate(apiKey, model, systemPrompt, userPrompt) {
+  const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+    body: JSON.stringify({ model, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }], temperature: 0.7, max_tokens: 8192, stream: true })
+  });
+  if (!response.ok) throw new Error((await response.json().catch(()=>({}))).error?.message || 'HTTP '+response.status);
+  return response;
+}
+
+async function readStream(response, onChunk) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6);
+      if (data === '[DONE]') return;
+      try {
+        const json = JSON.parse(data);
+        const delta = json.choices?.[0]?.delta?.content;
+        if (delta) onChunk(delta);
+      } catch(e) {}
+    }
+  }
+}
+
+// ── History ──
+const HISTORY_KEY = 'html-notebook-history';
+function loadHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) { return []; } }
+function saveHistory(entries) { localStorage.setItem(HISTORY_KEY, JSON.stringify(entries)); }
+function addToHistory(html, title, source) {
+  const hist = loadHistory();
+  hist.unshift({ id: Date.now(), time: new Date().toLocaleString('zh-CN'), title, html, source });
+  if (hist.length > 50) hist.length = 50;
+  saveHistory(hist);
+  renderHistory();
+}
+
+function renderHistory() {
+  const hist = loadHistory();
+  const container = document.getElementById('hist-list');
+  if (hist.length === 0) { container.innerHTML = '<p style="font-size:11px;color:#c5c0b8">暂无历史记录</p>'; return; }
+  container.innerHTML = hist.map((h, i) =>
+    '<div class="hist-item" data-idx="' + i + '">' +
+    '<div class="hist-time">' + h.time + '</div>' +
+    '<div class="hist-title">' + escapeHTML(h.title) + '</div>' +
+    '<div class="hist-meta">' + escapeHTML(h.source) + '</div>' +
+    '<button class="hist-del" data-idx="' + i + '" title="删除">&times;</button>' +
+    '</div>'
+  ).join('');
+  // Click to load
+  container.querySelectorAll('.hist-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (e.target.classList.contains('hist-del')) return;
+      const h = hist[parseInt(item.dataset.idx)];
+      generatedContent.innerHTML = h.html;
+      heroTitle.textContent = h.title;
+      heroDesc.textContent = '从历史记录加载 · ' + h.time;
+      btnExportPage.disabled = false;
+      initCopyButtons();
+      genTOC();
+    });
+  });
+  // Delete
+  container.querySelectorAll('.hist-del').forEach(btn => {
+    btn.addEventListener('click', (e) => { e.stopPropagation();
+      const h2 = loadHistory(); h2.splice(parseInt(btn.dataset.idx), 1); saveHistory(h2); renderHistory();
+    });
+  });
+  document.getElementById('tab-history').classList.toggle('has-content', hist.length > 0);
+}
+
+// ── TOC ──
+function genTOC() {
+  const steps = generatedContent.querySelectorAll('.step');
+  const tocList = document.getElementById('toc-list');
+  if (steps.length === 0) { tocList.innerHTML = '<p style="font-size:11px;color:#c5c0b8">暂无内容</p>'; return; }
+  tocList.innerHTML = Array.from(steps).map(step => {
+    const h2 = step.querySelector('.step-header h2');
+    const title = h2 ? h2.textContent : '(无标题)';
+    const id = step.id;
+    // Count notes referencing this step
+    const noteCount = annoRefsArr.filter(r => r.parentId === id && r.note && r.note.trim()).length;
+    const badge = noteCount > 0 ? ' <span class="toc-badge">' + noteCount + '</span>' : '';
+    return '<div class="toc-item" data-target="' + id + '">' + title + badge + '</div>';
+  }).join('');
+  // Click to scroll
+  tocList.querySelectorAll('.toc-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const el = document.getElementById(item.dataset.target);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  document.getElementById('tab-toc').classList.toggle('has-content', steps.length > 0);
+}
+
+// ── Contenteditable ──
+function initContentEditable() {
+  generatedContent.querySelectorAll('.step-body').forEach(body => {
+    body.addEventListener('dblclick', () => {
+      body.contentEditable = body.contentEditable === 'true' ? 'false' : 'true';
+      if (body.contentEditable === 'true') {
+        body.style.outline = '2px dashed #f59e0b';
+        body.style.outlineOffset = '-4px';
+        body.focus();
+      } else {
+        body.style.outline = '';
+        saveHistory(generatedContent.innerHTML, heroTitle.textContent, '手动编辑');
+      }
+    });
+  });
+}
+
+// ── Blank notebook ──
+document.getElementById('btn-blank').addEventListener('click', () => {
+  const emptyHTML = '<div class="step" id="overview"><div class="step-header"><div class="step-num">→</div><h2>概览</h2></div><div class="step-body"><p>开始编写你的笔记...</p></div></div><div class="step" id="step1"><div class="step-header"><div class="step-num">1</div><h2>新章节</h2></div><div class="step-body"><p>双击此处编辑内容。</p></div></div>';
+  placeholder.style.display = 'none';
+  generatedContent.innerHTML = emptyHTML;
+  heroTitle.textContent = 'HTML 笔记本';
+  heroDesc.textContent = '空白笔记 · 双击卡片正文编辑';
+  btnExportPage.disabled = false;
+  initCopyButtons();
+  initContentEditable();
+  genTOC();
+  addToHistory(emptyHTML, '空白笔记', '手动创建');
+});
+
 restoreRefs();
+renderHistory();
 </script>
 
 </body>
