@@ -325,8 +325,11 @@
     /* ── Tutorial images ── */
     .tutorial-img { display: block; max-width: 100%; margin: 20px 0; border: 1px solid #e0ddd8; border-radius: 4px; }
     [contenteditable="true"] img {
-      border: 2px dashed #f59e0b !important;
-      cursor: nwse-resize;
+      display: block; width: 100%; height: auto;
+    }
+    .img-resize-wrapper {
+      display: inline-block; max-width: 100%; resize: horizontal; overflow: hidden;
+      border: 2px dashed #f59e0b; vertical-align: top;
     }
     .img-caption { text-align: center; font-size: 11px; color: #a0a0a0; margin-top: -14px; margin-bottom: 20px; font-family: var(--font-mono); }
 
@@ -1810,12 +1813,14 @@ function initContentEditable() {
           const blob = item.getAsFile();
           const reader = new FileReader();
           reader.onload = () => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'img-resize-wrapper';
             const img = document.createElement('img');
             img.src = reader.result;
             img.className = 'tutorial-img';
-            img.style.maxWidth = '100%';
+            wrapper.appendChild(img);
             const sel = window.getSelection();
-            if (sel.rangeCount > 0) { sel.getRangeAt(0).insertNode(img); sel.collapseToEnd(); }
+            if (sel.rangeCount > 0) { sel.getRangeAt(0).insertNode(wrapper); sel.collapseToEnd(); }
           };
           reader.readAsDataURL(blob);
           break;
@@ -1831,12 +1836,14 @@ function initContentEditable() {
       e.preventDefault();
       const reader = new FileReader();
       reader.onload = () => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'img-resize-wrapper';
         const img = document.createElement('img');
         img.src = reader.result;
         img.className = 'tutorial-img';
-        img.style.maxWidth = '100%';
+        wrapper.appendChild(img);
         const sel = window.getSelection();
-        if (sel.rangeCount > 0) { sel.getRangeAt(0).insertNode(img); sel.collapseToEnd(); }
+        if (sel.rangeCount > 0) { sel.getRangeAt(0).insertNode(wrapper); sel.collapseToEnd(); }
       };
       reader.readAsDataURL(file);
     });
