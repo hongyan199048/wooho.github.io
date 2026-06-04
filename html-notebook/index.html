@@ -1760,12 +1760,15 @@ function genTOC() {
   if (steps.length === 0) { tocList.innerHTML = '<p style="font-size:11px;color:#c5c0b8">暂无内容</p>'; return; }
   tocList.innerHTML = Array.from(steps).map(step => {
     const h2 = step.querySelector('.step-header h2');
+    const num = step.querySelector('.step-num');
     const title = h2 ? h2.textContent : '(无标题)';
     const id = step.id;
-    // Count notes referencing this step
+    const numText = num ? num.textContent.trim() : '';
+    // Format: "1  环境准备" or "→  整体流程概览" or "?  常见问题 FAQ"
+    const prefix = numText ? numText + '  ' : '';
     const noteCount = annoRefsArr.filter(r => r.parentId === id && r.note && r.note.trim()).length;
     const badge = noteCount > 0 ? ' <span class="toc-badge">' + noteCount + '</span>' : '';
-    return '<div class="toc-item" data-target="' + id + '">' + title + badge + '</div>';
+    return '<div class="toc-item" data-target="' + id + '">' + prefix + title + badge + '</div>';
   }).join('');
   // Click to scroll
   tocList.querySelectorAll('.toc-item').forEach(item => {
