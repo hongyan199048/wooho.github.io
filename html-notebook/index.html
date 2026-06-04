@@ -1784,23 +1784,98 @@ function genTOC() {
 // ── Contenteditable ──
 function initContentEditable() {
   generatedContent.querySelectorAll('.step-body, .step-header, .step-header h2, .step-num, .hero h1, .hero p').forEach(el => {
-    if (el.dataset._editable) return; // avoid double-binding
+    if (el.dataset._editable) return;
     el.dataset._editable = '1';
     el.style.cursor = 'text';
     el.title = '双击编辑';
+
     el.addEventListener('dblclick', (e) => {
       e.stopPropagation();
-      el.contentEditable = el.contentEditable === 'true' ? 'false' : 'true';
-      if (el.contentEditable === 'true') {
-        el.style.outline = '2px dashed #f59e0b';
-        el.style.outlineOffset = '-4px';
-        el.focus();
-      } else {
-        el.style.outline = '';
+      if (el.contentEditable === 'true') { exitEdit(el); return; }
+      enterEdit(el);
+    });
+
+    // Image paste → auto-add tutorial-img class + correct sizing
+    el.addEventListener('paste', (e) => {
+      if (el.contentEditable !== 'true') return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const blob = item.getAsFile();
+          const reader = new FileReader();
+          reader.onload = () => {
+            const img = document.createElement('img');
+            img.src = reader.result;
+            img.className = 'tutorial-img';
+            img.style.maxWidth = '100%';
+            img.style.width = 'auto';
+            img.style.height = 'auto';
+            // Wrap in resizable container
+            const wrapper = document.createElement('span');
+            wrapper.style.display = 'inline-block';
+            wrapper.style.maxWidth = '100%';
+            wrapper.style.resize = 'both';
+            wrapper.style.overflow = 'hidden';
+            wrapper.appendChild(img);
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) { sel.getRangeAt(0).insertNode(wrapper); sel.collapseToEnd(); }
+          };
+          reader.readAsDataURL(blob);
+          break;
+        }
       }
+    });
+
+    // Drag-and-drop image file into editable area
+    el.addEventListener('drop', (e) => {
+      if (el.contentEditable !== 'true') return;
+      const file = e.dataTransfer?.files?.[0];
+      if (!file || !file.type.startsWith('image/')) return;
+      e.preventDefault();
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = document.createElement('img');
+        img.src = reader.result;
+        img.className = 'tutorial-img';
+        img.style.maxWidth = '100%';
+        const wrapper = document.createElement('span');
+        wrapper.style.display = 'inline-block';
+        wrapper.style.maxWidth = '100%';
+        wrapper.style.resize = 'both';
+        wrapper.style.overflow = 'hidden';
+        wrapper.appendChild(img);
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) { sel.getRangeAt(0).insertNode(wrapper); sel.collapseToEnd(); }
+      };
+      reader.readAsDataURL(file);
     });
   });
 }
+
+function enterEdit(el) {
+  el.contentEditable = 'true';
+  el.style.outline = '2px dashed #f59e0b';
+  el.style.outlineOffset = '-4px';
+  el.focus();
+}
+
+function exitEdit(el) {
+  el.contentEditable = 'false';
+  el.style.outline = '';
+  // Resize all images inside to fit notebook width
+  el.querySelectorAll('img').forEach(img => {
+    if (!img.classList.contains('tutorial-img')) img.classList.add('tutorial-img');
+    img.style.maxWidth = '100%';
+  });
+}
+
+// Click outside editable area → exit all
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[contenteditable="true"]')) return;
+  document.querySelectorAll('[contenteditable="true"]').forEach(el => exitEdit(el));
+});
 
 // ── Blank notebook ──
 document.getElementById('btn-blank').addEventListener('click', () => {
