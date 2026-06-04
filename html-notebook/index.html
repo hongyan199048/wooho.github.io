@@ -330,6 +330,14 @@
       font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; padding: 5px 12px; cursor: pointer;
     }
     .anno-export-btn:hover { background: #333; }
+    .anno-refine-btn {
+      background: #f0f7f2; border: 1px solid #2d6a4f; border-radius: 2px;
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px;
+      padding: 5px 10px; cursor: pointer; color: #2d6a4f;
+      transition: all 0.15s; margin-right: 4px;
+    }
+    .anno-refine-btn:hover { background: #2d6a4f; color: #fff; }
+    .anno-refine-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── Highlights ── */
     .anno-hl { background: #fef3c7; border-bottom: 2px solid #f59e0b; cursor: pointer; transition: background 0.15s; border-radius: 1px; padding: 0 1px; }
@@ -550,6 +558,7 @@
   </div>
   <div class="anno-footer">
     <span id="anno-status" class="anno-status saved">已保存</span>
+    <button id="anno-refine" class="anno-refine-btn" title="根据笔记优化教程内容">优化页面</button>
     <button id="anno-export" class="anno-export-btn">导出 HTML</button>
   </div>
 </div>
@@ -1467,6 +1476,80 @@ annoExport.addEventListener('click', () => {
   a.href = url; a.download = 'HTML-NOTEBOOK.html';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
+});
+
+// Refine tutorial with annotations
+const annoRefine = document.getElementById('anno-refine');
+annoRefine.addEventListener('click', async () => {
+  const currentHTML = generatedContent.innerHTML;
+  if (!currentHTML.trim()) {
+    alert('请先生成教程内容。');
+    return;
+  }
+
+  const notes = annoRefsArr.filter(r => r.note && r.note.trim());
+  if (notes.length === 0) {
+    alert('请先在笔记中写入优化意见。');
+    return;
+  }
+
+  const apiKey = document.getElementById('text-api-key').value.trim();
+  const model = document.getElementById('text-model').value;
+  if (!apiKey) {
+    alert('请先配置 DeepSeek API Key。');
+    return;
+  }
+
+  annoRefine.disabled = true;
+  annoRefine.textContent = '优化中...';
+
+  try {
+    let notesText = '';
+    notes.forEach((ref, i) => {
+      notesText += '【' + (ref.freeNote ? '批注' : '引用') + '】' + ref.note.trim() + '\n';
+      if (!ref.freeNote && ref.quote) {
+        notesText += '  引用原文：' + ref.quote.substring(0, 200) + '\n';
+      }
+      notesText += '\n';
+    });
+
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: 'system', content: '你是教程优化专家。根据用户笔记完善教程，只输出 HTML，保持原有格式和 class 名。' },
+          { role: 'user', content: `根据以下用户笔记优化这篇 HTML 教程。可以增删改内容，但保持 HTML 结构和 class 名不变。只输出 HTML。\n\n## 用户笔记\n${notesText}\n\n## 当前教程\n${currentHTML}` }
+        ],
+        temperature: 0.7,
+        max_tokens: 8192
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'HTTP ' + response.status);
+    }
+
+    const data = await response.json();
+    let html = data.choices[0].message.content;
+    html = html.replace(/^```html?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+
+    generatedContent.innerHTML = html;
+    heroDesc.textContent = '已根据笔记优化 · 由 DeepSeek 驱动';
+    initCopyButtons();
+    generatedContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (err) {
+    alert('优化失败：' + err.message);
+    console.error('Refine error:', err);
+  } finally {
+    annoRefine.disabled = false;
+    annoRefine.textContent = '优化页面';
+  }
 });
 
 restoreRefs();
