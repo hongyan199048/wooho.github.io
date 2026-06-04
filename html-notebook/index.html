@@ -1741,6 +1741,7 @@ function renderHistory() {
       heroDesc.textContent = '从历史记录加载 · ' + h.time;
       btnExportPage.disabled = false;
       initCopyButtons();
+      initContentEditable();
       genTOC();
     });
   });
@@ -1782,7 +1783,11 @@ function genTOC() {
 
 // ── Contenteditable ──
 function initContentEditable() {
-  generatedContent.querySelectorAll('.step-body, .step-header, .step-header h2').forEach(el => {
+  generatedContent.querySelectorAll('.step-body, .step-header, .step-header h2, .step-num, .hero h1, .hero p').forEach(el => {
+    if (el.dataset._editable) return; // avoid double-binding
+    el.dataset._editable = '1';
+    el.style.cursor = 'text';
+    el.title = '双击编辑';
     el.addEventListener('dblclick', (e) => {
       e.stopPropagation();
       el.contentEditable = el.contentEditable === 'true' ? 'false' : 'true';
@@ -1795,15 +1800,6 @@ function initContentEditable() {
       }
     });
   });
-  // Also make hero title editable
-  const heroH1 = document.querySelector('.hero h1');
-  if (heroH1) {
-    heroH1.addEventListener('dblclick', () => {
-      heroH1.contentEditable = heroH1.contentEditable === 'true' ? 'false' : 'true';
-      if (heroH1.contentEditable === 'true') { heroH1.style.outline = '2px dashed #f59e0b'; heroH1.style.outlineOffset = '-4px'; heroH1.focus(); }
-      else { heroH1.style.outline = ''; }
-    });
-  }
 }
 
 // ── Blank notebook ──
