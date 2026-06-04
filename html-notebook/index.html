@@ -324,6 +324,10 @@
 
     /* ── Tutorial images ── */
     .tutorial-img { display: block; max-width: 100%; margin: 20px 0; border: 1px solid #e0ddd8; border-radius: 4px; }
+    [contenteditable="true"] img {
+      border: 2px dashed #f59e0b !important;
+      cursor: nwse-resize;
+    }
     .img-caption { text-align: center; font-size: 11px; color: #a0a0a0; margin-top: -14px; margin-bottom: 20px; font-family: var(--font-mono); }
 
     /* ── Annotation panel ── */
@@ -1810,17 +1814,8 @@ function initContentEditable() {
             img.src = reader.result;
             img.className = 'tutorial-img';
             img.style.maxWidth = '100%';
-            img.style.width = 'auto';
-            img.style.height = 'auto';
-            // Wrap in resizable container
-            const wrapper = document.createElement('span');
-            wrapper.style.display = 'inline-block';
-            wrapper.style.maxWidth = '100%';
-            wrapper.style.resize = 'both';
-            wrapper.style.overflow = 'hidden';
-            wrapper.appendChild(img);
             const sel = window.getSelection();
-            if (sel.rangeCount > 0) { sel.getRangeAt(0).insertNode(wrapper); sel.collapseToEnd(); }
+            if (sel.rangeCount > 0) { sel.getRangeAt(0).insertNode(img); sel.collapseToEnd(); }
           };
           reader.readAsDataURL(blob);
           break;
@@ -1840,14 +1835,8 @@ function initContentEditable() {
         img.src = reader.result;
         img.className = 'tutorial-img';
         img.style.maxWidth = '100%';
-        const wrapper = document.createElement('span');
-        wrapper.style.display = 'inline-block';
-        wrapper.style.maxWidth = '100%';
-        wrapper.style.resize = 'both';
-        wrapper.style.overflow = 'hidden';
-        wrapper.appendChild(img);
         const sel = window.getSelection();
-        if (sel.rangeCount > 0) { sel.getRangeAt(0).insertNode(wrapper); sel.collapseToEnd(); }
+        if (sel.rangeCount > 0) { sel.getRangeAt(0).insertNode(img); sel.collapseToEnd(); }
       };
       reader.readAsDataURL(file);
     });
