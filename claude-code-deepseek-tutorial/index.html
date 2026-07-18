@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code + DeepSeek 接入教程 — 100x Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f2ed;
+      --bg-card: #ffffff;
+      --text: #1a1a1a;
+      --text-sec: #6b6b6b;
+      --text-dim: #a0a0a0;
+      --border: #e0ddd8;
+      --muted: #faf8f5;
+      --font-mono: 'Share Tech Mono', monospace;
+      --sidebar-width: 268px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Inter, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 50px;
+      background: rgba(245,242,237,0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e0ddd8;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+    .navbar-left a {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #6b6b6b;
+      text-decoration: none;
+    }
+    .navbar-left a:hover { color: #1a1a1a; }
+    .navbar-divider {
+      width: 1px;
+      height: 16px;
+      background: #e0ddd8;
+      margin: 0 14px;
+    }
+    .navbar-center {
+      flex: 1;
+      text-align: center;
+      font-family: Inter, sans-serif;
+      font-weight: 400;
+      font-size: 13px;
+      color: #1a1a1a;
+    }
+    .navbar-right {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #b0a89e;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100vh - 50px);
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 100;
+      padding: 0 0 20px;
+    }
+    .sidebar-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #b0a89e;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .sidebar ul { list-style: none; margin: 0; padding: 0; }
+    .sidebar li { margin: 0; }
+    .sidebar a {
+      display: block;
+      color: var(--text-sec);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 300;
+      border-left: 2px solid transparent;
+      padding: 7px 20px;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+    .sidebar a:hover { color: var(--text); border-left-color: var(--text); background: var(--bg); }
+    .sidebar a.active { color: var(--text); border-left-color: var(--text); }
+
+    /* ── Page body ── */
+    .page-body {
+      margin-left: var(--sidebar-width);
+      margin-top: 50px;
+      margin-right: 0;
+      transition: margin-right 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    body.anno-open .page-body {
+      margin-right: 290px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: #ffffff;
+      border-bottom: 1px solid #e0ddd8;
+      padding: 40px 48px 32px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      color: #1a1a1a;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      font-size: 14px;
+      color: #6b6b6b;
+      font-weight: 300;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .hero .subtitle {
+      margin-top: 14px;
+      font-size: 14px;
+      color: #6b6b6b;
+      font-weight: 300;
+    }
+    .hero .badge {
+      display: inline-block;
+      background: #f0ede8;
+      color: #888;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 2px;
+      margin: 0 2px;
+    }
+
+    /* ── Container ── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 48px 80px;
+    }
+
+    /* ── Steps ── */
+    .step {
+      background: #ffffff;
+      border: 1px solid #e0ddd8;
+      border-radius: 4px;
+      margin: 24px 0;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(26,26,26,0.05);
+    }
+    .step-header {
+      background: #1a1a1a;
+      color: #f5f2ed;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      background: rgba(245,242,237,0.15);
+      border: 1px solid rgba(245,242,237,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #f5f2ed;
+      flex-shrink: 0;
+    }
+    .step-header h2 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #f5f2ed;
+    }
+    .step-body {
+      padding: 24px;
+      background: #ffffff;
+    }
+
+    /* ── Typography ── */
+    h2 {
+      font-size: 18px;
+      font-weight: 500;
+      color: #1a1a1a;
+      border-bottom: 1px solid #e0ddd8;
+      padding-bottom: 8px;
+      margin: 28px 0 14px;
+    }
+    h3 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin: 22px 0 10px;
+    }
+    p { margin: 10px 0; color: #1a1a1a; }
+    ul, ol { margin: 10px 0 10px 28px; }
+    li { margin: 5px 0; }
+
+    /* ── Code ── */
+    .code-block {
+      background: var(--bg);
+      border: 1px solid #e0ddd8;
+      border-radius: 3px;
+      padding: 16px;
+      padding-right: 60px;
+      overflow-x: auto;
+      margin: 14px 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #1a1a1a;
+      line-height: 1.6;
+      white-space: pre;
+      position: relative;
+    }
+    .code-block .comment { color: #a0a0a0; }
+    .code-block .string { color: #2d6a4f; }
+
+    code {
+      background: #f0ede8;
+      color: #1a1a1a;
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+
+    /* ── Callouts ── */
+    .tip {
+      background: #f0f7f2;
+      border-left: 3px solid #2d6a4f;
+      padding: 12px 16px;
+      border-radius: 0 3px 3px 0;
+      margin: 14px 0;
+    }
+    .tip strong { color: #2d6a4f; }
+
+    .warning {
+      background: #fdf5ec;
+      border-left: 3px solid #b07030;
+      padding: 12px 16px;
+      border-radius: 0 3px 3px 0;
+      margin: 14px 0;
+    }
+    .warning strong { color: #b07030; }
+
+    /* ── Tables ── */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 14px 0;
+    }
+    th {
+      background: var(--bg);
+      border: 1px solid #e0ddd8;
+      padding: 10px 12px;
+      font-weight: 500;
+      font-size: 13px;
+      text-align: left;
+      color: #1a1a1a;
+    }
+    td {
+      border: 1px solid #e0ddd8;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    /* ── Images ── */
+    .tutorial-img {
+      display: block;
+      max-width: 100%;
+      margin: 20px 0;
+      border: 1px solid #e0ddd8;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(26,26,26,0.05);
+    }
+    .img-caption {
+      text-align: center;
+      font-size: 11px;
+      color: #a0a0a0;
+      margin-top: -14px;
+      margin-bottom: 20px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Flow diagram ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+      justify-content: center;
+    }
+    .flow-item {
+      background: #1a1a1a;
+      color: #f5f2ed;
+      padding: 6px 14px;
+      border-radius: 2px;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+    .flow-arrow {
+      color: #b0a89e;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    /* ── Architecture diagram ── */
+    .arch-diagram {
+      background: var(--bg);
+      border: 1px solid #e0ddd8;
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin: 16px 0;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 2;
+    }
+    .arch-diagram .box {
+      display: inline-block;
+      background: #ffffff;
+      border: 1px solid #c5c0b8;
+      border-radius: 3px;
+      padding: 8px 16px;
+      margin: 4px 6px;
+      white-space: nowrap;
+    }
+    .arch-diagram .arrow {
+      color: #b0a89e;
+      font-size: 18px;
+      margin: 0 2px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: #a0a0a0;
+      font-size: 13px;
+      border-top: 1px solid #e0ddd8;
+      margin-top: 40px;
+    }
+
+    /* ── Scroll to top ── */
+    .scroll-top {
+      background: #1a1a1a;
+      color: #f5f2ed;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(26,26,26,0.15);
+    }
+    .scroll-top:hover { background: #333; }
+
+    /* ── Annotation panel (right side) ── */
+    .anno-toggle {
+      position: fixed;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      background: #1a1a1a;
+      color: #c5c0b8;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 3px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      padding: 14px 8px;
+      border: 1px solid #333;
+      border-right: none;
+      border-radius: 3px 0 0 3px;
+      cursor: pointer;
+      z-index: 201;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .anno-toggle:hover { background: #333; color: #f5f2ed; }
+    .anno-toggle.hidden { opacity: 0; pointer-events: none; }
+
+    .anno-panel {
+      position: fixed;
+      top: 50px;
+      right: -290px;
+      width: 290px;
+      height: calc(100vh - 50px);
+      background: #ffffff;
+      border-left: 1px solid #e0ddd8;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
+      box-shadow: -2px 0 16px rgba(26,26,26,0.06);
+    }
+    .anno-panel.open { right: 0; }
+
+    .anno-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid #e0ddd8;
+      flex-shrink: 0;
+    }
+    .anno-header span {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #b0a89e;
+    }
+    .anno-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #a0a0a0;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .anno-close:hover { color: #1a1a1a; }
+
+    .anno-quote-btn {
+      background: none;
+      border: 1px solid #e0ddd8;
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #6b6b6b;
+      padding: 3px 8px;
+      cursor: pointer;
+      margin-left: auto;
+      margin-right: 8px;
+      transition: all 0.15s;
+      letter-spacing: 1px;
+    }
+    .anno-quote-btn:hover { background: #f0ede8; color: #1a1a1a; border-color: #c5c0b8; }
+    .anno-quote-btn.has-selection { background: #f0f7f2; color: #2d6a4f; border-color: #2d6a4f; }
+
+    .anno-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      border-top: 1px solid #e0ddd8;
+      flex-shrink: 0;
+    }
+    .anno-status {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #a0a0a0;
+      letter-spacing: 1px;
+    }
+    .anno-status.saved { color: #2d6a4f; }
+
+    .anno-export-btn {
+      background: #1a1a1a;
+      color: #f5f2ed;
+      border: none;
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .anno-export-btn:hover { background: #333; }
+
+    /* ── Highlights in main content ── */
+    .anno-hl {
+      background: #fef3c7;
+      border-bottom: 2px solid #f59e0b;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-radius: 1px;
+      padding: 0 1px;
+    }
+    .anno-hl:hover { background: #fde68a; }
+    .anno-hl.flash { background: #fbbf24; transition: background 0s; }
+
+    .anno-refs { flex: 1; overflow-y: auto; }
+    #anno-ref-count {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #b0a89e;
+    }
+    .anno-refs-header {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #b0a89e;
+      padding: 10px 18px 6px;
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+    }
+    .anno-ref-item { cursor: pointer; border-bottom: 1px solid #f5f2ed; }
+    .anno-ref-item:hover { background: #faf8f5; }
+    .anno-ref-item.active { background: #fef3c7; }
+    .anno-ref-item.expanded { background: #faf8f5; }
+    .anno-ref-item {
+      padding: 7px 18px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .anno-ref-expand {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: #c5c0b8;
+      margin-left: 8px;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .anno-ref-item.expanded .anno-ref-expand { transform: rotate(90deg); color: #6b6b6b; }
+    .anno-ref-note {
+      width: 100%;
+      border: none;
+      border-top: 1px solid #f0ede8;
+      outline: none;
+      resize: vertical;
+      padding: 12px 18px;
+      font-family: Inter, -apple-system, sans-serif;
+      font-size: 12px;
+      line-height: 1.7;
+      color: #1a1a1a;
+      background: #ffffff;
+      min-height: 60px;
+      display: none;
+    }
+    .anno-ref-item.expanded + .anno-ref-note { display: block; }
+    .anno-ref-note:focus { background: #faf8f5; }
+    .anno-ref-num {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: #b0a89e;
+      letter-spacing: 1px;
+    }
+    .anno-ref-text {
+      font-size: 11px;
+      color: #6b6b6b;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
+    }
+    .anno-ref-del {
+      background: none;
+      border: none;
+      color: #c5c0b8;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 0 0 0 8px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: color 0.15s;
+    }
+    .anno-ref-del:hover { color: #d93025; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .page-body { margin-left: 0; }
+      .container { padding: 24px 20px 60px; }
+      .hero { padding: 28px 20px 24px; }
+      .hero h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <a href="/">← wooho.cc</a>
+  </div>
+  <div class="navbar-divider"></div>
+  <div class="navbar-center">Claude Code + DeepSeek 接入教程</div>
+  <div class="navbar-right">#004</div>
+</nav>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-title">目录</div>
+  <ul>
+    <li><a href="#overview">整体流程概览</a></li>
+    <li><a href="#step1">1. 安装 Trae</a></li>
+    <li><a href="#step2">2. 安装 Claude Code 插件</a></li>
+    <li><a href="#step3">3. 打开一次 Claude 面板</a></li>
+    <li><a href="#step4">4. 安装 cc-switch</a></li>
+    <li><a href="#step5">5. 申请 DeepSeek API Key</a></li>
+    <li><a href="#step6">6. cc-switch 填 DeepSeek 并启用</a></li>
+    <li><a href="#step7">7. 验证是否接通</a></li>
+  </ul>
+</div>
+
+<div class="page-body">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>在 Trae 里用 Claude Code + ccswitch 接入 DeepSeek</h1>
+  <p>手把手教程——全程点鼠标、零命令行，把 Claude Code 的后台切到便宜很多的 DeepSeek API</p>
+  <div class="subtitle">
+    <span class="badge">Windows 10/11</span>
+    <span class="badge">Trae</span>
+    <span class="badge">Claude Code 插件</span>
+    <span class="badge">cc-switch</span>
+    <span class="badge">DeepSeek API</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 整体流程 -->
+  <div class="step" id="overview">
+    <div class="step-header">
+      <div class="step-num">→</div>
+      <h2>整体流程概览</h2>
+    </div>
+    <div class="step-body">
+
+      <div class="arch-diagram">
+        <span class="box">Trae 编辑器</span>
+        <span class="arrow">←→</span>
+        <span class="box">Claude Code 插件<br><small style="color:#888">（图形聊天面板）</small></span>
+        <span class="arrow">←→</span>
+        <span class="box">cc-switch<br><small style="color:#888">（改了一份配置）</small></span>
+        <span class="arrow">←→</span>
+        <span class="box">DeepSeek 服务器</span>
+      </div>
+      <p style="text-align:center;color:#6b6b6b;font-size:13px;">cc-switch 把 Claude Code 的后台地址换成 DeepSeek，插件面板无需登录就能直接用。</p>
+
+      <div class="flow" style="margin-top:20px;">
+        <div class="flow-item">1. 装 Trae</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">2. 装插件</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">3. 打开面板</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">4. 装 cc-switch</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">5. 拿 Key</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">6. 填 Key 启用</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">7. 验证 🎉</div>
+      </div>
+      <p style="text-align:center;color:#a0a0a0;font-size:12px;margin-top:12px;">全程约 15~25 分钟，不需要编程基础，不需要碰命令行。</p>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step" id="step1">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <h2>安装 Trae（已装可跳过）</h2>
+    </div>
+    <div class="step-body">
+      <p>Trae 是字节跳动推出的免费 AI 代码编辑器，原生支持中文界面，对国内用户更友好。</p>
+      <ol>
+        <li>浏览器打开 Trae 官网：<a href="https://www.trae.ai" target="_blank">https://www.trae.ai</a></li>
+        <li>下载 <strong>Windows 版</strong>（<code>.exe</code> 安装包）。</li>
+        <li>双击安装包，一路「下一步 → 我同意 → 安装」即可。</li>
+        <li>安装完成，打开 Trae。界面默认是中文的。<br>如果打开是英文的，可以在右上角设置里切换语言。</li>
+      </ol>
+
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <h2>在 Trae 里安装 Claude Code 插件</h2>
+    </div>
+    <div class="step-body">
+      <p>这一步装的是<strong>图形聊天面板</strong>——你后面用的就是它。Trae 底层兼容 VSCode，插件安装方式完全一致。</p>
+
+      <div class="tip">
+        <strong>💡 提示：</strong>Trae 默认使用 Open VSX 应用商店。如果搜不到 Claude Code，可在 Trae 设置中搜索 <code>extensionMarketUrl</code>，将其改为 VS Code 官方市场地址 <code>https://marketplace.visualstudio.com/vscode</code>，然后重新搜索安装。
+      </div>
+
+      <ol>
+        <li>打开 Trae。</li>
+        <li>看左边竖排的一列图标，找到<strong>由四个小方块组成</strong>的那个图标（「扩展」），点它。<br>或者按快捷键 <strong><code>Ctrl + Shift + X</code></strong> 直接打开。</li>
+        <li>顶部搜索框输入 <strong><code>Claude Code for VS Code</code></strong>。</li>
+        <li>找到发布者是 <strong>Anthropic</strong> 的结果，点 <strong>「安装」</strong>。</li>
+      </ol>
+
+      <!-- 图 1: 扩展面板搜索 + 安装后星形图标 -->
+      <img class="tutorial-img" src="images/step2-plugin-install.png" alt="Trae 扩展面板搜索安装 Claude Code 插件" loading="lazy">
+      <p class="img-caption">▲ 图 1：Trae 扩展面板 — 搜索 Claude Code for VS Code，找到 Anthropic 发布者并安装；安装完成后右上角出现 ✱ 星形图标</p>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="step3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <h2>先打开一次 Claude 面板</h2>
+    </div>
+    <div class="step-body">
+      <div class="warning">
+        <strong>⚠️ 这一步很重要，不要跳过。</strong>目的是让电脑自动生成 Claude Code 的配置文件夹，好让后面的 cc-switch 能找到它。
+      </div>
+
+      <ol>
+        <li>在 Trae 里先随便打开一个文件夹：菜单「文件 → 打开文件夹」，选桌面上任意一个文件夹即可。</li>
+        <li>点右上角的 <strong>✱ 星形图标</strong>，打开 Claude 面板。</li>
+        <li>面板会弹出一个<strong>「登录 / Sign in」</strong>画面。</li>
+      </ol>
+
+
+      <div class="tip">
+        <strong>✅ 看到这个页面就对了！</strong>如果只用 DeepSeek，不用管这个登录。cc-switch 配好之后会自动跳过登录。<br><br>
+        看到这个画面说明配置文件夹已经在后台自动生成了，目的达成。配置文件夹位置：<code>C:\Users\你的用户名\.claude\</code>，先关掉面板，后面用。
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="step4">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <h2>安装 cc-switch（切换工具）</h2>
+    </div>
+    <div class="step-body">
+      <p>cc-switch 是一个开源的<strong>带图形界面</strong>的小工具，专门给 Claude Code 切换后台供应商用。由 GitHub 上的 <strong>farion1231</strong> 开发维护。</p>
+
+      <ol>
+        <li>浏览器打开：<a href="https://github.com/farion1231/cc-switch/releases" target="_blank">https://github.com/farion1231/cc-switch/releases</a></li>
+        <li>下载 <strong>Windows 版</strong>：<code>CC-Switch-v3.17.0-Windows-Portable.zip</code>。</li>
+        <li>解压 zip 文件，双击 <code>CC-Switch.exe</code> 运行。</li>
+        <li>打开 cc-switch。首次启动时它会<strong>自动扫描你电脑上的 Claude Code 配置并导入</strong>。</li>
+        <li>右下角任务栏里会出现 cc-switch 的小图标，说明它在运行。</li>
+      </ol>
+
+      <!-- IMG 5: GitHub Releases 下载 -->
+      <img class="tutorial-img" src="images/step4-ccswitch-download.png" alt="cc-switch GitHub Releases 下载页面" loading="lazy">
+      <p class="img-caption">▲ 图 2：cc-switch Releases 页面 — 下载 CC-Switch-v3.17.0-Windows-Portable.zip</p>
+
+      <div class="tip">
+        <strong>💡 如果 cc-switch 提示「找不到 Claude Code」：</strong>多半是第 3 步漏了。回 Trae 打开一次 Claude 面板（弹出登录界面即可关闭），然后重启 cc-switch。
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step" id="step5">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <h2>申请 DeepSeek API Key</h2>
+    </div>
+    <div class="step-body">
+      <p>这是你在 DeepSeek 的「门禁卡 + 付费凭证」。</p>
+
+      <ol>
+        <li>浏览器打开 DeepSeek 开放平台：<a href="https://platform.deepseek.com/api_keys" target="_blank">https://platform.deepseek.com/api_keys</a></li>
+        <li>注册 / 登录（手机号或邮箱均可）。</li>
+        <li><strong>先去「充值 / 余额」充点钱</strong>（比如 10 元，足够用很久）。不充值的话后面调用会报错。</li>
+        <li>点 <strong>「创建 API Key」</strong>，随便起个名字（如 <code>claude-code</code>）。</li>
+        <li>生成后会显示一串 <code>sk-xxxxxxxx</code>——<strong>马上复制，存到记事本里</strong>。</li>
+      </ol>
+
+      <div class="warning">
+        <strong>⚠️ 这串密钥只显示这一次，关掉页面就再也看不到了。务必先保存好。</strong>不要泄露给任何人，不要发到聊天群/朋友圈/截图里。
+      </div>
+
+      <!-- IMG 6: DeepSeek API Keys 页面 -->
+      <img class="tutorial-img" src="images/step5-apikey-popup.png" alt="API Key 生成后的显示弹窗" loading="lazy">
+      <p class="img-caption">▲ 图 3：创建成功弹窗 — ⚠️ 立即复制密钥！关掉后就再也看不到了。复制后保存到记事本里。</p>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step" id="step6">
+    <div class="step-header">
+      <div class="step-num">6</div>
+      <h2>在 cc-switch 里填 DeepSeek 并启用</h2>
+    </div>
+    <div class="step-body">
+      <p>回到 cc-switch 的窗口。cc-switch 已经内置了 DeepSeek 的配置模板，<strong>你只需要填 API Key 就行</strong>，Base URL 和模型名都会自动填好。</p>
+
+      <ol>
+        <li>点右上角的 <strong>「+」</strong>（新增 Provider）。</li>
+        <li>在模板列表里选 <strong>DeepSeek</strong>。选完之后 Base URL、模型名都已经帮你填好了，不用动。</li>
+        <li>在 <strong>API Key</strong> 栏里，粘贴第 5 步存的 <code>sk-xxxx……</code>（注意：整串完整，<strong>别多带空格或换行</strong>）。</li>
+        <li>点 <strong>「测试 (Test)」</strong> 按钮跑个测试请求，显示通过后再点 <strong>「启用 (Enable)」</strong>。</li>
+      </ol>
+
+      <!-- 图 4: cc-switch 主页面 -->
+      <img class="tutorial-img" src="images/step6a-main.png" alt="cc-switch 主页面" loading="lazy">
+      <p class="img-caption">▲ 图 4：cc-switch 主页面 — 点右上角「+」添加第三方模型供应商</p>
+
+      <!-- 图 5: 选择 DeepSeek -->
+      <img class="tutorial-img" src="images/step6b-select-deepseek.png" alt="选择 DeepSeek 模板" loading="lazy">
+      <p class="img-caption">▲ 图 5：点击「+」后 — 在列表中选中 DeepSeek 模板</p>
+
+      <!-- 图 6: 填写 API Key -->
+      <img class="tutorial-img" src="images/step6c-api-key.png" alt="填写 DeepSeek API Key" loading="lazy">
+      <p class="img-caption">▲ 图 6：选择 DeepSeek 后 — 在 API Key 栏粘贴你的 sk-xxxx，其他字段自动填好，点测试通过后再点启用</p>
+
+      <div class="tip">
+        <strong>💡 cc-switch 实际改了哪个文件？</strong>（了解即可，不用手动操作）<br>
+        它把配置写进了 <code>C:\Users\你的用户名\.claude\settings.json</code>。这份文件正是 Claude Code 插件读取的那份，所以配一次，插件面板就能用。
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="step" id="step7">
+    <div class="step-header">
+      <div class="step-num">7</div>
+      <h2>验证是否接通了 DeepSeek</h2>
+    </div>
+    <div class="step-body">
+      <p>cc-switch 启用之后，直接在 Trae 里打开 Claude Code 插件即可使用，不需要额外操作。</p>
+
+      <ol>
+        <li>点右上角 <strong>✱ 星形图标</strong>打开 Claude 面板。</li>
+        <li>直接就是聊天输入框，输入一句测试消息，例如：</li>
+      </ol>
+
+      <div class="code-block">你好，请用一句话介绍你自己</div>
+
+      <p><strong>它正常回复了</strong> → 🎉 成功！你现在用的就是 DeepSeek 后台，可以开始干活了。</p>
+
+    </div>
+  </div>
+
+</div><!-- .container -->
+
+<footer>
+  Claude Code + DeepSeek 接入教程 · wooho.cc · 2026-07
+</footer>
+
+</div><!-- .page-body -->
+
+<!-- Annotation panel toggle -->
+<div id="anno-toggle" class="anno-toggle">批注</div>
+
+<!-- Annotation panel -->
+<div id="anno-panel" class="anno-panel">
+  <div class="anno-header">
+    <span>批注</span>
+    <button id="anno-quote" class="anno-quote-btn" title="引用页面中选中的文字">引用选中</button>
+    <button id="anno-close" class="anno-close" title="关闭">&times;</button>
+  </div>
+  <div id="anno-refs" class="anno-refs">
+    <div class="anno-refs-header">引用列表 <span id="anno-ref-count"></span></div>
+    <div id="anno-refs-list"></div>
+  </div>
+  <div class="anno-footer">
+    <span id="anno-status" class="anno-status saved">已保存</span>
+    <button id="anno-export" class="anno-export-btn">导出 HTML</button>
+  </div>
+</div>
+
+<a class="scroll-top" href="#" title="回到顶部">↑</a>
+
+<script>
+// ── Sidebar active link on scroll ──
+const secEls = document.querySelectorAll('.step[id], [id="overview"]');
+const sidebarLinks = document.querySelectorAll('.sidebar a');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      sidebarLinks.forEach(a => a.classList.remove('active'));
+      const active = document.querySelector('.sidebar a[href="#' + entry.target.id + '"]');
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+secEls.forEach(s => obs.observe(s));
+
+// ── Copy button for code blocks ──
+document.querySelectorAll('.code-block').forEach(block => {
+  const codeText = block.textContent.trim();
+  block.setAttribute('data-code', codeText);
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.style.cssText = 'position:absolute;top:8px;right:8px;background:#fff;border:1px solid #e0ddd8;border-radius:2px;font-family:var(--font-mono);font-size:10px;color:#6b6b6b;padding:3px 10px;cursor:pointer;opacity:0;transition:opacity 0.15s;letter-spacing:1px;text-transform:uppercase';
+  block.style.position = 'relative';
+  block.appendChild(btn);
+  block.addEventListener('mouseenter', () => { btn.style.opacity = '1'; });
+  block.addEventListener('mouseleave', () => { btn.style.opacity = '0'; });
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(block.getAttribute('data-code')).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    }).catch(() => {
+      btn.textContent = 'Error';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    });
+  });
+});
+
+// ── Annotation panel ──
+const annoToggle   = document.getElementById('anno-toggle');
+const annoPanel    = document.getElementById('anno-panel');
+const annoClose    = document.getElementById('anno-close');
+const annoQuote    = document.getElementById('anno-quote');
+const annoStatus   = document.getElementById('anno-status');
+const annoExport   = document.getElementById('anno-export');
+const annoRefsList = document.getElementById('anno-refs-list');
+const annoRefCount = document.getElementById('anno-ref-count');
+const pageBody     = document.querySelector('.page-body');
+
+let annoRefsArr = [];
+
+function openPanel() {
+  annoPanel.classList.add('open');
+  annoToggle.classList.add('hidden');
+  document.body.classList.add('anno-open');
+}
+function closePanel() {
+  annoPanel.classList.remove('open');
+  annoToggle.classList.remove('hidden');
+  document.body.classList.remove('anno-open');
+}
+function escapeHTML(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function saveRefs() {
+  const data = annoRefsArr.map(r => ({ id: r.id, quote: r.quote, parentId: r.parentId, note: r.note || '' }));
+  localStorage.setItem('claude-deepseek-tutorial-refs', JSON.stringify(data));
+}
+function deleteRef(idx) {
+  const ref = annoRefsArr[idx];
+  if (!ref) return;
+  if (ref.markEl && document.body.contains(ref.markEl)) {
+    const parent = ref.markEl.parentNode;
+    while (ref.markEl.firstChild) parent.insertBefore(ref.markEl.firstChild, ref.markEl);
+    parent.removeChild(ref.markEl);
+    parent.normalize();
+  }
+  annoRefsArr.splice(idx, 1);
+  annoRefsArr.forEach((r, i) => { r.id = i; if (r.markEl) r.markEl.dataset.annoRef = i; });
+  saveRefs();
+  renderRefs();
+}
+function renderRefs() {
+  annoRefsArr.sort((a, b) => {
+    if (!a.markEl || !document.body.contains(a.markEl)) return 0;
+    if (!b.markEl || !document.body.contains(b.markEl)) return 0;
+    const pos = a.markEl.compareDocumentPosition(b.markEl);
+    return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+  });
+  annoRefsArr.forEach((r, i) => { r.id = i; if (r.markEl) r.markEl.dataset.annoRef = i; });
+  annoRefsList.innerHTML = annoRefsArr.map((ref, i) =>
+    '<div class="anno-ref-item" data-anno-ref="' + i + '">' +
+    '<div class="anno-ref-num">引用 #' + (i + 1) + '</div>' +
+    '<div class="anno-ref-text">' + escapeHTML(ref.quote.substring(0, 120)) + '</div>' +
+    '<span class="anno-ref-expand">▶</span>' +
+    '<button class="anno-ref-del" data-action="delete" data-idx="' + i + '" title="删除此引用">&times;</button>' +
+    '</div>' +
+    '<textarea class="anno-ref-note" data-anno-ref="' + i + '" placeholder="点击左侧引用条目展开，在此写批注...">' + escapeHTML(ref.note || '') + '</textarea>'
+  ).join('');
+  annoRefCount.textContent = annoRefsArr.length > 0 ? '(' + annoRefsArr.length + ')' : '';
+}
+function restoreRefs() {
+  const raw = localStorage.getItem('claude-deepseek-tutorial-refs');
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch (e) { return; }
+  if (!Array.isArray(data)) return;
+  data.forEach((item, idx) => {
+    const container = item.parentId ? document.getElementById(item.parentId) : pageBody;
+    if (!container) return;
+    const mark = findAndWrapText(container, item.quote, idx);
+    if (mark) {
+      annoRefsArr.push({ id: idx, quote: item.quote, markEl: mark, parentId: item.parentId, note: item.note || '' });
+    }
+  });
+  if (annoRefsArr.length > 0) renderRefs();
+}
+function findAndWrapText(container, searchText, refIdx) {
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+  let node;
+  while ((node = walker.nextNode())) {
+    const idx = node.textContent.indexOf(searchText);
+    if (idx === -1) continue;
+    if (node.parentNode.closest('textarea, script, style, .anno-panel, .sidebar, nav')) continue;
+    try {
+      const range = document.createRange();
+      range.setStart(node, idx);
+      range.setEnd(node, idx + searchText.length);
+      const mark = document.createElement('mark');
+      mark.className = 'anno-hl';
+      mark.dataset.annoRef = refIdx;
+      range.surroundContents(mark);
+      return mark;
+    } catch (e) { continue; }
+  }
+  return null;
+}
+
+annoToggle.addEventListener('click', openPanel);
+annoClose.addEventListener('click', closePanel);
+
+document.addEventListener('selectionchange', () => {
+  const sel = window.getSelection();
+  const inContent = sel.rangeCount > 0 && pageBody.contains(sel.anchorNode);
+  if (sel.toString().trim().length > 0 && inContent) {
+    annoQuote.classList.add('has-selection');
+  } else {
+    annoQuote.classList.remove('has-selection');
+  }
+});
+
+annoQuote.addEventListener('click', () => {
+  const sel = window.getSelection();
+  const text = sel.toString().trim();
+  if (!text) return;
+  if (sel.rangeCount === 0) return;
+  const range = sel.getRangeAt(0);
+  if (!pageBody.contains(range.commonAncestorContainer)) return;
+  let mark;
+  try {
+    mark = document.createElement('mark');
+    mark.className = 'anno-hl';
+    mark.dataset.annoRef = annoRefsArr.length;
+    range.surroundContents(mark);
+  } catch (e) {
+    try {
+      const frag = range.extractContents();
+      mark = document.createElement('mark');
+      mark.className = 'anno-hl';
+      mark.dataset.annoRef = annoRefsArr.length;
+      mark.appendChild(frag);
+      range.insertNode(mark);
+    } catch (e2) {
+      alert('无法高亮跨层级选区，请选择单个段落内的文字。');
+      return;
+    }
+  }
+  const parentStep = mark.closest('.step');
+  const parentId = parentStep ? parentStep.id : null;
+  annoRefsArr.push({ id: annoRefsArr.length, quote: text, markEl: mark, parentId: parentId, note: '' });
+  saveRefs();
+  renderRefs();
+  if (!annoPanel.classList.contains('open')) openPanel();
+  sel.removeAllRanges();
+});
+
+pageBody.addEventListener('click', (e) => {
+  const mark = e.target.closest('.anno-hl');
+  if (!mark) return;
+  const refIdx = parseInt(mark.dataset.annoRef);
+  if (isNaN(refIdx) || refIdx >= annoRefsArr.length) return;
+  if (!annoPanel.classList.contains('open')) openPanel();
+  const refItem = annoRefsList.querySelector('[data-anno-ref="' + refIdx + '"]');
+  if (refItem) {
+    annoRefsList.querySelectorAll('.anno-ref-item').forEach(el => el.classList.remove('active'));
+    refItem.classList.add('active');
+    refItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (!refItem.classList.contains('expanded')) refItem.classList.add('expanded');
+  }
+  mark.classList.add('flash');
+  setTimeout(() => mark.classList.remove('flash'), 800);
+});
+
+annoRefsList.addEventListener('click', (e) => {
+  if (e.target.dataset.action === 'delete') {
+    e.stopPropagation();
+    const idx = parseInt(e.target.dataset.idx);
+    if (!isNaN(idx)) deleteRef(idx);
+    return;
+  }
+  const item = e.target.closest('.anno-ref-item');
+  if (!item) return;
+  if (e.target.closest('.anno-ref-note')) return;
+  const refIdx = parseInt(item.dataset.annoRef);
+  if (isNaN(refIdx) || refIdx >= annoRefsArr.length) return;
+  if (item.classList.contains('expanded')) {
+    item.classList.remove('expanded');
+  } else {
+    item.classList.add('expanded');
+    const noteTA = annoRefsList.querySelector('.anno-ref-note[data-anno-ref="' + refIdx + '"]');
+    if (noteTA) noteTA.focus();
+  }
+  const mark = annoRefsArr[refIdx].markEl;
+  if (mark && document.body.contains(mark)) {
+    mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    mark.classList.add('flash');
+    setTimeout(() => mark.classList.remove('flash'), 800);
+  }
+});
+
+annoRefsList.addEventListener('input', (e) => {
+  const noteTA = e.target.closest('.anno-ref-note');
+  if (!noteTA) return;
+  const refIdx = parseInt(noteTA.dataset.annoRef);
+  if (isNaN(refIdx) || refIdx >= annoRefsArr.length) return;
+  annoRefsArr[refIdx].note = noteTA.value;
+  annoStatus.textContent = '保存中...';
+  annoStatus.classList.remove('saved');
+  clearTimeout(noteTA._saveTimer);
+  noteTA._saveTimer = setTimeout(() => {
+    saveRefs();
+    annoStatus.textContent = '已保存';
+    annoStatus.classList.add('saved');
+  }, 500);
+});
+
+restoreRefs();
+
+annoExport.addEventListener('click', () => {
+  let html = document.documentElement.outerHTML;
+  let report = '';
+  annoRefsArr.forEach((ref, i) => {
+    report += '────────────────────────\n';
+    report += '[引用 #' + (i + 1) + ']\n';
+    report += '> ' + ref.quote.replace(/\n/g, '\n> ') + '\n';
+    if (ref.note && ref.note.trim()) {
+      report += '\n批注：\n' + ref.note.trim() + '\n';
+    }
+    report += '\n';
+  });
+  const pre = '<pre style="white-space:pre-wrap;font-family:monospace;font-size:13px;background:#f5f2ed;padding:20px;border:1px solid #e0ddd8;margin:20px 0;border-radius:4px;">' + escapeHTML(report) + '</pre>';
+  html = html.replace(/<div id="anno-panel"[^]*?<\/div>/s, '');
+  html = html.replace(/<div id="anno-toggle"[^]*?<\/div>/s, '');
+  html = html.replace(/(<\/body>)/, pre + '\n$1');
+  const blob = new Blob(['<!DOCTYPE html>\n' + html], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'claude-code-deepseek-tutorial-批注版.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+// ── Scroll to top ──
+document.querySelector('.scroll-top').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+
+</body>
+</html>
