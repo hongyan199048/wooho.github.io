@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Typing — AI 语音输入工具</title>
+    <title>VoiceType — AI 语音输入工具</title>
+    <meta name="description" content="Linux 桌面下的 AI 语音转文字工具。按住快捷键说话，松开自动润色并粘贴到光标位置，任何能打字的地方都能用。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -28,6 +29,12 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .marquee-track { animation: none !important; }
+        }
 
         body {
             font-family: var(--font-sans);
@@ -71,12 +78,17 @@
             transition: color 0.2s;
         }
         nav a:hover { color: var(--text-sec); }
+        .nav-links {
+            display: flex;
+            gap: 26px;
+            align-items: center;
+        }
 
         /* ── Hero ── */
         .hero {
             position: relative;
             z-index: 10;
-            padding: 140px 24px 100px;
+            padding: 140px 24px 90px;
             text-align: center;
             max-width: 900px;
             margin: 0 auto;
@@ -95,26 +107,33 @@
         .hero h1 {
             font-size: 64px;
             font-weight: 600;
-            line-height: 1.1;
+            line-height: 1.08;
             color: var(--text);
             margin-bottom: 24px;
             letter-spacing: -0.03em;
         }
         .hero-subtitle {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 300;
             color: var(--text-sec);
-            line-height: 1.5;
-            margin-bottom: 48px;
-            max-width: 600px;
+            line-height: 1.55;
+            margin-bottom: 44px;
+            max-width: 640px;
             margin-left: auto;
             margin-right: auto;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
         .btn-primary {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            padding: 16px 40px;
+            padding: 16px 36px;
             background: var(--text);
             color: var(--bg);
             border-radius: var(--radius);
@@ -129,6 +148,47 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(26,26,26,0.2);
         }
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 36px;
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .btn-ghost:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+        .btn-dl {
+            flex-direction: column;
+            gap: 3px;
+            padding: 12px 26px;
+            min-width: 156px;
+        }
+        .btn-dl .dl-fmt { font-size: 15px; font-weight: 600; }
+        .btn-dl .dl-os {
+            font-size: 11px;
+            font-weight: 300;
+            opacity: 0.6;
+            letter-spacing: 0.02em;
+        }
+        .hero-secondary { margin-top: 18px; }
+
+        kbd {
+            font-family: var(--font-mono);
+            font-size: 0.86em;
+            padding: 2px 7px;
+            border: 1px solid var(--border-hover);
+            border-bottom-width: 2px;
+            border-radius: 4px;
+            background: var(--bg-card);
+            color: var(--text);
+            white-space: nowrap;
+        }
 
         /* ── Section ── */
         .section {
@@ -137,6 +197,7 @@
             padding: 80px 24px;
             max-width: 1100px;
             margin: 0 auto;
+            scroll-margin-top: 72px;
         }
         .section-title {
             font-family: var(--font-mono);
@@ -145,16 +206,252 @@
             text-transform: uppercase;
             color: var(--text-dim);
             text-align: center;
-            margin-bottom: 48px;
+            margin-bottom: 16px;
         }
         .section-heading {
             font-size: 36px;
             font-weight: 600;
             color: var(--text);
             text-align: center;
-            margin-bottom: 56px;
+            margin-bottom: 16px;
             letter-spacing: -0.02em;
         }
+        .section-sub {
+            font-size: 16px;
+            font-weight: 300;
+            color: var(--text-sec);
+            text-align: center;
+            margin-bottom: 56px;
+            line-height: 1.6;
+            max-width: 620px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .band {
+            background: var(--bg-muted);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ── Placeholder blocks ── */
+        .ph {
+            background: repeating-linear-gradient(
+                45deg,
+                transparent, transparent 8px,
+                rgba(26,26,26,0.025) 8px, rgba(26,26,26,0.025) 16px
+            );
+            border: 1px dashed var(--border-hover);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-dim);
+            letter-spacing: 0.05em;
+            padding: 12px;
+        }
+        .ph-dark {
+            background: repeating-linear-gradient(
+                45deg,
+                transparent, transparent 8px,
+                rgba(255,255,255,0.03) 8px, rgba(255,255,255,0.03) 16px
+            );
+            border-color: rgba(255,255,255,0.16);
+            color: rgba(255,255,255,0.4);
+        }
+        .ph-16-9 { aspect-ratio: 16 / 9; }
+        .ph-4-3  { aspect-ratio: 4 / 3; }
+
+        /* ── Speed comparison ── */
+        .speed-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 24px;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .speed-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-card);
+        }
+        .speed-card.hl { border-color: var(--accent); box-shadow: 0 4px 20px rgba(45,106,79,0.12); }
+        .speed-card-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            gap: 10px;
+        }
+        .speed-card-head h3 { font-size: 14px; font-weight: 600; }
+        .speed-rate {
+            font-family: var(--font-mono);
+            font-size: 15px;
+            color: var(--text-sec);
+        }
+        .speed-card.hl .speed-rate { color: var(--accent); font-weight: 600; }
+        .speed-vs {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 0.1em;
+        }
+        .speed-foot {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 14px;
+            font-weight: 300;
+            color: var(--text-sec);
+        }
+        .speed-foot strong { font-weight: 600; color: var(--accent); }
+
+        /* ── How it works ── */
+        .how-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .step {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: var(--shadow-card);
+        }
+        .step-num {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            margin-bottom: 18px;
+        }
+        .step kbd { font-size: 15px; padding: 5px 12px; margin-bottom: 18px; display: inline-block; }
+        .step h3 { font-size: 16px; font-weight: 600; margin: 14px 0 8px; }
+        .step p { font-size: 13px; font-weight: 300; color: var(--text-sec); line-height: 1.6; }
+
+        /* ── Showcase (AI polish) ── */
+        .showcase {
+            max-width: 760px;
+            margin: 0 auto;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(26,26,26,0.15);
+        }
+        .showcase-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.05em;
+        }
+        .showcase-row {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .showcase-row:last-child { border-bottom: none; }
+        .showcase-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .showcase-label.raw { color: rgba(255,255,255,0.35); }
+        .showcase-label.done { color: #6fbfa0; }
+        .showcase-text {
+            font-size: 15px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.5);
+        }
+        .showcase-text.done { color: rgba(255,255,255,0.95); }
+
+        /* ── Polish capability cards ── */
+        .cap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 56px;
+        }
+        .cap-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px;
+            box-shadow: var(--shadow-card);
+        }
+        .cap-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .cap-card p {
+            font-size: 13px;
+            font-weight: 300;
+            color: var(--text-sec);
+            line-height: 1.65;
+        }
+        .cap-cap {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border-radius: 2px;
+            background: var(--bg-muted);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            margin-bottom: 14px;
+        }
+
+        /* ── Strength table ── */
+        .strength {
+            max-width: 760px;
+            margin: 48px auto 0;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--bg-card);
+            box-shadow: var(--shadow-card);
+        }
+        .strength table { width: 100%; border-collapse: collapse; }
+        .strength th, .strength td {
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+        .strength thead th {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 400;
+            background: var(--bg-muted);
+        }
+        .strength tbody tr:last-child td { border-bottom: none; }
+        .strength tbody td:first-child { font-weight: 500; color: var(--text); }
+        .strength tbody td:not(:first-child) {
+            font-weight: 300;
+            color: var(--text-sec);
+            text-align: center;
+        }
+        .strength .yes { color: var(--accent); font-weight: 500; }
+        .strength .no  { color: var(--text-dim); }
 
         /* ── Features Grid ── */
         .features-grid {
@@ -170,20 +467,9 @@
             box-shadow: var(--shadow-card);
             transition: box-shadow 0.2s, transform 0.2s;
         }
-        .feature-card:hover {
-            box-shadow: var(--shadow-hover);
-            transform: translateY(-2px);
-        }
-        .feature-icon {
-            font-size: 28px;
-            margin-bottom: 14px;
-        }
-        .feature-card h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 10px;
-        }
+        .feature-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+        .feature-icon { font-size: 28px; margin-bottom: 14px; }
+        .feature-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
         .feature-card p {
             font-size: 13px;
             font-weight: 300;
@@ -191,20 +477,21 @@
             line-height: 1.6;
         }
 
-        /* ── Compatibility ── */
-        .compat-section {
-            background: var(--bg-muted);
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+        /* ── Marquee ── */
+        .marquee {
+            overflow: hidden;
+            -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+            mask-image:         linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+            padding: 4px 0;
         }
-        .app-grid {
+        .marquee-track {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
             gap: 16px;
-            max-width: 800px;
-            margin: 0 auto;
+            width: max-content;
+            animation: marquee 48s linear infinite;
         }
+        @keyframes marquee { to { transform: translateX(-50%); } }
+        .marquee:hover .marquee-track { animation-play-state: paused; }
         .app-badge {
             padding: 10px 18px;
             background: var(--bg-card);
@@ -212,32 +499,20 @@
             border-radius: var(--radius);
             font-size: 13px;
             color: var(--text-sec);
-            font-weight: 400;
+            white-space: nowrap;
         }
 
         /* ── Privacy ── */
-        .privacy-section {
-            text-align: center;
-        }
         .privacy-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 32px;
-            margin-top: 48px;
+            max-width: 900px;
+            margin: 48px auto 0;
+            text-align: center;
         }
-        .privacy-item {
-            padding: 24px;
-        }
-        .privacy-icon {
-            font-size: 32px;
-            margin-bottom: 16px;
-        }
-        .privacy-item h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
+        .privacy-icon { font-size: 32px; margin-bottom: 16px; }
+        .privacy-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
         .privacy-item p {
             font-size: 13px;
             font-weight: 300;
@@ -245,7 +520,87 @@
             line-height: 1.6;
         }
 
-        /* ── CTA Section ── */
+        /* ── Install ── */
+        .install-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .install-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+        }
+        .install-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+        .install-card .os {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 0.06em;
+            margin-bottom: 16px;
+        }
+        .install-card pre {
+            background: var(--bg-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            font-family: var(--font-mono);
+            font-size: 11.5px;
+            line-height: 1.6;
+            color: var(--text-sec);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .install-note {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 300;
+            color: var(--text-dim);
+            margin-top: 28px;
+            line-height: 1.6;
+        }
+
+        /* ── FAQ ── */
+        .faq { max-width: 720px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid var(--border); }
+        .faq-item:first-child { border-top: 1px solid var(--border); }
+        .faq-item summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 20px 8px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after {
+            content: "+";
+            font-family: var(--font-mono);
+            color: var(--text-dim);
+            font-size: 18px;
+            transition: transform 0.2s;
+        }
+        .faq-item[open] summary::after { transform: rotate(45deg); }
+        .faq-item .faq-body {
+            padding: 0 8px 20px;
+            font-size: 14px;
+            font-weight: 300;
+            color: var(--text-sec);
+            line-height: 1.7;
+        }
+        .faq-item .faq-body a { color: var(--accent); text-decoration: none; }
+        .faq-item .faq-body a:hover { text-decoration: underline; }
+
+        /* ── CTA ── */
         .cta-section {
             text-align: center;
             padding: 100px 24px;
@@ -255,7 +610,6 @@
         .cta-section h2 {
             font-size: 42px;
             font-weight: 600;
-            color: var(--text);
             margin-bottom: 20px;
             letter-spacing: -0.02em;
         }
@@ -282,23 +636,72 @@
             position: relative;
             z-index: 10;
             border-top: 1px solid var(--border);
-            padding: 32px 24px;
-            text-align: center;
+            padding: 56px 24px 32px;
             background: var(--bg);
         }
-        footer p {
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+        }
+        .footer-brand h3 {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
+        }
+        .footer-brand p {
+            font-size: 13px;
+            font-weight: 300;
+            color: var(--text-sec);
+            line-height: 1.6;
+            max-width: 280px;
+        }
+        .footer-col h4 {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 400;
+            margin-bottom: 16px;
+        }
+        .footer-col a {
+            display: block;
+            font-size: 13px;
+            color: var(--text-sec);
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: color 0.2s;
+        }
+        .footer-col a:hover { color: var(--text); }
+        .footer-bottom {
+            max-width: 1100px;
+            margin: 48px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
             font-family: var(--font-mono);
             font-size: 11px;
             color: var(--text-dim);
+            text-align: center;
         }
 
         /* ── Responsive ── */
         @media (max-width: 768px) {
             .hero h1 { font-size: 42px; }
-            .hero-subtitle { font-size: 18px; }
+            .hero-subtitle { font-size: 17px; }
             .section-heading { font-size: 28px; }
             .cta-section h2 { font-size: 32px; }
-            .features-grid { grid-template-columns: 1fr; }
+            .features-grid, .cap-grid { grid-template-columns: 1fr; }
+            .how-grid { grid-template-columns: 1fr; }
+            .install-grid { grid-template-columns: 1fr; }
+            .speed-grid { grid-template-columns: 1fr; }
+            .speed-vs { text-align: center; }
+            .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+            .strength { overflow-x: auto; }
+            .strength table { min-width: 460px; }
         }
     </style>
 </head>
@@ -310,111 +713,444 @@
 <!-- Navbar -->
 <nav>
     <a href="/">← 100 Tools. 100x You.</a>
+    <div class="nav-links">
+        <a href="https://github.com/hongyan199048/voice_typing" target="_blank">GitHub ↗</a>
+    </div>
 </nav>
 
 <!-- Hero -->
 <section class="hero">
     <div class="hero-tag">#002 — AI VOICE INPUT</div>
-    <h1>Voice Typing</h1>
+    <h1>说话，别打字。</h1>
     <p class="hero-subtitle">
-        <strong>说话，别打字。</strong>按住快捷键说话，松开自动粘贴。<br>
-        让语音输入像打字一样自然流畅。
+        按住快捷键说话，松开自动润色并粘贴到光标。
+        说出来的零散想法，直接变成能发出去的句子。
     </p>
-    <a href="https://github.com/hongyan199048/voice_typing/releases" target="_blank" class="btn-primary">
-        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-        </svg>
-        <span>免费下载</span>
-    </a>
+    <div class="hero-actions">
+        <a href="https://github.com/hongyan199048/voice_typing/releases/latest/download/voice-typing.deb" class="btn-primary btn-dl">
+            <span class="dl-fmt">下载 .deb ↓</span>
+            <span class="dl-os">Debian / Ubuntu</span>
+        </a>
+        <a href="https://github.com/hongyan199048/voice_typing/releases/latest/download/voice-typing.rpm" class="btn-primary btn-dl">
+            <span class="dl-fmt">下载 .rpm ↓</span>
+            <span class="dl-os">Fedora / RHEL</span>
+        </a>
+        <a href="https://github.com/hongyan199048/voice_typing/releases/latest/download/VoiceType-x86_64.AppImage" class="btn-primary btn-dl">
+            <span class="dl-fmt">下载 .AppImage ↓</span>
+            <span class="dl-os">其他发行版 · 107 MB</span>
+        </a>
+    </div>
+    <div class="hero-secondary">
+        <a href="#how" class="btn-ghost">看它怎么工作 ↓</a>
+    </div>
 </section>
 
-<!-- Demo Video -->
-<section class="section" style="padding-top: 40px; padding-bottom: 60px;">
-    <div style="max-width: 900px; margin: 0 auto;">
-        <div style="background: var(--bg-dark); border-radius: 8px; overflow: hidden; box-shadow: 0 8px 32px rgba(26,26,26,0.15); border: 1px solid var(--border); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-family: var(--font-mono); font-size: 14px;">
-            [ 演示视频占位 ]
+<!-- Speed comparison -->
+<section class="section" style="padding-top: 20px;">
+    <div class="speed-grid">
+        <div class="speed-card">
+            <div class="speed-card-head">
+                <h3>⌨️ 键盘打字</h3>
+                <span class="speed-rate">约 60 字/分</span>
+            </div>
+            <div class="ph ph-16-9">[ 打字演示占位 ]</div>
         </div>
+        <div class="speed-vs">VS</div>
+        <div class="speed-card hl">
+            <div class="speed-card-head">
+                <h3>🎤 VoiceType 说话</h3>
+                <span class="speed-rate">约 200 字/分</span>
+            </div>
+            <div class="ph ph-16-9">[ 语音输入演示占位 ]</div>
+        </div>
+    </div>
+    <p class="speed-foot">
+        同样一段话，说出来比打出来快 <strong>约 3 倍</strong>。想法不会被打字速度打断。
+    </p>
+</section>
+
+<!-- How it works -->
+<section class="section" id="how">
+    <div class="section-title">How it works</div>
+    <div class="section-heading">按住，说话，松开。</div>
+    <div class="section-sub">三步，零切换。无需点任何按钮，文字直接落在你正在输入的地方。</div>
+    <div class="how-grid">
+        <div class="step">
+            <div class="step-num">01</div>
+            <kbd>⌨ 快捷键</kbd>
+            <h3>按住快捷键</h3>
+            <p>任何应用中长按你设定的组合键或单键，即可触发录音。</p>
+        </div>
+        <div class="step">
+            <div class="step-num">02</div>
+            <kbd>🎤 说话</kbd>
+            <h3>实时转写</h3>
+            <p>屏幕底部浮窗同步显示识别结果，不用等待。</p>
+        </div>
+        <div class="step">
+            <div class="step-num">03</div>
+            <kbd>松开</kbd>
+            <h3>自动润色 + 粘贴</h3>
+            <p>松手即自动润色并粘贴到光标位置，手不用离开键盘。</p>
+        </div>
+    </div>
+</section>
+
+<!-- AI Polish -->
+<section class="section band" id="polish">
+    <div class="section-title">AI 润色</div>
+    <div class="section-heading">说人话，输出能直接发的文字。</div>
+    <div class="section-sub">
+        不是逐字转录。润色模型会理解你想表达什么，把口语整理成书面语，同时不改动你的原意。
+    </div>
+
+    <div class="showcase">
+        <div class="showcase-head">
+            <span>VOICE TYPING · 润色前后</span>
+            <span>● REC</span>
+        </div>
+        <div class="showcase-row">
+            <div class="showcase-label raw">你说</div>
+            <div class="showcase-text">那个就是我想说我们这个下周要上线了然后你记得把那个文档发我一下</div>
+        </div>
+        <div class="showcase-row">
+            <div class="showcase-label done">输出</div>
+            <div class="showcase-text done">我们下周要上线，记得把文档发我一下。</div>
+        </div>
+        <div class="showcase-row">
+            <div class="showcase-label raw">你说</div>
+            <div class="showcase-text">这个接口我们打算去延津……不对，是盐津那边先做灰度</div>
+        </div>
+        <div class="showcase-row">
+            <div class="showcase-label done">输出</div>
+            <div class="showcase-text done">这个接口我们打算在盐津那边先做灰度。</div>
+        </div>
+        <div class="showcase-row">
+            <div class="showcase-label raw">你说</div>
+            <div class="showcase-text">先打开终端然后运行那个脚本然后再重启一下服务就行了</div>
+        </div>
+        <div class="showcase-row">
+            <div class="showcase-label done">输出</div>
+            <div class="showcase-text done">1. 打开终端<br>2. 运行脚本<br>3. 重启服务</div>
+        </div>
+    </div>
+
+    <div class="cap-grid">
+        <div class="cap-card">
+            <div class="cap-cap">轻度起</div>
+            <h3>去语气词</h3>
+            <p>「嗯」「呃」「啊」这类填充词直接去掉。中度起还会清掉「那个」「就是说」「然后就是」等口头禅。</p>
+        </div>
+        <div class="cap-card">
+            <div class="cap-cap">中度起</div>
+            <h3>识别改口</h3>
+            <p>说到一半改主意，只保留你最后想说的那版。「去延津……不对，盐津」输出就是「盐津」。</p>
+        </div>
+        <div class="cap-card">
+            <div class="cap-cap">中度起</div>
+            <h3>自动排版</h3>
+            <p>说到「第一……第二……」「首先……然后……最后」时，自动排成编号列表，不用手动整理。</p>
+        </div>
+        <div class="cap-card">
+            <div class="cap-cap">全档位</div>
+            <h3>补标点 + 分段</h3>
+            <p>补上缺失的逗号句号，并按语义把一大段话自然拆成多个段落。</p>
+        </div>
+        <div class="cap-card">
+            <div class="cap-cap">可选</div>
+            <h3>自定义词库</h3>
+            <p>人名、术语、专有名词可配发音别名，识别后自动替换成正确写法。润色前后各做一次。</p>
+        </div>
+        <div class="cap-card">
+            <div class="cap-cap">安全网</div>
+            <h3>失败回退原文</h3>
+            <p>润色调用失败或超时，直接输出识别原文，不会丢字。也可以完全关闭润色。</p>
+        </div>
+    </div>
+
+    <div class="strength">
+        <table>
+            <thead>
+                <tr>
+                    <th>能力</th>
+                    <th>轻度</th>
+                    <th>中度</th>
+                    <th>重度</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>去「嗯 / 呃 / 啊」</td>
+                    <td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td>
+                </tr>
+                <tr>
+                    <td>补标点、自然分段</td>
+                    <td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td>
+                </tr>
+                <tr>
+                    <td>去「那个 / 就是说」等口头禅</td>
+                    <td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td>
+                </tr>
+                <tr>
+                    <td>识别改口，只留最终版本</td>
+                    <td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td>
+                </tr>
+                <tr>
+                    <td>并列要点排成列表</td>
+                    <td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td>
+                </tr>
+                <tr>
+                    <td>明显错词按上下文修正</td>
+                    <td class="no">—</td><td class="no">—</td><td class="yes">✓</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </section>
 
 <!-- Features -->
-<section class="section">
+<section class="section" id="features">
     <div class="section-title">核心功能</div>
+    <div class="section-heading">为「不想打那么多字」而设计</div>
     <div class="features-grid">
         <div class="feature-card">
-            <div class="feature-icon">⚡</div>
+            <div class="feature-icon">⌨️</div>
             <h3>全局快捷键</h3>
-            <p>任何应用中按住 Ctrl+Alt+V 即可触发，无需切换窗口。</p>
+            <p>组合键或单键长按两种触发方式，快捷键由你设定，随处一按即说。</p>
         </div>
         <div class="feature-card">
-            <div class="feature-icon">🎤</div>
+            <div class="feature-icon">⚡</div>
             <h3>实时转写</h3>
-            <p>说话时屏幕底部显示实时识别结果，松开自动粘贴到光标位置。</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">🌐</div>
-            <h3>云端 + 本地</h3>
-            <p>支持阿里云 Paraformer（快速准确）和本地 faster-whisper（离线可用）。</p>
+            <p>说话时屏幕底部浮窗同步显示，可拖拽、不挡工作区，松开即粘贴。</p>
         </div>
         <div class="feature-card">
             <div class="feature-icon">🎨</div>
-            <h3>极简界面</h3>
-            <p>暗黑风格 GUI，浮窗显示不遮挡工作区域。</p>
+            <h3>浮窗四套主题</h3>
+            <p>glass / minimal / neon / aurora，挑一个顺眼的放在屏幕角落。</p>
         </div>
+        <div class="feature-card">
+            <div class="feature-icon">☁️</div>
+            <h3>双引擎识别</h3>
+            <p>阿里云 Paraformer 或火山引擎豆包流式识别，任选其一，中文准确率高。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🚀</div>
+            <h3>边说边润色</h3>
+            <p>可选开启实时润色，说话过程中就开始处理，松手出字更快。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📇</div>
+            <h3>自定义词库</h3>
+            <p>人名、术语、专有名词一键替换，识别结果更贴合你的表达习惯。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🕘</div>
+            <h3>历史记录</h3>
+            <p>最近 100 条转写保存在本地，随时回看、复制。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>使用统计</h3>
+            <p>累计录音时长、识别字数、使用次数，看看自己省了多少打字时间。</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 56px;">
+        <div class="ph ph-16-9" style="max-width: 900px; margin: 0 auto;">[ 应用界面截图占位 ]</div>
     </div>
 </section>
 
-<!-- Compatibility -->
-<section class="section compat-section">
-    <div class="section-heading">适用于你常用的应用</div>
-    <div class="app-grid">
-        <div class="app-badge">VS Code</div>
-        <div class="app-badge">Terminal</div>
-        <div class="app-badge">Chrome</div>
-        <div class="app-badge">Firefox</div>
-        <div class="app-badge">Slack</div>
-        <div class="app-badge">Notion</div>
-        <div class="app-badge">Obsidian</div>
-        <div class="app-badge">Typora</div>
-        <div class="app-badge">LibreOffice</div>
-        <div class="app-badge">Thunderbird</div>
-        <div class="app-badge">Telegram</div>
-        <div class="app-badge">微信</div>
+<!-- Works everywhere -->
+<section class="section band">
+    <div class="section-heading">任何能打字的地方</div>
+    <div class="section-sub">通过剪贴板注入文本，无需插件、无需集成，应用不需要知道你的存在。</div>
+    <div class="marquee">
+        <div class="marquee-track">
+            <div class="app-badge">VS Code</div>
+            <div class="app-badge">Cursor</div>
+            <div class="app-badge">Terminal</div>
+            <div class="app-badge">Chrome</div>
+            <div class="app-badge">Firefox</div>
+            <div class="app-badge">Slack</div>
+            <div class="app-badge">Discord</div>
+            <div class="app-badge">Notion</div>
+            <div class="app-badge">Obsidian</div>
+            <div class="app-badge">Typora</div>
+            <div class="app-badge">LibreOffice</div>
+            <div class="app-badge">WPS</div>
+            <div class="app-badge">Thunderbird</div>
+            <div class="app-badge">Telegram</div>
+            <div class="app-badge">微信</div>
+            <div class="app-badge">飞书</div>
+            <div class="app-badge">钉钉</div>
+            <div class="app-badge">QQ</div>
+            <div class="app-badge">PyCharm</div>
+            <div class="app-badge">GIMP</div>
+            <div class="app-badge">Blender</div>
+            <div class="app-badge">Claude Code</div>
+            <div class="app-badge">VS Code</div>
+            <div class="app-badge">Cursor</div>
+            <div class="app-badge">Terminal</div>
+            <div class="app-badge">Chrome</div>
+            <div class="app-badge">Firefox</div>
+            <div class="app-badge">Slack</div>
+            <div class="app-badge">Discord</div>
+            <div class="app-badge">Notion</div>
+            <div class="app-badge">Obsidian</div>
+            <div class="app-badge">Typora</div>
+            <div class="app-badge">LibreOffice</div>
+            <div class="app-badge">WPS</div>
+            <div class="app-badge">Thunderbird</div>
+            <div class="app-badge">Telegram</div>
+            <div class="app-badge">微信</div>
+            <div class="app-badge">飞书</div>
+            <div class="app-badge">钉钉</div>
+            <div class="app-badge">QQ</div>
+            <div class="app-badge">PyCharm</div>
+            <div class="app-badge">GIMP</div>
+            <div class="app-badge">Blender</div>
+            <div class="app-badge">Claude Code</div>
+        </div>
     </div>
 </section>
 
 <!-- Privacy -->
-<section class="section privacy-section">
+<section class="section">
     <div class="section-title">隐私优先</div>
     <div class="section-heading">你的语音，你的数据</div>
     <div class="privacy-grid">
         <div class="privacy-item">
-            <div class="privacy-icon">🔒</div>
-            <h3>本地处理</h3>
-            <p>本地模式下所有数据在设备上处理，不上传云端。</p>
+            <div class="privacy-icon">🗑️</div>
+            <h3>转写即弃</h3>
+            <p>音频仅用于实时转写，完成后立即丢弃，不落盘、不存储。</p>
         </div>
         <div class="privacy-item">
             <div class="privacy-icon">🚫</div>
             <h3>不训练模型</h3>
-            <p>你的语音数据不会被用于训练任何 AI 模型。</p>
+            <p>你的语音与文本不会被用于训练任何 AI 模型。</p>
         </div>
         <div class="privacy-item">
-            <div class="privacy-icon">💾</div>
-            <h3>不存储录音</h3>
-            <p>录音仅用于实时转写，转写完成后立即删除。</p>
+            <div class="privacy-icon">🔑</div>
+            <h3>你掌控一切</h3>
+            <p>使用你自己的 API Key，可随时关闭润色、切换引擎。</p>
         </div>
+    </div>
+</section>
+
+<!-- Install -->
+<section class="section band" id="install">
+    <div class="section-title">Install</div>
+    <div class="section-heading">一条命令装好</div>
+    <div class="section-sub">Ubuntu / Fedora / 其他发行版，各有对应安装包。</div>
+    <div class="install-grid">
+        <div class="install-card">
+            <h3>Debian / Ubuntu</h3>
+            <div class="os">DEB</div>
+            <pre>URL=$(curl -s https://api.github.com/repos/hongyan199048/voice_typing/releases/latest | grep "browser_download_url.*_amd64\.deb" | cut -d '"' -f 4)
+wget -O voice-typing.deb "$URL" && sudo dpkg -i voice-typing.deb && sudo apt-get install -f</pre>
+        </div>
+        <div class="install-card">
+            <h3>Fedora / RHEL</h3>
+            <div class="os">RPM</div>
+            <pre>URL=$(curl -s https://api.github.com/repos/hongyan199048/voice_typing/releases/latest | grep "browser_download_url.*\.rpm" | cut -d '"' -f 4)
+wget -O voice-typing.rpm "$URL" && sudo dnf install ./voice-typing.rpm</pre>
+        </div>
+        <div class="install-card">
+            <h3>其他发行版</h3>
+            <div class="os">APPIMAGE</div>
+            <pre>URL=$(curl -s https://api.github.com/repos/hongyan199048/voice_typing/releases/latest | grep "browser_download_url.*\.AppImage" | cut -d '"' -f 4)
+wget -O VoiceType.AppImage "$URL" && chmod +x VoiceType.AppImage && ./VoiceType.AppImage</pre>
+        </div>
+    </div>
+    <p class="install-note">
+        首次运行会打开设置窗口：选引擎、填 API Key、录快捷键，即可开始。<br>
+        需要 <kbd>X11</kbd> 桌面；AppImage 版需系统已装 <kbd>xclip</kbd> 与 <kbd>xdotool</kbd>。
+    </p>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+    <div class="section-title">FAQ</div>
+    <div class="section-heading">常见问题</div>
+    <div class="faq">
+        <details class="faq-item">
+            <summary>支持哪些系统？</summary>
+            <div class="faq-body">Linux 桌面，需 <kbd>X11</kbd>（在终端运行 <code>echo $XDG_SESSION_TYPE</code> 应为 <code>x11</code>）。Ubuntu、Fedora、Debian 等均可，Wayland 下快捷键与粘贴可能失效。</div>
+        </details>
+        <details class="faq-item">
+            <summary>需要自己申请 API Key 吗？</summary>
+            <div class="faq-body">需要。识别引擎选其一：<a href="https://bailian.console.aliyun.com/" target="_blank">阿里云百炼</a>（Paraformer）或<a href="https://console.volcengine.com/speech/new/setting/apikeys" target="_blank">火山引擎豆包</a>。润色模型（DeepSeek / 智谱 GLM / MiniMax）各自另有 Key，也可完全关闭。</div>
+        </details>
+        <details class="faq-item">
+            <summary>三档润色强度怎么选？</summary>
+            <div class="faq-body">
+                <strong>轻度</strong>：只去「嗯呃啊」、补标点、分段，内容一字不改，适合逐字记录。<br>
+                <strong>中度</strong>：再加去口头禅、识别改口、并列要点排成列表，日常默认。<br>
+                <strong>重度</strong>：再加按上下文修正明显错词，适合说错字多的场景。
+            </div>
+        </details>
+        <details class="faq-item">
+            <summary>润色会不会改掉我想说的话？</summary>
+            <div class="faq-body">两种保护。一是 prompt 明确禁止添加原文没有的内容、禁止总结合并、禁止把不同措辞的强调当冗余删掉；二是润色调用失败或超时直接回退识别原文，不会丢字。你也可以完全关闭润色，只走识别。</div>
+        </details>
+        <details class="faq-item">
+            <summary>我的语音数据会上传吗？</summary>
+            <div class="faq-body">云端识别会把音频发送给你所选引擎做实时转写，但不会被存储、不用于训练，转写完成后立即丢弃。历史记录只存在你本地的配置文件里。</div>
+        </details>
+        <details class="faq-item">
+            <summary>在哪些应用里能用？</summary>
+            <div class="faq-body">任何能打字的 App——浏览器、聊天软件、代码编辑器、Office、邮件客户端等。文本通过剪贴板粘贴注入，无需插件或集成。</div>
+        </details>
+        <details class="faq-item">
+            <summary>免费吗？</summary>
+            <div class="faq-body">软件本身开源免费（MIT License），没有账号、没有订阅、没有字数上限。API 调用按各引擎的计费规则收取，费用由你直接支付给引擎服务商。</div>
+        </details>
     </div>
 </section>
 
 <!-- CTA -->
 <section class="cta-section">
-    <h2>立即开始</h2>
-    <p>适用于 Ubuntu 22.04+ 系统，开源免费。</p>
+    <h2>用声音，写一切。</h2>
+    <p>开源免费，适用于 Linux 桌面。</p>
+    <a href="#install" class="btn-primary">
+        <span>前往下载</span>
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M12 4v14m0 0l-6-6m6 6l6-6"/>
+        </svg>
+    </a>
+    <div class="platform-badge">MIT LICENSE · OPEN SOURCE</div>
 </section>
 
 <!-- Footer -->
 <footer>
-    <p>© 2025 Tim — wooho.cc</p>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <h3>VOICETYPE</h3>
+            <p>Linux 桌面下的 AI 语音转文字工具。按住说话，松开即成文。</p>
+        </div>
+        <div class="footer-col">
+            <h4>项目</h4>
+            <a href="https://github.com/hongyan199048/voice_typing" target="_blank">GitHub 仓库</a>
+            <a href="https://github.com/hongyan199048/voice_typing/releases" target="_blank">版本发布</a>
+            <a href="https://github.com/hongyan199048/voice_typing/issues" target="_blank">问题反馈</a>
+        </div>
+        <div class="footer-col">
+            <h4>相关服务</h4>
+            <a href="https://bailian.console.aliyun.com/" target="_blank">阿里云百炼</a>
+            <a href="https://console.volcengine.com/speech/new/setting/apikeys" target="_blank">火山引擎语音</a>
+            <a href="https://platform.deepseek.com/" target="_blank">DeepSeek</a>
+        </div>
+        <div class="footer-col">
+            <h4>本页</h4>
+            <a href="#how">怎么用</a>
+            <a href="#polish">AI 润色</a>
+            <a href="#install">下载安装</a>
+            <a href="#faq">FAQ</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        © 2026 Tim — wooho.cc · MIT License
+    </div>
 </footer>
 
 </body>
